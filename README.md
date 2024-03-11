@@ -8,6 +8,8 @@
 
 设计：JACK WANG
 
+财务：Atyuki Tang
+
 项目负责人：JJZHANG
 
 
