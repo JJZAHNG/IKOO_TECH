@@ -27,6 +27,6 @@ Apifox 团队邀请：
 git init
 git commit -m "first commit"
 git branch -M main
-git remote add origin https://github.com/JJZAHNG/BeeCodeDev.git
+git remote add origin https://github.com/JJZAHNG/IKOO_TECH.git
 git push -u origin main
 ```
