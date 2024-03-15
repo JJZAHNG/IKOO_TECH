@@ -1,7 +1,5 @@
 import json
 from django.http import JsonResponse
-from django.shortcuts import render
-from rest_framework.response import Response
 from ..ChatBot import AiChatter
 
 # Create your views here.
