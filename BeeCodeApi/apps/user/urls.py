@@ -1,5 +1,5 @@
 from rest_framework.routers import SimpleRouter
-from ..user import views
+from user import views
 
 router = SimpleRouter()
 router.register('mobile', views.MobileView, 'mobile')

@@ -1,10 +1,9 @@
-from django.shortcuts import HttpResponse
 from rest_framework.viewsets import ViewSet, GenericViewSet
 from rest_framework.decorators import action
 from utils.common_response import APIResponse
 from django.core.exceptions import ObjectDoesNotExist
 from django.utils.datastructures import MultiValueDictKeyError
-from ..user import models, serializer
+from user import models, serializers
 from libs.tx_sms import get_code
 from django.core.cache import cache
 from rest_framework.mixins import CreateModelMixin
@@ -44,21 +43,17 @@ class MobileView(ViewSet):
         # 把验证码保存到缓存中
         cache.set('cache_mobile_%s' % mobile, code)
 
-        # # 异步发送短信
-        # text_message = Thread(target=send_sms, args=[code, mobile])
-        # text_message.start()
-
         # celery异步发送短信
         send_message.delay(code, mobile)
         return APIResponse(msg='短信已发送')
 
 
 class UserLoginView(GenericViewSet):
-    serializer_class = serializer.UserLoginSerializer
+    serializer_class = serializers.UserLoginSerializer
 
     def get_serializer_class(self):
         if self.action == 'sms_login':
-            return serializer.SMSLoginSerializer
+            return serializers.SMSLoginSerializer
         else:
             return super().get_serializer_class()
 
@@ -82,17 +77,7 @@ class UserLoginView(GenericViewSet):
 
 
 class UserRegisterView(GenericViewSet, CreateModelMixin):
-    serializer_class = serializer.UserRegisterSerializer
-
-    # 注册
-    # @action(methods=['POST'], detail=False)
-    # def user_registration(self, request, *args, **kwargs):
-    #     ser = self.get_serializer(data=request.data)
-    #     ser.is_valid(raise_exception=True)
-    #     username = ser.context.get('username')
-    #     token = ser.context.get('token')
-    #     icon = ser.context.get('icon')
-    #     return APIResponse(username=username, token=token, icon=icon)
+    serializer_class = serializers.UserRegisterSerializer
 
     @action(methods=['POST'], detail=False)
     def user_registration(self, request, *args, **kwargs):
