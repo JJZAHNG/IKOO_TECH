@@ -126,4 +126,4 @@ class UserMobileRegisterSerializer(UniversalSerializer):
                 user = models.User.objects.create_user(**attrs)
                 return user
         else:
-            raise ValidationError('验证码错误')
+            raise ValidationError('验证吗错误')
