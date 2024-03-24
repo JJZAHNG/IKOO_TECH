@@ -26,14 +26,14 @@ token_result = get_access_token()
 
 
 
-def main():
+def eurine_response(user_input):
     url = "https://aip.baidubce.com/rpc/2.0/ai_custom/v1/wenxinworkshop/chat/completions_pro?access_token=" + token_result
     
     payload = json.dumps({
         "messages": [
             {
                 "role": "user",
-                "content": "介绍一下杭州"
+                "content": user_input
             }
         ]
     })
@@ -43,8 +43,10 @@ def main():
     
     response = requests.request("POST", url, headers=headers, data=payload)
     
-    print(response.text)
+    return response.text
     
+a = eurine_response('跟我讲讲中国，100字以内')
+print(a)
 
-if __name__ == '__main__':
-    main()
+# 接口待更换
+# {"error_code":17,"error_msg":"Open api daily request limit reached"}
