@@ -9,6 +9,7 @@ import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import Icon from 'react-native-vector-icons/MaterialIcons'; 
 import Main from 'react-native-country-picker-modal';
+import { SafeAreaView } from 'react-native-safe-area-context';
 
 // Create a Stack Navigator
 const Stack = createNativeStackNavigator();
@@ -48,7 +49,7 @@ const LoginScreen = ({ navigation }) => {
 
   return (
     
-    <View style={styles.container_login}>
+    <SafeAreaView style={styles.container_login}>
       <StatusBar hidden={true} />
       <View style={styles.inputContainer_login}>
         <CountryPicker
@@ -96,7 +97,7 @@ const LoginScreen = ({ navigation }) => {
           <Text style={styles.buttonText_login}>登录</Text>
         </TouchableOpacity>
       </View>
-    </View>
+    </SafeAreaView>
   );
 };
 
@@ -143,7 +144,7 @@ const MainScreen = ({ navigation }) => {
 
   // An example of what the data object could look like
   return (
-    <View style={styles.container_home}>
+    <SafeAreaView style={styles.container_home}>
       <StatusBar hidden={true} />
       {/* Placeholder for the left 30% of the screen */}
       <View style={styles.leftPlaceholder_home} />
@@ -212,7 +213,7 @@ const MainScreen = ({ navigation }) => {
           </View>
         </View>
       </View>
-    </View>
+    </SafeAreaView>
   );
 };
 
@@ -241,7 +242,7 @@ const CourseScreen = ({ navigation }) => {
   };
 
   return (
-    <View style={styles.container_course}>
+    <SafeAreaView style={styles.container_course}>
       <StatusBar hidden={true} />
       <ScrollView
         style={styles.scrollContainer_course}
@@ -271,7 +272,7 @@ const CourseScreen = ({ navigation }) => {
           </TouchableOpacity>
         ))}
       </View>
-    </View>
+    </SafeAreaView>
   );
 }
 
