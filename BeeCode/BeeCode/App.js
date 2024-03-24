@@ -7,8 +7,7 @@ import CountryPicker from 'react-native-country-picker-modal';
 // Import NavigationContainer and createNativeStackNavigator from React Navigation
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
-import Icon from 'react-native-vector-icons/MaterialIcons'; 
-import Main from 'react-native-country-picker-modal';
+
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 // Create a Stack Navigator
