@@ -1,7 +1,7 @@
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
-import eurine4
+from apps.ChatBot import eurine4
 
 class BotChat(APIView):
     def post(self, request, *args, **kwargs):
