@@ -7,11 +7,12 @@ from user import models, serializers
 from libs.tx_sms import get_code
 from django.core.cache import cache
 from rest_framework.mixins import CreateModelMixin
+from django.db.models import Q
 from celery_task.user_task import send_message
 
 
 # Create your views here.
-
+# 1.手机号短信登录
 class MobileView(ViewSet):
 
     # 校验手机号是否正确
@@ -48,6 +49,9 @@ class MobileView(ViewSet):
         return APIResponse(msg='短信已发送')
 
 
+
+
+# 用户密码 邮箱密码 手机号密码登录
 class UserLoginView(GenericViewSet):
     serializer_class = serializers.UserLoginSerializer
 
@@ -56,7 +60,8 @@ class UserLoginView(GenericViewSet):
             return serializers.SMSLoginSerializer
         else:
             return super().get_serializer_class()
-
+ 
+    @action(methods=['POST'], detail=False)
     def _login(self, request, *args, **kwargs):
         ser = self.get_serializer(data=request.data)
         ser.is_valid(raise_exception=True)
@@ -75,7 +80,7 @@ class UserLoginView(GenericViewSet):
     def sms_login(self, request, *args, **kwargs):
         return self._login(request, *args, **kwargs)
 
-
+# 手机号注册接口
 class UserRegisterView(GenericViewSet, CreateModelMixin):
     serializer_class = serializers.UserRegisterSerializer
 
@@ -83,3 +88,41 @@ class UserRegisterView(GenericViewSet, CreateModelMixin):
     def user_registration(self, request, *args, **kwargs):
         super().create(request, *args, **kwargs)
         return APIResponse(msg='注册成功')
+
+# 用户账号注册
+class RegisterView(GenericViewSet):
+    serializer_class = serializers.RegisterSerializer
+
+    @action(methods=['POST'], detail=False)
+    def register(self, request, *args, **kwargs):
+        res = self.get_serializer(data=request.data)
+        res.is_valid(raise_exception=True)
+        res.save()
+        return APIResponse(msg='注册成功')
+
+
+
+
+# # 忘记密码
+# # 忘记密码也先验证手机号 与 验证码 发送验证码
+# class ForgetView(GenericViewSet):
+#     serializer_class = serializers.ForgetSerializer
+
+#     @action(methods=['POST'], detail=False)
+#     def forget(self, request, *args, **kwargs):
+#         username = request.data.get('username')
+#         mobile = request.data.get('mobile')
+#         try:
+#             models.User.objects.filter(Q(username=username) & Q(mobile=mobile))
+#             code = sms_random()
+#             sms_texting(code, mobile)
+#             cache.set('my_capt', code)
+#             return APIResponse(code=200, msg='短信发送成功')
+#         except Exception:
+#             raise Exception('用户名或手机号错误')
+
+#     @action(methods=['POST'], detail=False)
+#     def setpwd(self, request, *args, **kwargs):
+#         res = self.get_serializer(data=request.data)
+#         res.is_valid(raise_exception=True)
+#         return APIResponse(code=200, msg='密码设置成功')

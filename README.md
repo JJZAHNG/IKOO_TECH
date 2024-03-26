@@ -32,3 +32,14 @@ git branch -M main
 git remote add origin https://github.com/JJZAHNG/IKOO_TECH.git
 git push -u origin main
 ```
+# 项目需求及其测试
+1.用户注册
+手机号注册  
+账号密码注册
+邮箱注册
+
+2.用户登录
+手机号登录  登录前校验手机号是否存在 然后发送短信
+账号密码登录
+邮箱登录
+
