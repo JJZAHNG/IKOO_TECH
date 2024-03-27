@@ -7,7 +7,7 @@ from django.contrib.auth.models import AbstractUser
 
 class User(AbstractUser):
     # 扩写auth表 加入手机号 头像
-    mobile = models.CharField(verbose_name='手机号', max_length=11)
+    mobile = models.CharField(verbose_name='手机号', max_length=11,null=True)
 
     # 需要pillow包的支持
     icon = models.ImageField(verbose_name='头像', upload_to='icon', default='icon/default.png')

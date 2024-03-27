@@ -10,7 +10,6 @@ from rest_framework.mixins import CreateModelMixin
 from django.db.models import Q
 from celery_task.user_task import send_message
 
-
 # Create your views here.
 # 1.手机号短信登录
 class MobileView(ViewSet):
@@ -85,7 +84,7 @@ class UserRegisterView(GenericViewSet, CreateModelMixin):
     serializer_class = serializers.UserRegisterSerializer
 
     @action(methods=['POST'], detail=False)
-    def user_registration(self, request, *args, **kwargs):
+    def mobile_registration(self, request, *args, **kwargs):
         super().create(request, *args, **kwargs)
         return APIResponse(msg='注册成功')
 
@@ -94,7 +93,8 @@ class RegisterView(GenericViewSet):
     serializer_class = serializers.RegisterSerializer
 
     @action(methods=['POST'], detail=False)
-    def register(self, request, *args, **kwargs):
+    def user_register(self, request, *args, **kwargs):
+        print('访问成功')
         res = self.get_serializer(data=request.data)
         res.is_valid(raise_exception=True)
         res.save()

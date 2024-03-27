@@ -175,6 +175,16 @@ REST_FRAMEWORK = {
     'EXCEPTION_HANDLER': 'utils.common_exceptions.common_exception_handler',
 }
 
+DATABASES = {
+    'default': {
+        # 其他数据库设置...
+        'OPTIONS': {
+            'init_command': "SET sql_mode='STRICT_TRANS_TABLES'",
+        },
+    }
+}
+
+
 CORS_ORIGIN_ALLOW_ALL = True
 CORS_ALLOW_METHODS = (
     'DELETE',

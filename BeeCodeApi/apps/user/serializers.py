@@ -52,6 +52,13 @@ class UserLoginSerializer(UniversalSerializer):
 class SMSLoginSerializer(serializers.Serializer):
     mobile = serializers.CharField()
     code = serializers.CharField()
+
+
+    def validate_mobile(self,var):
+        if re.match('^1[3-9]\d{9}$',var):
+             raise ValidationError('手机号格式错误')
+        return var
+
     def validate(self, attrs):
         # 校验用户名密码是否正确
         user = self._get_user(attrs)
@@ -85,7 +92,6 @@ class SMSLoginSerializer(serializers.Serializer):
 class UserRegisterSerializer(serializers.ModelSerializer):
     # code不是表中字段需要重写
     code = serializers.CharField(max_length=4, min_length=4, write_only=True)
-
     class Meta:
         model = models.User
         fields = ['mobile', 'code']
@@ -141,7 +147,7 @@ class RegisterSerializer(serializers.ModelSerializer):
             raise ValidationError('两次密码不一致')
     
     def create(self, validated_data):
-        user = models.User.objects.create(**validated_data)
+        user = models.User.objects.create_user(**validated_data)
         return user
 
 
