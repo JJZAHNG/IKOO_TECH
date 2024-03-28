@@ -97,3 +97,19 @@ username       用户名
 password       密码
 条件  成功返回code=100 msg=成功 usenrname(用户名), token, icon(头像)  
       失败返回code=800 msg=账号密码错误
+
+
+7.忘记密码
+http://127.0.0.1:8000/api/v1/user/forget_pwd/setpwd/
+post请求
+格式：{"username":"111111111","password":"999999999","tow_password":"999999999"}
+成功
+{
+    "code": 100,
+    "msg": "密码设置成功"
+}
+失败 
+{
+    "code": 800,
+    "msg": "请求异常-drf:{'password': [ErrorDetail(string='密码长度要大于8个字符', code='invalid')]}"
+}

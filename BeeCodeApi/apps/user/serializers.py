@@ -12,7 +12,7 @@ import re
 class UniversalSerializer(serializers.Serializer):
     username = serializers.CharField()
     password = serializers.CharField()
-    
+
     def validate(self, attrs):
         # 校验用户名密码是否正确
         user = self._get_user(attrs)
@@ -23,13 +23,13 @@ class UniversalSerializer(serializers.Serializer):
         # 把签发的token放到context中
         self.context['username'] = user.username
         self.context['token'] = token
-        self.context['icon'] = settings.BACKEND_URL + '/media/' + str(user.icon)
+        self.context['icon'] = settings.BACKEND_URL + \
+            '/media/' + str(user.icon)
 
         return attrs
 
     def _get_user(self, attrs):
         pass
-       
 
     def _get_token(self, user):
         payload = jwt_payload_handler(user)
@@ -37,11 +37,14 @@ class UniversalSerializer(serializers.Serializer):
         return token
 
 # 用户名密码登录
+
+
 class UserLoginSerializer(UniversalSerializer):
     def _get_user(self, attrs):
         username = attrs.get('username')
         password = attrs.get('password')
-        user = models.User.objects.filter(Q(username=username) | Q(mobile=username) | Q(email=username)).first()
+        user = models.User.objects.filter(Q(username=username) | Q(
+            mobile=username) | Q(email=username)).first()
 
         if user and user.check_password(password):
             return user
@@ -49,14 +52,15 @@ class UserLoginSerializer(UniversalSerializer):
             raise ValidationError('用户名或密码错误')
 
 # 手机号登录
+
+
 class SMSLoginSerializer(serializers.Serializer):
     mobile = serializers.CharField()
     code = serializers.CharField()
 
-
-    def validate_mobile(self,var):
-        if re.match('^1[3-9]\d{9}$',var):
-             raise ValidationError('手机号格式错误')
+    def validate_mobile(self, var):
+        if re.match('^1[3-9]\d{9}$', var):
+            raise ValidationError('手机号格式错误')
         return var
 
     def validate(self, attrs):
@@ -69,9 +73,11 @@ class SMSLoginSerializer(serializers.Serializer):
         # 把签发的token放到context中
         self.context['username'] = user.username
         self.context['token'] = token
-        self.context['icon'] = settings.BACKEND_URL + '/media/' + str(user.icon)
+        self.context['icon'] = settings.BACKEND_URL + \
+            '/media/' + str(user.icon)
 
         return attrs
+
     def _get_token(self, user):
         payload = jwt_payload_handler(user)
         token = jwt_encode_handler(payload)
@@ -86,12 +92,13 @@ class SMSLoginSerializer(serializers.Serializer):
             return user
         else:
             raise ValidationError('验证码错误')
-    
-    
+
+
 # 手机号注册
 class UserRegisterSerializer(serializers.ModelSerializer):
     # code不是表中字段需要重写
     code = serializers.CharField(max_length=4, min_length=4, write_only=True)
+
     class Meta:
         model = models.User
         fields = ['mobile', 'code']
@@ -124,17 +131,15 @@ class UserRegisterSerializer(serializers.ModelSerializer):
 class RegisterSerializer(serializers.ModelSerializer):
     # username = serializers.CharField(max_length=9)
     tow_password = serializers.CharField()
-    
+
     class Meta:
         model = models.User
-        fields = ['username','password','tow_password']
+        fields = ['username', 'password', 'tow_password']
 
-
-    def validate_password(self,var):
+    def validate_password(self, var):
         if len(var) < 8:
             raise ValidationError('密码长度要大于8个字符')
         return var
-
 
     def validate(self, attrs):
         username = attrs.get('username')
@@ -145,9 +150,39 @@ class RegisterSerializer(serializers.ModelSerializer):
             return attrs
         else:
             raise ValidationError('两次密码不一致')
-    
+
     def create(self, validated_data):
         user = models.User.objects.create_user(**validated_data)
         return user
 
 
+# 设置新密码
+class SetPwdSerializer(serializers.ModelSerializer):
+    tow_password = serializers.CharField(write_only=True)
+
+
+    class Meta:
+        model = models.User
+        fields = ['username', 'password','tow_password']
+
+
+    def validate_password(self, value):
+        if len(value) < 8:
+            raise serializers.ValidationError('密码长度要大于8个字符')
+        return value
+
+    def validate(self, attrs):
+        password = attrs.get('password')
+        tow_password = attrs.get('tow_password')
+        if password != tow_password:
+            raise serializers.ValidationError('两次密码不一致')
+        return attrs
+
+    def update(self, instance, validated_data):
+        print(instance)
+        new_password = validated_data.get('password')
+        username = validated_data.get('username')
+        instance.username = username
+        instance.password = make_password(new_password)
+        instance.save()
+        return instance

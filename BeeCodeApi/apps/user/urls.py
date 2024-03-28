@@ -10,5 +10,8 @@ router.register('login', views.UserLoginView, 'login')
 router.register('mobile_register', views.UserRegisterView, 'mobile_register')
 # 账号密码注册
 router.register('user_register', views.RegisterView, 'user_register')
+# 忘记密码
+router.register('forget_pwd', views.ForgetpwdView, 'forget_pwd')
+
 urlpatterns = []
 urlpatterns += router.urls

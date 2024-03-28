@@ -7,6 +7,7 @@ from user import models, serializers
 from libs.tx_sms import get_code
 from django.core.cache import cache
 from rest_framework.mixins import CreateModelMixin
+from rest_framework.generics import CreateAPIView
 from django.db.models import Q
 from celery_task.user_task import send_message
 
@@ -24,6 +25,7 @@ class MobileView(ViewSet):
 
             # 去数据库中查询是否存在 且唯一
             models.User.objects.get(mobile=mobile)
+        
             return APIResponse(msg='验证通过')
         # 验证不通过抛出异常
         except ObjectDoesNotExist:
@@ -94,7 +96,6 @@ class RegisterView(GenericViewSet):
 
     @action(methods=['POST'], detail=False)
     def user_register(self, request, *args, **kwargs):
-        print('访问成功')
         res = self.get_serializer(data=request.data)
         res.is_valid(raise_exception=True)
         res.save()
@@ -103,26 +104,33 @@ class RegisterView(GenericViewSet):
 
 
 
-# # 忘记密码
-# # 忘记密码也先验证手机号 与 验证码 发送验证码
-# class ForgetView(GenericViewSet):
-#     serializer_class = serializers.ForgetSerializer
+# 忘记密码
+# 忘记密码也先验证手机号 与 验证码 发送验证码
 
-#     @action(methods=['POST'], detail=False)
-#     def forget(self, request, *args, **kwargs):
-#         username = request.data.get('username')
-#         mobile = request.data.get('mobile')
-#         try:
-#             models.User.objects.filter(Q(username=username) & Q(mobile=mobile))
-#             code = sms_random()
-#             sms_texting(code, mobile)
-#             cache.set('my_capt', code)
-#             return APIResponse(code=200, msg='短信发送成功')
-#         except Exception:
-#             raise Exception('用户名或手机号错误')
+class ForgetpwdView(GenericViewSet):
+    queryset = models.User.objects.all()
+    serializer_class = serializers.SetPwdSerializer
 
-#     @action(methods=['POST'], detail=False)
-#     def setpwd(self, request, *args, **kwargs):
-#         res = self.get_serializer(data=request.data)
-#         res.is_valid(raise_exception=True)
-#         return APIResponse(code=200, msg='密码设置成功')
+    @action(detail=False, methods=['post'])
+    def setpwd(self, request, *args, **kwargs):
+        username = request.data.get('username')
+        user = models.User.objects.filter(username=username).first()
+        if user:
+            serializer = self.serializer_class(instance=user,data=request.data)
+            serializer.is_valid(raise_exception=True)
+            serializer.save()
+            return APIResponse(msg='密码设置成功')
+        return APIResponse(msg='账号输入错误')
+
+
+
+
+# 用户输入账号 输入密码 提示错误
+# 然后会点击忘记密码  
+# 输入账号 判断账号是否存在
+# 如果存在通过账号查询id
+# 然后修改密码
+
+# 手机号登录输入密码
+# 手机号对了 但是密码错误
+# 然后就是输入手机号 通过手机号修改密码
