@@ -106,7 +106,6 @@ class RegisterView(GenericViewSet):
 
 # 忘记密码
 # 忘记密码也先验证手机号 与 验证码 发送验证码
-
 class ForgetpwdView(GenericViewSet):
     queryset = models.User.objects.all()
     serializer_class = serializers.SetPwdSerializer
@@ -122,15 +121,6 @@ class ForgetpwdView(GenericViewSet):
             return APIResponse(msg='密码设置成功')
         return APIResponse(msg='账号输入错误')
 
+# 测试pycharm是否管用
 
 
-
-# 用户输入账号 输入密码 提示错误
-# 然后会点击忘记密码  
-# 输入账号 判断账号是否存在
-# 如果存在通过账号查询id
-# 然后修改密码
-
-# 手机号登录输入密码
-# 手机号对了 但是密码错误
-# 然后就是输入手机号 通过手机号修改密码
