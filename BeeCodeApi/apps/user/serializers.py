@@ -103,6 +103,11 @@ class UserRegisterSerializer(serializers.ModelSerializer):
         model = models.User
         fields = ['mobile', 'code']
 
+    def validate_mobile(self, var):
+        if not re.match('^1[34578]\d{9}$', var):
+            raise ValidationError('手机号格式错误')
+        return var
+
     def validate(self, attrs):
         mobile = attrs.get('mobile')
         code = attrs.get('code')
@@ -137,7 +142,7 @@ class RegisterSerializer(serializers.ModelSerializer):
         fields = ['username', 'password','mobile', 'tow_password']
 
     def validate_mobile(self, var):
-        if re.match('^1[3-9]\d{9}$', var):
+        if not re.match('^1[34578]\d{9}$', var):
             raise ValidationError('手机号格式错误')
         return var
 
