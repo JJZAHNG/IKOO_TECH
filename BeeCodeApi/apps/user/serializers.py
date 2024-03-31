@@ -53,7 +53,6 @@ class UserLoginSerializer(UniversalSerializer):
 
 # 手机号登录
 
-
 class SMSLoginSerializer(serializers.Serializer):
     mobile = serializers.CharField()
     code = serializers.CharField()
