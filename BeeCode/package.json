@@ -5,7 +5,8 @@
     "expo": "^50.0.14",
     "react-native-safe-area-context": "4.8.2",
     "react-native-screens": "^3.29.0",
-    "expo-screen-orientation": "~6.4.1"
+    "expo-screen-orientation": "~6.4.1",
+    "react-native-webview": "13.6.4"
   },
   "devDependencies": {
     "expo-cli": "^6.3.10"
