@@ -13,6 +13,10 @@ import MainScreen from './Screens/Main/MainScreen';
 import SMSLoginScreen from './Screens/SMSLogin/SMSLoginScreen';
 import CourseScreen from './Screens/Course/CourseScreen';
 
+// Import ScratchScreen Component
+import ScratchScreen from './Screens/ScratchScreen';
+
+
 // Create a Stack Navigator
 const Stack = createNativeStackNavigator();
 
@@ -43,6 +47,10 @@ const App = () => {
           }}
         />
         <Stack.Screen name="Course" component={CourseScreen} options={{title: "课程套件"}} />
+
+        {/* add ScratchScreen Component */}
+        <Stack.Screen name="Scratch" component={ScratchScreen} options={{ title: "Scratch" }} />
+
       </Stack.Navigator>
     </NavigationContainer>
   );
