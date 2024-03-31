@@ -59,7 +59,7 @@ class SMSLoginSerializer(serializers.Serializer):
     code = serializers.CharField()
 
     def validate_mobile(self, var):
-        if re.match('^1[3-9]\d{9}$', var):
+        if not re.match('^1[34578]\d{9}$', var):
             raise ValidationError('手机号格式错误')
         return var
 
