@@ -19,3 +19,10 @@ class User(AbstractUser):
 
     def __str__(self):
         return self.username
+
+
+
+# class Course(models.Model):
+#     course_name = models.CharField(max_length=11,verbose_name='课程名称')
+#     course_synopsis = models.TextField(max_length=255,verbose_name='课程介绍')
+#     course_classify = models.CharField()

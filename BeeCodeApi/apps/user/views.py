@@ -18,11 +18,10 @@ class MobileView(ViewSet):
     # 校验手机号是否正确
     @action(methods=['GET'], detail=False)
     def verify_mobile(self, request, *args, **kwargs):
-
         try:
             # 取出前端传过来的手机号
             mobile = request.query_params['mobile']
-
+            print(mobile)
             # 去数据库中查询是否存在 且唯一
             models.User.objects.get(mobile=mobile)
         
@@ -48,8 +47,6 @@ class MobileView(ViewSet):
         # celery异步发送短信
         send_message.delay(code, mobile)
         return APIResponse(msg='短信已发送')
-
-
 
 
 # 用户密码 邮箱密码 手机号密码登录
@@ -102,8 +99,6 @@ class RegisterView(GenericViewSet):
         return APIResponse(msg='注册成功')
 
 
-
-
 # 忘记密码
 # 忘记密码也先验证手机号 与 验证码 发送验证码
 class ForgetpwdView(GenericViewSet):
@@ -121,6 +116,6 @@ class ForgetpwdView(GenericViewSet):
             return APIResponse(msg='密码设置成功')
         return APIResponse(msg='账号输入错误')
 
-# 测试pycharm是否管用
+
 
 

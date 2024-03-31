@@ -134,7 +134,13 @@ class RegisterSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = models.User
-        fields = ['username', 'password', 'tow_password']
+        fields = ['username', 'password','mobile', 'tow_password']
+
+    def validate_mobile(self, var):
+        if re.match('^1[3-9]\d{9}$', var):
+            raise ValidationError('手机号格式错误')
+        return var
+
 
     def validate_password(self, var):
         if len(var) < 8:
