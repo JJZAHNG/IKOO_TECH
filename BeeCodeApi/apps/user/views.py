@@ -70,7 +70,8 @@ class UserLoginView(GenericViewSet):
 
     # 多方式登陆
     @action(methods=['POST'], detail=False)
-    def mul_login(self, request, *args, **kwargs):
+    def mul_login(self, request, *args, **kwargs): 
+        print(1)
         return self._login(request, *args, **kwargs)
 
     # 短信登陆

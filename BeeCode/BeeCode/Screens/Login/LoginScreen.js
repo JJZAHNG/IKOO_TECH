@@ -13,10 +13,34 @@ const LoginScreen = ({ navigation }) => {
   const [accountNumber, setAccountNumber] = useState('');
   const [password, setPassword] = useState('');
 
-  const handleLogin = () => {
-    // Logic for handling login
+  const handleLogin = async () => {
     console.log("Login pressed");
-    navigation.navigate("Main");
+
+    try {
+      const response = await fetch('http://192.168.31.103:8000/api/v1/user/login/mul_login/', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          username: accountNumber,
+          password: password,
+        }),
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+        console.log('Login successful:', data);
+        navigation.navigate("Main");
+      } else {
+        console.error('Login failed:', data);
+        // Handle login failure (e.g., show an error message)
+      }
+    } catch (error) {
+      console.error('Error during login:', error);
+      // Handle network error (e.g., show an error message)
+    }
   };
 
   const handleSignIn = () => {
