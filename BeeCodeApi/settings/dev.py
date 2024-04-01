@@ -24,6 +24,7 @@ ALLOWED_HOSTS = ['*']
 # Application definition
 
 INSTALLED_APPS = [
+    'simpleui',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -35,7 +36,8 @@ INSTALLED_APPS = [
     'user',
     'orders',
     'courses',
-    'ChatBot'
+    'ChatBot',
+    'schedule'
 ]
 
 
@@ -56,6 +58,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'corsheaders.middleware.CorsMiddleware'
 ]
 
 ROOT_URLCONF = 'BeeCodeApi.urls'
@@ -81,6 +84,7 @@ WSGI_APPLICATION = 'BeeCodeApi.wsgi.application'
 # https://docs.djangoproject.com/en/5.0/ref/settings/#databases
 pymysql.install_as_MySQLdb()
 
+
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
@@ -88,9 +92,14 @@ DATABASES = {
         'HOST': '127.0.0.1',
         'PORT': 3306,
         'USER': 'root',
-        'PASSWORD': 'a1234567'
+        'PASSWORD': 'a1234567',
+        'OPTIONS':{
+            "init_command":"SET sql_mode='STRICT_TRANS_TABLES'"
+        }
+
     }
 }
+
 
 # Password validation
 # https://docs.djangoproject.com/en/5.0/ref/settings/#auth-password-validators
@@ -179,12 +188,12 @@ LOGGING = {
         },
     }
 }
-
+# 使用自己的异常处理
 REST_FRAMEWORK = {
     'EXCEPTION_HANDLER': 'utils.common_exceptions.common_exception_handler',
 }
 
-
+# 解决跨域问题的第三方
 CORS_ORIGIN_ALLOW_ALL = True
 CORS_ALLOW_METHODS = (
     'DELETE',
@@ -210,7 +219,7 @@ CORS_ALLOW_HEADERS = (
     'Pragma',
     'token'
 )
-
+# 继承auth user表需要注册
 AUTH_USER_MODEL = 'user.User'
 
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')

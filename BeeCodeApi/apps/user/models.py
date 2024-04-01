@@ -21,8 +21,19 @@ class User(AbstractUser):
         return self.username
 
 
+class UserProfile(models.Model):
+    user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='profile')
+    is_member = models.BooleanField(default=False, verbose_name='是否是会员')
+    avatar = models.ImageField(upload_to='icon', null=True, blank=True, verbose_name='头像')
+    nickname = models.CharField(max_length=255, null=True, blank=True, verbose_name='昵称')
+    phone = models.CharField(max_length=20, null=True, blank=True, unique=True, verbose_name='绑定手机号')
 
-# class Course(models.Model):
-#     course_name = models.CharField(max_length=11,verbose_name='课程名称')
-#     course_synopsis = models.TextField(max_length=255,verbose_name='课程介绍')
-#     course_classify = models.CharField()
+    class Meta:
+        db_table = 'BeeCode_profile'
+        verbose_name = '用户表'
+        verbose_name_plural = verbose_name
+
+
+    def __str__(self):
+        return self.user.username
+

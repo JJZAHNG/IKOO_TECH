@@ -24,6 +24,7 @@ ALLOWED_HOSTS = ['*']
 # Application definition
 
 INSTALLED_APPS = [
+    'simpleui',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -35,8 +36,11 @@ INSTALLED_APPS = [
     'user',
     'orders',
     'courses',
-    'ChatBot'
+    'ChatBot',
+    'schedule'
 ]
+
+
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
@@ -46,6 +50,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'corsheaders.middleware.CorsMiddleware'
 ]
 
 ROOT_URLCONF = 'BeeCodeApi.urls'
@@ -79,7 +84,11 @@ DATABASES = {
         'HOST': '127.0.0.1',
         'PORT': 3306,
         'USER': 'root',
-        'PASSWORD': 'a1234567'
+        'PASSWORD': 'a1234567',
+        'OPTIONS':{
+            "init_command":"SET sql_mode='STRICT_TRANS_TABLES'"
+        }
+
     }
 }
 
