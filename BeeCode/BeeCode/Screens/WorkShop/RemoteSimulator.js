@@ -8,6 +8,7 @@ const RemoteSimulator = () => {
   // 处理摇杆动作的函数
   const handleJoystickMove = (joystick, direction) => {
     console.log(`${joystick} joystick moved ${direction}`);
+  }
 
   // 模拟方向键的处理函数
   const handleDirectionPress = (direction) => {
