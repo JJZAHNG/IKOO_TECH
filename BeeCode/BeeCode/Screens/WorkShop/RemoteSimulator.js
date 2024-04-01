@@ -23,21 +23,28 @@ const RemoteSimulator = () => {
 
   return (
     <View style={styles.container}>
+      {/* 左摇杆 */}
+      <View style={styles.joystickContainer}>
+        <View style={styles.joystick}>
+          <View style={styles.joystickPuck}></View>
+        </View>
+      </View>
+
       {/* 方向键 */}
       <View style={styles.directionPad}>
         <TouchableOpacity style={styles.directionButton} onPress={() => handleDirectionPress('up')}>
-          <Text style={styles.buttonText}>上</Text>
+          <Text style={styles.buttonText}>↑</Text>
         </TouchableOpacity>
         <View style={styles.horizontalDirections}>
           <TouchableOpacity style={styles.directionButton} onPress={() => handleDirectionPress('left')}>
-            <Text style={styles.buttonText}>左</Text>
+            <Text style={styles.buttonText}>←</Text>
           </TouchableOpacity>
           <TouchableOpacity style={styles.directionButton} onPress={() => handleDirectionPress('right')}>
-            <Text style={styles.buttonText}>右</Text>
+            <Text style={styles.buttonText}>→</Text>
           </TouchableOpacity>
         </View>
         <TouchableOpacity style={styles.directionButton} onPress={() => handleDirectionPress('down')}>
-          <Text style={styles.buttonText}>下</Text>
+          <Text style={styles.buttonText}>↓</Text>
         </TouchableOpacity>
       </View>
 
@@ -47,30 +54,19 @@ const RemoteSimulator = () => {
           <Text style={styles.buttonText}>X</Text>
         </TouchableOpacity>
         <TouchableOpacity style={styles.actionButton} onPress={() => handleActionPress('O')}>
-          <Text style={styles.buttonText}>圆</Text>
+          <Text style={styles.buttonText}>O</Text>
         </TouchableOpacity>
-        <TouchableOpacity style={styles.actionButton} onPress={() => handleActionPress('□')}>
-          <Text style={styles.buttonText}>方块</Text>
+        <TouchableOpacity style={styles.actionButton} onPress={() => handleActionPress('square')}>
+          <Text style={styles.buttonText}>□</Text>
         </TouchableOpacity>
-        <TouchableOpacity style={styles.actionButton} onPress={() => handleActionPress('△')}>
-          <Text style={styles.buttonText}>三角</Text>
+        <TouchableOpacity style={styles.actionButton} onPress={() => handleActionPress('triangle')}>
+          <Text style={styles.buttonText}>△</Text>
         </TouchableOpacity>
       </View>
-
-      {/* 左摇杆 */}
-      <View style={styles.joystickContainer}>
-        <View style={styles.joystick} onTouchMove={(e) => handleJoystickMove('left', e.nativeEvent.locationX)}>
-          {/* 摇杆的中心点 */}
-          <View style={styles.joystickPuck}></View>
-        </View>
-      </View>
-
-      {/* 方向键、功能键和其他按钮省略，与上面的代码相同 */}
 
       {/* 右摇杆 */}
       <View style={styles.joystickContainer}>
-        <View style={styles.joystick} onTouchMove={(e) => handleJoystickMove('right', e.nativeEvent.locationY)}>
-          {/* 摇杆的中心点 */}
+        <View style={styles.joystick}>
           <View style={styles.joystickPuck}></View>
         </View>
       </View>
@@ -79,6 +75,5 @@ const RemoteSimulator = () => {
     </View>
   );
 };
-
 
 export default RemoteSimulator;

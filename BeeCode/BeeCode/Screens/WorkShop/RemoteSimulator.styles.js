@@ -1,66 +1,66 @@
-// RemoteSimulator.styles.js
 import { StyleSheet } from 'react-native';
 
 export default StyleSheet.create({
   container: {
     flex: 1,
-    padding: 20,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  directionPad: {
-    justifyContent: 'space-between',
-    marginBottom: 20,
-  },
-  horizontalDirections: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
-  },
-  directionButton: {
-    padding: 10,
-    margin: 5,
-    backgroundColor: 'grey',
     alignItems: 'center',
-    justifyContent: 'center',
-  },
-  actionButtons: {
-    flexDirection: 'row',
     justifyContent: 'space-around',
-  },
-  actionButton: {
-    padding: 10,
-    margin: 5,
-    backgroundColor: 'darkgrey',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  buttonText: {
-    fontSize: 20,
-    color: 'white',
+    padding: 20,
+    backgroundColor: '#fff' // 背景色，可根据需要调整
   },
   joystickContainer: {
-    width: 100,
-    height: 100,
     justifyContent: 'center',
     alignItems: 'center',
-    margin: 10,
   },
   joystick: {
     width: 80,
     height: 80,
-    borderRadius: 40, // 使其成为圆形
-    borderWidth: 1,
-    borderColor: '#ccc',
+    borderRadius: 40,
+    backgroundColor: '#ddd',
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: '#ddd', // 轻微灰色背景，可根据设计调整
+    borderWidth: 1,
+    borderColor: '#ccc'
   },
   joystickPuck: {
     width: 30,
     height: 30,
-    borderRadius: 15, // 使其成为圆形
-    backgroundColor: '#bbb', // 轻微深色背景，可根据设计调整
+    borderRadius: 15,
+    backgroundColor: '#bbb'
   },
-  
+  directionPad: {
+    alignItems: 'center'
+  },
+  horizontalDirections: {
+    flexDirection: 'row',
+    justifyContent: 'space-between'
+  },
+  directionButton: {
+    width: 60,
+    height: 60,
+    borderRadius: 30,
+    backgroundColor: 'grey',
+    justifyContent: 'center',
+    alignItems: 'center',
+    margin: 5
+  },
+  actionButtons: {
+    flexDirection: 'row',
+    alignItems: 'center'
+  },
+  actionButton: {
+    width: 60,
+    height: 60,
+    borderRadius: 30,
+    backgroundColor: 'darkgrey',
+    justifyContent: 'center',
+    alignItems: 'center',
+    margin: 5
+  },
+  buttonText: {
+    fontSize: 20,
+    color: 'white'
+  },
   // 其他需要的样式...
 });
