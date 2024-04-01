@@ -23,6 +23,7 @@ const MainScreen = ({ navigation }) => {
   const handleButtonC = () => {
     console.log('Pressed Button 快速编程')
     // Navigate to related page
+    navigation.navigate('Remote'); // 'Remote' 是遥控器界面在导航栈中的名字
   }
 
   const handleButtonD = () => {

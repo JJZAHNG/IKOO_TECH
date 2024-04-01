@@ -56,8 +56,8 @@ const App = () => {
         {/* <Stack.Screen name="Scratch" component={ScratchScreen} options={{ title: "Scratch" }} /> */}
         
         
-
-
+        {/* 添加遥控器界面 */}
+        <Stack.Screen name="Remote" component={RemoteSimulator} options={{ title: "遥控器" }} />
       </Stack.Navigator>
     </NavigationContainer>
   );

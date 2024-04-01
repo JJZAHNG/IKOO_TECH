@@ -78,5 +78,6 @@ const RemoteSimulator = () => {
     </View>
   );
 };
+}
 
 export default RemoteSimulator;
