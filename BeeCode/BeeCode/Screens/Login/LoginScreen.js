@@ -9,6 +9,7 @@ import styles from './LoginScreen.styles';
 
 
 const LoginScreen = ({ navigation }) => {
+  console.log('LoginScreen is rendering');
   const [accountNumber, setAccountNumber] = useState('');
   const [password, setPassword] = useState('');
 
@@ -30,6 +31,7 @@ const LoginScreen = ({ navigation }) => {
   };
 
   useEffect(() => {
+      console.log('Component did mount or update');
       ScreenOrientation.lockAsync(ScreenOrientation.OrientationLock.PORTRAIT);
 
       return () => {

@@ -1,3 +1,5 @@
+console.log('App.js is loaded');
+
 // Import React and necessary hooks
 import React, { useState, useEffect} from 'react';
 // Import components from React Native
@@ -22,6 +24,7 @@ const Stack = createNativeStackNavigator();
 
 // App component that sets up navigation
 const App = () => {
+  console.log('App is rendering');
   return (
     <NavigationContainer>
       <Stack.Navigator
