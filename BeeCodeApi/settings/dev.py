@@ -77,7 +77,6 @@ TEMPLATES = [
 ]
 
 WSGI_APPLICATION = 'BeeCodeApi.wsgi.application'
-
 # Database
 # https://docs.djangoproject.com/en/5.0/ref/settings/#databases
 pymysql.install_as_MySQLdb()

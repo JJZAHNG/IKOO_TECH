@@ -14,6 +14,7 @@ import LoginScreen from './Screens/Login/LoginScreen';
 import MainScreen from './Screens/Main/MainScreen';
 import SMSLoginScreen from './Screens/SMSLogin/SMSLoginScreen';
 import CourseScreen from './Screens/Course/CourseScreen';
+import RemoteSimulator from './Screens/WorkShop/RemoteSimulator';
 
 // Import ScratchScreen Component
 // import ScratchScreen from './Screens/ScratchScreen';
@@ -53,6 +54,9 @@ const App = () => {
 
         {/* add ScratchScreen Component */}
         {/* <Stack.Screen name="Scratch" component={ScratchScreen} options={{ title: "Scratch" }} /> */}
+        
+        
+
 
       </Stack.Navigator>
     </NavigationContainer>
