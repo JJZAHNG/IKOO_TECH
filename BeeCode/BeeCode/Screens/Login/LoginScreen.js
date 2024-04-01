@@ -17,7 +17,7 @@ const LoginScreen = ({ navigation }) => {
     console.log("Login pressed");
 
     try {
-      const response = await fetch('http://192.168.31.103:8000/api/v1/user/login/mul_login/', {
+      const response = await fetch('http://192.168.110.84:8000/api/v1/user/login/mul_login/', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
