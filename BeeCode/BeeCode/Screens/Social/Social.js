@@ -16,6 +16,42 @@ const postsData = [
   {
     id: '1',
     userName: '张三',
+    avatar: 'https://letsenhance.io/static/8f5e523ee6b2479e26ecc91b9c25261e/1015f/MainAfter.jpg',
+    content: '今天天气不错！',
+    image: 'https://www.goodfreephotos.com/albums/other-landscapes/sunrise-over-the-lake-with-tree-and-birds.jpg',
+    likes: ['李四', '王五'],
+    comments: [
+      { id: 'c1', userName: '李四', text: '真的很不错！' },
+      { id: 'c2', userName: '王五', text: '赞同！' },
+    ],
+  },
+  {
+    id: '2',
+    userName: '李四',
+    avatar: 'https://www.adobe.com/products/media_14562ad96c12a2f3030725ae81bd3ede1c68cb783.jpeg?width=750&format=jpeg&optimize=medium',
+    content: '今天天气不错！',
+    image: 'https://cdn.pixabay.com/photo/2015/04/23/22/00/tree-736881_640.jpg',
+    likes: ['李四', '王五'],
+    comments: [
+      { id: 'c1', userName: '李四', text: '真的很不错！' },
+      { id: 'c2', userName: '王五', text: '赞同！' },
+    ],
+  },
+  {
+    id: '3',
+    userName: '狼哥',
+    avatar: 'https://deep-image.ai/_next/static/media/app-info-generator.bf08e63e.webp',
+    content: '今天天气不错！',
+    image: 'https://www.befunky.com/images/prismic/82e0e255-17f9-41e0-85f1-210163b0ea34_hero-blur-image-3.jpg?auto=avif,webp&format=jpg&width=896',
+    likes: ['李四', '王五'],
+    comments: [
+      { id: 'c1', userName: '李四', text: '真的很不错！' },
+      { id: 'c2', userName: '王五', text: '赞同！' },
+    ],
+  },
+  {
+    id: '4',
+    userName: 'Jackie',
     avatar: 'https://via.placeholder.com/100x100',
     content: '今天天气不错！',
     image: 'https://via.placeholder.com/300x200',
@@ -66,14 +102,14 @@ const SocialScreen = () => {
       renderItem={renderPost}
       ListHeaderComponent={
         <ImageBackground
-          source={{ uri: 'your-cover-photo-url' }} // 你的朋友圈封面图片链接
+          source={{ uri: 'https://www.akamai.com/site/im-demo/perceptual-standard.jpg?imbypass=true' }} // 你的朋友圈封面图片链接
           style={styles.coverPhoto}
         >
           <StatusBar barStyle="light-content" />
           <TouchableOpacity style={styles.cameraButton}>
             <Icon name="camera" size={20} color="#fff" />
           </TouchableOpacity>
-          <Image source={{ uri: 'your-profile-photo-url' }} style={styles.profilePhoto} />
+          <Image source={{ uri: 'https://imgupscaler.com/images/samples/anime-after.webp' }} style={styles.profilePhoto} />
         </ImageBackground>
       }
       style={styles.feed}
