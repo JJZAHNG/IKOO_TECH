@@ -7,7 +7,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import * as ScreenOrientation from 'expo-screen-orientation';
 import styles from './LoginScreen.styles';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import config from './config'; 
+import config from '../../config.js'; 
 
 
 
