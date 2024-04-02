@@ -7,7 +7,7 @@ import { WebView } from 'react-native-webview';
 const ScratchScreen = () => {
   return (
     <WebView
-      source={{ uri: '192.168.110.84:8602' }} // 替换成你的scratch-gui地址
+      source={{ uri: 'http://192.168.110.84:8602' }} // 替换成你的scratch-gui地址
       style={{ flex: 1 }}
     />
   );
