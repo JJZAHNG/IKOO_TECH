@@ -34,6 +34,7 @@ const MainScreen = ({ navigation }) => {
   const handleButtonE = () => {
     console.log('Pressed Button 在线咨询')
     // Navigate to related page
+    navigation.navigate('ChatService'); // 使用 'ChatService' 导航到聊天界面
   }
 
   const handleButtonF = () => {

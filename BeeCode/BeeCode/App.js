@@ -58,6 +58,9 @@ const App = () => {
         
         {/* 添加遥控器界面 */}
         <Stack.Screen name="Remote" component={RemoteSimulator} options={{ title: "遥控器" }} />
+
+        {/* 在线咨询界面 */}
+        <Stack.Screen name="ChatService" component={ChatService} options={{ title: "在线咨询" }} />
       </Stack.Navigator>
     </NavigationContainer>
   );
