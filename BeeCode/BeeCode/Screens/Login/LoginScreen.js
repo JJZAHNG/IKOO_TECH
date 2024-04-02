@@ -17,6 +17,11 @@ const LoginScreen = ({ navigation }) => {
   const [accountNumber, setAccountNumber] = useState('');
   const [password, setPassword] = useState('');
 
+  const handleDevelopmentAccess = () => {
+    // Logic for direct navigation to MainScreen for development purposes
+    navigation.navigate('Main');
+  };
+
   const handleLogin = async () => {
     console.log("Login pressed");
 
@@ -107,6 +112,11 @@ const LoginScreen = ({ navigation }) => {
 
       <TouchableOpacity onPress={handleSignIn} style={[styles.button, styles.button_register]}>
         <Text style={styles.buttonText}>注册</Text>
+      </TouchableOpacity>
+
+      {/* Development Button */}
+      <TouchableOpacity onPress={handleDevelopmentAccess} style={styles.button_development}>
+        <Text style={styles.buttonText}>开发</Text>
       </TouchableOpacity>
     </SafeAreaView>
   );

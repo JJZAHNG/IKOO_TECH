@@ -84,4 +84,13 @@ export default StyleSheet.create({
     fontWeight: "bold",
     alignSelf: "center",
   },
+
+  // Add a new style for the development button
+  button_development: {
+    marginTop: 10, // You can adjust this value as needed
+    backgroundColor: 'green', // Choose a color that distinguishes it from other buttons
+    padding: 15,
+    borderRadius: 5,
+    alignItems: 'center',
+  },
 })
