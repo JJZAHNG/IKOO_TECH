@@ -13,6 +13,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import SplashScreen from './Screens/SplashScreen/SplashScreen';
 import SettingScreen from './Screens/Setting/SeetingScreen';
 import WorkShopScreen from './Screens/WorkShop/WorkShopScreen';
+import ScratchScreen from './Screens/WorkShop/ScratchScreen'; // 更新为你的正确路径
 
 
 // Create a Stack Navigator
@@ -92,6 +93,7 @@ const App = () => {
         <Stack.Screen name="Setting" component={SettingScreen} options={{ title: "设置"}} />
         {/* ... 其他 Stack.Screen 配置 */}
         <Stack.Screen name="WorkShop" component={WorkShopScreen} options={{ title: "工作坊" }} />
+        <Stack.Screen name="Scratch" component={ScratchScreen} options={{ title: "Scratch编程" }} />
       </Stack.Navigator>
     </NavigationContainer>
   );

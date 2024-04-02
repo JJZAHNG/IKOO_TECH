@@ -8,7 +8,7 @@ const WorkShopScreen = ({ navigation }) => {
       <TouchableOpacity style={styles.box} onPress={() => navigation.navigate('RemoteSimulator')}>
         <Text style={styles.boxText}>遥控</Text>
       </TouchableOpacity>
-      <TouchableOpacity style={styles.box} onPress={() => {/* Navigate to Programming */}}>
+      <TouchableOpacity style={styles.box} onPress={() => navigation.navigate('ScratchScreen')}>
         <Text style={styles.boxText}>编程</Text>
       </TouchableOpacity>
       <TouchableOpacity style={styles.box} onPress={() => {/* Navigate to Examples */}}>
