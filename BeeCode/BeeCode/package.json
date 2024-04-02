@@ -25,6 +25,7 @@
     "react-native-screens": "~3.29.0",
     "react-native-touchable": "^1.0.6",
     "react-native-webview": "^13.8.4",
+    "use-latest-callback": "^0.1.9",
     "warn-once": "^0.1.1"
   },
   "devDependencies": {
