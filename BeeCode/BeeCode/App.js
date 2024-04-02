@@ -1,23 +1,16 @@
 console.log('App.js is loaded');
 
-// Import React and necessary hooks
 import React, { useState, useEffect} from 'react';
-// Import components from React Native
-import { View, TextInput, TouchableOpacity, Text, StyleSheet, Button, ScrollView, Animated, Dimensions, StatusBar } from 'react-native';
-// Import the CountryPicker from 'react-native-country-picker-modal'
-import CountryPicker from 'react-native-country-picker-modal';
-// Import NavigationContainer and createNativeStackNavigator from React Navigation
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
-
 import LoginScreen from './Screens/Login/LoginScreen';
 import MainScreen from './Screens/Main/MainScreen';
 import SMSLoginScreen from './Screens/SMSLogin/SMSLoginScreen';
 import CourseScreen from './Screens/Course/CourseScreen';
 import RemoteSimulator from './Screens/WorkShop/RemoteSimulator';
+import ChatService from './Screens/Ai_Chat/ChatService';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
-// Import ScratchScreen Component
-// import ScratchScreen from './Screens/ScratchScreen';
 
 
 // Create a Stack Navigator
@@ -26,6 +19,34 @@ const Stack = createNativeStackNavigator();
 // App component that sets up navigation
 const App = () => {
   console.log('App is rendering');
+
+  const [isInitialLoading, setIsInitialLoading] = useState(true);
+  const [initialRouteName, setInitialRouteName] = useState('Login');
+
+  useEffect(() => {
+    const checkLoginStatus = async () => {
+      try {
+        const isLoggedIn = await AsyncStorage.getItem('isLoggedIn');
+        if (isLoggedIn === 'true') {
+          setInitialRouteName('Main');
+        } else {
+          setInitialRouteName('Login');
+        }
+      } catch (error) {
+        console.error('Failed to fetch login status', error);
+      } finally {
+        setIsInitialLoading(false);
+      }
+    };
+
+    checkLoginStatus();
+  }, []);
+
+  if (isInitialLoading) {
+    // return <SplashScreen />; // Show splash screen or any loading indicator you prefer
+  }
+
+
   return (
     <NavigationContainer>
       <Stack.Navigator
@@ -38,7 +59,7 @@ const App = () => {
             fontWeight: '900', // Set the header title style
           },
         }}>
-        <Stack.Screen name="Login" component={LoginScreen} />
+        <Stack.Screen name="Login" component={LoginScreen} options={{headerShown: false}}/>
         <Stack.Screen name="SMSLogin" component={SMSLoginScreen} />
         <Stack.Screen
           name="Main"

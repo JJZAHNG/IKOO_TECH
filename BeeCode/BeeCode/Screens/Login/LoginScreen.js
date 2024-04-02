@@ -32,10 +32,15 @@ const LoginScreen = ({ navigation }) => {
 
       if (response.ok) {
         console.log('Login successful:', data);
+        await AsyncStorage.setItem('isLoggedIn', 'true');
+        console.log('Set isLoggedIn to true...');
         navigation.navigate("Main");
       } else {
         console.error('Login failed:', data);
         // Handle login failure (e.g., show an error message)
+        await AsyncStorage.setItem('isLoggedIn', 'false');
+        console.log('Set isLoggedIn to false...');
+        alert("Account Number or Password is not correct")
       }
     } catch (error) {
       console.error('Error during login:', error);
