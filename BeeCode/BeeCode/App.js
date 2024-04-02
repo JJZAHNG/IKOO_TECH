@@ -12,6 +12,8 @@ import ChatService from './Screens/Ai_Chat/ChatService';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import SplashScreen from './Screens/SplashScreen/SplashScreen';
 import SettingScreen from './Screens/Setting/SeetingScreen';
+import WorkShopScreen from './Screens/WorkShop/WorkShopScreen';
+
 
 // Create a Stack Navigator
 const Stack = createNativeStackNavigator();
