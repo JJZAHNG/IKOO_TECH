@@ -37,3 +37,69 @@ class UserProfile(models.Model):
     def __str__(self):
         return self.user.username
 
+
+
+
+# Table Achievenment Add In
+# user/models.py
+
+class Achievement(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='achievements')
+    name = models.CharField(max_length=255, verbose_name='成就名称')
+    description = models.TextField(verbose_name='成就描述')
+    earned_at = models.DateTimeField(auto_now_add=True, verbose_name='获得时间')
+    
+    class Meta:
+        db_table = 'BeeCode_achievement'
+        verbose_name = '成就表'
+        verbose_name_plural = verbose_name
+
+    def __str__(self):
+        return f"{self.user.username} - {self.name}"
+
+
+# 朋友圈系列
+# user/models.py
+
+class Post(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='posts')
+    text = models.TextField(verbose_name='帖子内容')
+    created_at = models.DateTimeField(auto_now_add=True, verbose_name='发布时间')
+    image = models.ImageField(upload_to='posts/images/', null=True, blank=True, verbose_name='帖子图片')
+
+    class Meta:
+        db_table = 'BeeCode_post'
+        verbose_name = '帖子表'
+        verbose_name_plural = verbose_name
+
+    def __str__(self):
+        return f"{self.user.username} - {self.text[:20]}"
+
+
+class Comment(models.Model):
+    post = models.ForeignKey(Post, on_delete=models.CASCADE, related_name='comments')
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    text = models.TextField(verbose_name='评论内容')
+    created_at = models.DateTimeField(auto_now_add=True, verbose_name='评论时间')
+
+    class Meta:
+        db_table = 'BeeCode_comment'
+        verbose_name = '评论表'
+        verbose_name_plural = verbose_name
+
+    def __str__(self):
+        return f"{self.user.username} - {self.text[:20]}"
+
+
+class Like(models.Model):
+    post = models.ForeignKey(Post, on_delete=models.CASCADE, related_name='likes')
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    created_at = models.DateTimeField(auto_now_add=True, verbose_name='点赞时间')
+
+    class Meta:
+        db_table = 'BeeCode_like'
+        verbose_name = '点赞表'
+        verbose_name_plural = verbose_name
+
+    def __str__(self):
+        return f"{self.user.username} - {self.post.id}"

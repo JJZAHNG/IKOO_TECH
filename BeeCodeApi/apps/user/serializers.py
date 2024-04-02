@@ -7,7 +7,13 @@ from django.conf import settings
 from django.core.cache import cache
 from django.contrib.auth.hashers import make_password, check_password
 import re
+from .models import Achievement
+from .models import Post, Comment, Like
 
+class AchievementSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Achievement
+        fields = '__all__'
 
 class UniversalSerializer(serializers.Serializer):
     username = serializers.CharField()
@@ -196,3 +202,22 @@ class SetPwdSerializer(serializers.ModelSerializer):
         instance.password = make_password(new_password)
         instance.save()
         return instance
+
+
+# 朋友圈系列
+class PostSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Post
+        fields = '__all__'
+
+
+class CommentSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Comment
+        fields = '__all__'
+
+
+class LikeSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Like
+        fields = '__all__'

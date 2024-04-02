@@ -11,6 +11,11 @@ from rest_framework.generics import CreateAPIView
 from django.db.models import Q
 from celery_task.user_task import send_message
 
+from rest_framework import status, viewsets
+from rest_framework.response import Response
+from .models import User, Achievement
+from .serializers import AchievementSerializer
+
 # Create your views here.
 # 1.手机号短信登录
 class MobileView(ViewSet):
@@ -119,4 +124,58 @@ class ForgetpwdView(GenericViewSet):
 
 
 
+
+
+
+
+# Achievements / Accomplishments
+class AchievementViewSet(viewsets.ModelViewSet):
+    queryset = Achievement.objects.all()
+    serializer_class = AchievementSerializer
+
+    @action(detail=True, methods=['post'])
+    def earn_achievement(self, request, pk=None):
+        user = self.get_object()
+        achievement, created = Achievement.objects.get_or_create(
+            user=user,
+            name=request.data.get('name'),
+            defaults={'description': request.data.get('description')}
+        )
+        if created:
+            return Response({'status': 'achievement earned'}, status=status.HTTP_201_CREATED)
+        else:
+            return Response({'status': 'achievement already earned'}, status=status.HTTP_200_OK)
+
+
+
+# 朋友圈系列
+# user/views.py
+
+
+from .models import Post, Comment, Like
+from .serializers import PostSerializer, CommentSerializer, LikeSerializer
+
+class PostViewSet(viewsets.ModelViewSet):
+    queryset = Post.objects.all()
+    serializer_class = PostSerializer
+    # 添加权限和认证等
+
+class CommentViewSet(viewsets.ModelViewSet):
+    queryset = Comment.objects.all()
+    serializer_class = CommentSerializer
+    # 添加权限和认证等
+
+class LikeViewSet(viewsets.ModelViewSet):
+    queryset = Like.objects.all()
+    serializer_class = LikeSerializer
+    # 添加权限和认证等
+
+    def perform_create(self, serializer):
+        # 确保同一个用户不会对同一个帖子点赞两次
+        user = self.request.user
+        post = serializer.validated_data['post']
+        like, created = Like.objects.get_or_create(user=user, post=post)
+        if not created:
+            raise serializers.ValidationError('You have already liked this post.')
+        serializer.save(user=user, post=post)
 

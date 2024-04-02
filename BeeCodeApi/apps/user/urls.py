@@ -12,6 +12,12 @@ router.register('mobile_register', views.UserRegisterView, 'mobile_register')
 router.register('user_register', views.RegisterView, 'user_register')
 # 忘记密码
 router.register('forget_pwd', views.ForgetpwdView, 'forget_pwd')
+# 个人成就
+router.register('achievements', views.AchievementViewSet, 'achievements')
+# 朋友圈系列
+router.register('posts', views.PostViewSet, 'posts')
+router.register('comments', views.CommentViewSet, 'comments')
+router.register('likes', views.LikeViewSet, 'likes')
 
 urlpatterns = []
 urlpatterns += router.urls
