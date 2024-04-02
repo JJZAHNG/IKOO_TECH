@@ -10,8 +10,8 @@ import CourseScreen from './Screens/Course/CourseScreen';
 import RemoteSimulator from './Screens/WorkShop/RemoteSimulator';
 import ChatService from './Screens/Ai_Chat/ChatService';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-
-
+import SplashScreen from './Screens/SplashScreen/SplashScreen';
+import SettingScreen from './Screens/Setting/SeetingScreen';
 
 // Create a Stack Navigator
 const Stack = createNativeStackNavigator();
@@ -27,8 +27,11 @@ const App = () => {
     const checkLoginStatus = async () => {
       try {
         const isLoggedIn = await AsyncStorage.getItem('isLoggedIn');
+        console.log("isLoggedIn is", isLoggedIn);
         if (isLoggedIn === 'true') {
           setInitialRouteName('Main');
+          console.log("should Initial Route Name: ", initialRouteName);
+
         } else {
           setInitialRouteName('Login');
         }
@@ -39,26 +42,28 @@ const App = () => {
       }
     };
 
+
     checkLoginStatus();
   }, []);
 
   if (isInitialLoading) {
-    // return <SplashScreen />; // Show splash screen or any loading indicator you prefer
+    return <SplashScreen />; // Show splash screen or any loading indicator you prefer
   }
 
 
   return (
     <NavigationContainer>
       <Stack.Navigator
-        screenOptions={{
-          headerStyle: {
-            backgroundColor: '#fcbf49', // Set your own color
-          },
-          headerTintColor: '#fff', // Set the color for the header title and buttons
-          headerTitleStyle: {
-            fontWeight: '900', // Set the header title style
-          },
-        }}>
+        // screenOptions={{
+        //   headerStyle: {
+        //     backgroundColor: '#fcbf49', // Set your own color
+        //   },
+        //   headerTintColor: '#fff', // Set the color for the header title and buttons
+        //   headerTitleStyle: {
+        //     fontWeight: '900', // Set the header title style
+        //   },
+        // }}
+        initialRouteName={initialRouteName}>
         <Stack.Screen name="Login" component={LoginScreen} options={{headerShown: false}}/>
         <Stack.Screen name="SMSLogin" component={SMSLoginScreen} />
         <Stack.Screen
@@ -82,6 +87,7 @@ const App = () => {
 
         {/* 在线咨询界面 */}
         <Stack.Screen name="ChatService" component={ChatService} options={{ title: "在线咨询" }} />
+        <Stack.Screen name="Setting" component={SettingScreen} options={{ title: "设置"}} />
       </Stack.Navigator>
     </NavigationContainer>
   );
