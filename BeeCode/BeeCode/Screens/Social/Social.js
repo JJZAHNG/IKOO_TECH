@@ -1,9 +1,6 @@
 
-// 从服务器获取的帖子数据
-const posts = [
-  
-];
-
+import * as ScreenOrientation from 'expo-screen-orientation';
+import { useEffect } from 'react';
 import React, { useState } from 'react';
 import { 
   View, Text, Image, FlatList, StyleSheet, TouchableOpacity,
@@ -65,6 +62,19 @@ const postsData = [
 ];
 
 const SocialScreen = () => {
+  useEffect(() => {
+    const changeScreenOrientation = async () => {
+      await ScreenOrientation.lockAsync(ScreenOrientation.OrientationLock.PORTRAIT_UP);
+    };
+
+    changeScreenOrientation();
+
+    // 在组件卸载时恢复默认的屏幕方向（例如，允许自动旋转），则需要如下处理：
+    return () => {
+      ScreenOrientation.unlockAsync();
+    };
+  }, []);
+
   const [selectedId, setSelectedId] = useState(null);
 
   const renderPost = ({ item }) => {
@@ -102,7 +112,7 @@ const SocialScreen = () => {
       renderItem={renderPost}
       ListHeaderComponent={
         <ImageBackground
-          source={{ uri: 'https://www.akamai.com/site/im-demo/perceptual-standard.jpg?imbypass=true' }} // 你的朋友圈封面图片链接
+          source={{ uri: 'https://imgv3.fotor.com/images/slider-image/A-clear-close-up-photo-of-a-woman.jpg' }} // 你的朋友圈封面图片链接
           style={styles.coverPhoto}
         >
           <StatusBar barStyle="light-content" />
