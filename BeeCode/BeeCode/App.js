@@ -80,9 +80,6 @@ const App = () => {
           }}
         />
         <Stack.Screen name="Course" component={CourseScreen} options={{title: "课程套件"}} />
-
-        {/* add ScratchScreen Component */}
-        {/* <Stack.Screen name="Scratch" component={ScratchScreen} options={{ title: "Scratch" }} /> */}
         
         
         {/* 添加遥控器界面 */}
@@ -94,6 +91,7 @@ const App = () => {
         {/* ... 其他 Stack.Screen 配置 */}
         <Stack.Screen name="WorkShop" component={WorkShopScreen} options={{ title: "工作坊" }} />
         <Stack.Screen name="Scratch" component={ScratchScreen} options={{ title: "Scratch编程" }} />
+
       </Stack.Navigator>
     </NavigationContainer>
   );
