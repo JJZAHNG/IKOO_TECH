@@ -6,6 +6,10 @@ import { View, TextInput, Text, StyleSheet, Button, ScrollView, Animated, Dimens
 import { SafeAreaView } from 'react-native-safe-area-context';
 import * as ScreenOrientation from 'expo-screen-orientation';
 import styles from './LoginScreen.styles';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import config from './config'; 
+
+
 
 
 const LoginScreen = ({ navigation }) => {
@@ -17,7 +21,7 @@ const LoginScreen = ({ navigation }) => {
     console.log("Login pressed");
 
     try {
-      const response = await fetch('http://192.168.110.84:8000/api/v1/user/login/mul_login/', {
+      const response = await fetch('http://${config.SERVER_IP}:8000/api/v1/user/login/mul_login/', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

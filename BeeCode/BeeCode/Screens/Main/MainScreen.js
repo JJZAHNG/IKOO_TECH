@@ -45,6 +45,7 @@ const MainScreen = ({ navigation }) => {
   const handleButtonG = () => {
     console.log('Pressed Button 设置中心')
     // Navigate to related page
+    navigation.navigate('Setting');
   }
 
   useEffect(() => {
