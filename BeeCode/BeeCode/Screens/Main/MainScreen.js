@@ -40,6 +40,7 @@ const MainScreen = ({ navigation }) => {
   const handleButtonF = () => {
     console.log('Pressed Button 会员中心')
     // Navigate to related page
+    navigation.navigate('SocialScreen');
   }
 
   const handleButtonG = () => {
