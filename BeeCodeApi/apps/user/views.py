@@ -28,7 +28,7 @@ class MobileView(ViewSet):
             print(mobile)
             # 去数据库中查询是否存在 且唯一
             models.User.objects.get(mobile=mobile)
-        
+
             return APIResponse(msg='验证通过')
         # 验证不通过抛出异常
         except ObjectDoesNotExist:
@@ -62,7 +62,7 @@ class UserLoginView(GenericViewSet):
             return serializers.SMSLoginSerializer
         else:
             return super().get_serializer_class()
- 
+
     @action(methods=['POST'], detail=False)
     def _login(self, request, *args, **kwargs):
         ser = self.get_serializer(data=request.data)
@@ -145,7 +145,10 @@ class AchievementViewSet(GenericViewSet):
     @action(detail=False, methods=['post'])
     def earn_achieve(self,request):
         # 判断成就是否完成条件 添加达成返回200
-        signin_count = Achievement.objects.aggregate(total_signin=Sum('signin'))['total_signin']
+        # signin_count = Achievement.objects.aggregate(total_signin=Sum('signin'))['total_signin']
+        username = request.META.get('HTTP_USERNAME')
+        user = models.User.objects.filter(username=username).first()
+        signin_count = Achievement.objects.filter(user=user).aggregate(total_signin=Sum('signin'))['total_signin']
         if signin_count == 7:
             return APIResponse(code=705,msg='签到新星')
         elif signin_count == 15:
