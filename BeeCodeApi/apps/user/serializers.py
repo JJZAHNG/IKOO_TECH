@@ -7,13 +7,10 @@ from django.conf import settings
 from django.core.cache import cache
 from django.contrib.auth.hashers import make_password, check_password
 import re
+import datetime
 from .models import Achievement
 from .models import Post, Comment, Like
 
-class AchievementSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Achievement
-        fields = '__all__'
 
 class UniversalSerializer(serializers.Serializer):
     username = serializers.CharField()
@@ -30,7 +27,7 @@ class UniversalSerializer(serializers.Serializer):
         self.context['username'] = user.username
         self.context['token'] = token
         self.context['icon'] = settings.BACKEND_URL + \
-            '/media/' + str(user.icon)
+                               '/media/' + str(user.icon)
 
         return attrs
 
@@ -42,9 +39,8 @@ class UniversalSerializer(serializers.Serializer):
         token = jwt_encode_handler(payload)
         return token
 
+
 # 用户名密码登录
-
-
 class UserLoginSerializer(UniversalSerializer):
     def _get_user(self, attrs):
         username = attrs.get('username')
@@ -56,6 +52,7 @@ class UserLoginSerializer(UniversalSerializer):
             return user
         else:
             raise ValidationError('用户名或密码错误')
+
 
 # 手机号登录
 
@@ -79,7 +76,7 @@ class SMSLoginSerializer(serializers.Serializer):
         self.context['username'] = user.username
         self.context['token'] = token
         self.context['icon'] = settings.BACKEND_URL + \
-            '/media/' + str(user.icon)
+                               '/media/' + str(user.icon)
 
         return attrs
 
@@ -144,13 +141,12 @@ class RegisterSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = models.User
-        fields = ['username', 'password','mobile', 'tow_password']
+        fields = ['username', 'password', 'mobile', 'tow_password']
 
     def validate_mobile(self, var):
         if not re.match('^1[34578]\d{9}$', var):
             raise ValidationError('手机号格式错误')
         return var
-
 
     def validate_password(self, var):
         if len(var) < 8:
@@ -176,11 +172,9 @@ class RegisterSerializer(serializers.ModelSerializer):
 class SetPwdSerializer(serializers.ModelSerializer):
     tow_password = serializers.CharField(write_only=True)
 
-
     class Meta:
         model = models.User
-        fields = ['username', 'password','tow_password']
-
+        fields = ['username', 'password', 'tow_password']
 
     def validate_password(self, value):
         if len(value) < 8:
@@ -202,6 +196,28 @@ class SetPwdSerializer(serializers.ModelSerializer):
         instance.password = make_password(new_password)
         instance.save()
         return instance
+
+
+class AchievementSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Achievement
+        fields = ['pk']
+
+    def validate(self, attrs):
+        user = self.context.get('user')
+        username = models.User.objects.filter(username=user).first()
+        today_records = Achievement.objects.filter(user_id=username.id,earned_at__date=datetime.datetime.now())
+        if today_records:
+            raise serializers.ValidationError('今天已经签到过')
+        return attrs
+
+    def update(self, instance, validated_data):
+        user = models.User.objects.filter(username=instance).first()
+        today_record, created = Achievement.objects.get_or_create(user_id=user.id)
+        if not created:
+            today_record.signin += 1
+            today_record.save()
+            return instance
 
 
 # 朋友圈系列

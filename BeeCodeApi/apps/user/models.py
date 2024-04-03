@@ -45,10 +45,15 @@ class UserProfile(models.Model):
 
 class Achievement(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='achievements')
-    name = models.CharField(max_length=255, verbose_name='成就名称')
-    description = models.TextField(verbose_name='成就描述')
-    earned_at = models.DateTimeField(auto_now_add=True, verbose_name='获得时间')
-    
+    name = models.CharField(max_length=255, verbose_name='成就名称',null=True)
+    description = models.TextField(verbose_name='成就描述',null=True)
+    earned_at = models.DateTimeField(auto_now_add=True, verbose_name='签到时间')
+    # 成就条件
+    # 签到次数
+    signin = models.IntegerField(verbose_name='签到次数',default=0)
+
+
+
     class Meta:
         db_table = 'BeeCode_achievement'
         verbose_name = '成就表'
@@ -58,9 +63,11 @@ class Achievement(models.Model):
         return f"{self.user.username} - {self.name}"
 
 
+
+
+
 # 朋友圈系列
 # user/models.py
-
 class Post(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='posts')
     text = models.TextField(verbose_name='帖子内容')

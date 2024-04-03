@@ -7,14 +7,13 @@ from user import models, serializers
 from libs.tx_sms import get_code
 from django.core.cache import cache
 from rest_framework.mixins import CreateModelMixin
-from rest_framework.generics import CreateAPIView
-from django.db.models import Q
 from celery_task.user_task import send_message
-
+from django.db.models import Sum
 from rest_framework import status, viewsets
-from rest_framework.response import Response
 from .models import User, Achievement
 from .serializers import AchievementSerializer
+from rest_framework_jwt.authentication import JSONWebTokenAuthentication
+from rest_framework.permissions import IsAuthenticated
 
 # Create your views here.
 # 1.手机号短信登录
@@ -75,8 +74,7 @@ class UserLoginView(GenericViewSet):
 
     # 多方式登陆
     @action(methods=['POST'], detail=False)
-    def mul_login(self, request, *args, **kwargs): 
-        print(1)
+    def mul_login(self, request, *args, **kwargs):
         return self._login(request, *args, **kwargs)
 
     # 短信登陆
@@ -124,34 +122,40 @@ class ForgetpwdView(GenericViewSet):
 
 
 
-
-
-
-
+from rest_framework.viewsets import ModelViewSet,ReadOnlyModelViewSet
 # Achievements / Accomplishments
-class AchievementViewSet(viewsets.ModelViewSet):
+class AchievementViewSet(GenericViewSet):
     queryset = Achievement.objects.all()
     serializer_class = AchievementSerializer
+    authentication_classes = [JSONWebTokenAuthentication,]
+    permission_classes = [IsAuthenticated,]
+    # 签到表
+    @action(detail=False, methods=['post'])
+    def earn_achievement(self, request,*args,**kwargs):
+        # print(request.META) # HTTP_USERNAME
+        user = request.META.get('HTTP_USERNAME')
+        serializer = self.serializer_class(instance=request.user,data=request.data)
+        serializer.context['user'] = user
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+        return APIResponse(msg='签到成功')
 
-    @action(detail=True, methods=['post'])
-    def earn_achievement(self, request, pk=None):
-        user = self.get_object()
-        achievement, created = Achievement.objects.get_or_create(
-            user=user,
-            name=request.data.get('name'),
-            defaults={'description': request.data.get('description')}
-        )
-        if created:
-            return Response({'status': 'achievement earned'}, status=status.HTTP_201_CREATED)
-        else:
-            return Response({'status': 'achievement already earned'}, status=status.HTTP_200_OK)
+
+    # 时时返回的签到标签
+    @action(detail=False, methods=['post'])
+    def earn_achieve(self,request):
+        # 判断成就是否完成条件 添加达成返回200
+        signin_count = Achievement.objects.aggregate(total_signin=Sum('signin'))['total_signin']
+        if signin_count == 7:
+            return APIResponse(code=705,msg='签到新星')
+        elif signin_count == 15:
+            return APIResponse(code=706, msg='签到达人')
+        return APIResponse(code=201,msg='没有成就')
 
 
 
 # 朋友圈系列
 # user/views.py
-
-
 from .models import Post, Comment, Like
 from .serializers import PostSerializer, CommentSerializer, LikeSerializer
 

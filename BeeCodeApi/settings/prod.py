@@ -4,6 +4,7 @@ import sys
 import pymysql
 import datetime
 from .user_settings import *
+
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -39,8 +40,6 @@ INSTALLED_APPS = [
     'ChatBot',
     'schedule'
 ]
-
-
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
@@ -84,9 +83,9 @@ DATABASES = {
         'HOST': '127.0.0.1',
         'PORT': 3306,
         'USER': 'root',
-        'PASSWORD': 'a1234567',
-        'OPTIONS':{
-            "init_command":"SET sql_mode='STRICT_TRANS_TABLES'"
+        'PASSWORD': '123456',
+        'OPTIONS': {
+            "init_command": "SET sql_mode='STRICT_TRANS_TABLES'"
         }
 
     }
@@ -193,7 +192,6 @@ DATABASES = {
     }
 }
 
-
 CORS_ORIGIN_ALLOW_ALL = True
 CORS_ALLOW_METHODS = (
     'DELETE',
@@ -238,8 +236,8 @@ CACHES = {
     },
 }
 
-JJWT_AUTH = {
+JWT_AUTH = {
     # 过期时间1天
-    ' JWT_EXPIRATION_DELTA': datetime.timedelta(days=7),
+    ' JWT_EXPIRATION_DELTA': datetime.timedelta(days=2),
 
 }

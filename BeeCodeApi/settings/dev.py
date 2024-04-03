@@ -92,7 +92,7 @@ DATABASES = {
         'HOST': '127.0.0.1',
         'PORT': 3306,
         'USER': 'root',
-        'PASSWORD': 'a1234567',
+        'PASSWORD': '123456',
         'OPTIONS':{
             "init_command":"SET sql_mode='STRICT_TRANS_TABLES'"
         }
@@ -238,8 +238,12 @@ CACHES = {
     },
 }
 
-JJWT_AUTH = {
-    # 过期时间1天
-    ' JWT_EXPIRATION_DELTA': datetime.timedelta(days=7),
+# JWT_AUTH = {
+#     # 过期时间1天
+#     ' JWT_EXPIRATION_DELTA': datetime.timedelta(days=7),
+# }
 
+JWT_AUTH = {
+    # token过期时间过期时间7天
+    'JWT_EXPIRATION_DELTA': datetime.timedelta(days=2),
 }
