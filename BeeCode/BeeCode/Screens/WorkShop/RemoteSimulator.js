@@ -1,13 +1,24 @@
 import React, { useState, useRef } from 'react';
-import { View, TouchableOpacity, Text, Animated, PanResponder, StyleSheet, Modal, Button } from 'react-native';
+import {
+  View,
+  TouchableOpacity,
+  Text,
+  Animated,
+  PanResponder,
+  StyleSheet,
+  Modal,
+  Button,
+  FlatList,
+} from 'react-native';
+
 
 const RemoteSimulator = () => {
   // 创建两个摇杆的动画值
   const leftJoystickOffset = useRef(new Animated.ValueXY()).current;
   const rightJoystickOffset = useRef(new Animated.ValueXY()).current;
-
-  // 蓝牙设备列表和模态视图的状态
-  const [bluetoothModalVisible, setBluetoothModalVisible] = useState(false);
+  // 蓝牙设置
+  const [isBluetoothModalVisible, setBluetoothModalVisible] = useState(false);
+  const [bluetoothDevices, setBluetoothDevices] = useState([]);
 
   // 摇杆的PanResponder配置
   const createPanResponder = (joystickOffset) => {
@@ -44,28 +55,30 @@ const RemoteSimulator = () => {
   // 模拟蓝牙设备搜索和连接
   const handleBluetoothPress = () => {
     console.log('蓝牙按钮 pressed');
-    // 此处需要你自己实现具体的蓝牙搜索和连接逻辑
-    // 这是假设的代码，真正的实现需要用到特定的蓝牙库
-    // getBluetoothDevices().then(devices => {
-    //   setBluetoothDevices(devices);
-    //   setBluetoothModalVisible(true);
-    // });
+    const fakeDevices = [
+      { id: 'device1', name: '设备1' },
+      { id: 'device2', name: '设备2' },
+      // 添加更多设备...
+    ];
+    setBluetoothDevices(fakeDevices);
     setBluetoothModalVisible(true);
   };
 
   // 渲染蓝牙设备模态
   const renderBluetoothModal = () => (
     <Modal
-      visible={bluetoothModalVisible}
+      visible={isBluetoothModalVisible}
       onRequestClose={() => setBluetoothModalVisible(false)}
       animationType="slide"
       transparent={true}
     >
       <View style={styles.modalView}>
         <Text>可用的蓝牙设备:</Text>
-        {/* 设备列表应该通过状态来动态生成 */}
-        <Text>设备1</Text>
-        <Text>设备2</Text>
+        <FlatList
+          data={bluetoothDevices}
+          keyExtractor={(item) => item.id}
+          renderItem={({ item }) => <Text>{item.name}</Text>}
+        />
         <Button title="关闭" onPress={() => setBluetoothModalVisible(false)} />
       </View>
     </Modal>
@@ -84,7 +97,7 @@ const RemoteSimulator = () => {
       </Animated.View>
 
       <TouchableOpacity onPress={handleBluetoothPress} style={styles.bluetoothButton}>
-        <Text>蓝牙</Text>
+        <Text style={styles.buttonText}>蓝牙</Text>
       </TouchableOpacity>
 
       <Animated.View
