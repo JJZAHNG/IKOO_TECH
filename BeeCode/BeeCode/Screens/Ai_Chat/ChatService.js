@@ -39,6 +39,7 @@ const ChatService = () => {
             text: response.data.msg, // 确保这里是msg，这与您的后端返回的键匹配
             sender: 'service',
           };
+          // setMessages(prevMessages => [...prevMessages, userMessage]);
           setMessages(prevMessages => [serviceMessage, ...prevMessages]);
         }
   
