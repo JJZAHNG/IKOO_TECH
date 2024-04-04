@@ -1,42 +1,17 @@
 import React, { useState, useRef } from 'react';
-import { View, TouchableOpacity, Text, Animated, PanResponder, StyleSheet } from 'react-native';
+import { View, TouchableOpacity, Text, Animated, PanResponder, StyleSheet, Modal, Button } from 'react-native';
 
 const RemoteSimulator = () => {
-  // 设置摇杆活动区域的半径
-  const joystickRadius = 40;
-  const joystickOffset = useRef(new Animated.ValueXY()).current;
+  // 创建两个摇杆的动画值
+  const leftJoystickOffset = useRef(new Animated.ValueXY()).current;
+  const rightJoystickOffset = useRef(new Animated.ValueXY()).current;
 
-  // 功能键动画值
-  const [buttonsFade] = useState({
-    X: new Animated.Value(1),
-    O: new Animated.Value(1),
-    Square: new Animated.Value(1),
-    Triangle: new Animated.Value(1),
-  });
+  // 蓝牙设备列表和模态视图的状态
+  const [bluetoothModalVisible, setBluetoothModalVisible] = useState(false);
 
-  const animateButtonPressIn = (button) => {
-    Animated.spring(buttonsFade[button], {
-      toValue: 0.5,
-      useNativeDriver: true
-    }).start();
-  };
-
-  const animateButtonPressOut = (button) => {
-    Animated.spring(buttonsFade[button], {
-      toValue: 1,
-      useNativeDriver: true
-    }).start();
-  };
-
-  // 模拟功能键的处理函数
-  const handleActionButtonPress = (action) => {
-    console.log(`${action} pressed`);
-    // 这里可以添加更多逻辑
-  };
-
-  // 摇杆处理逻辑
-  const joystickPanResponder = useRef(
-    PanResponder.create({
+  // 摇杆的PanResponder配置
+  const createPanResponder = (joystickOffset) => {
+    return PanResponder.create({
       onStartShouldSetPanResponder: () => true,
       onPanResponderGrant: () => {
         Animated.spring(joystickOffset, {
@@ -47,7 +22,12 @@ const RemoteSimulator = () => {
       onPanResponderMove: Animated.event([null, {
         dx: joystickOffset.x, // x轴方向的移动
         dy: joystickOffset.y, // y轴方向的移动
-      }], { useNativeDriver: false }),
+      }], {
+        useNativeDriver: false,
+        listener: (event, gestureState) => {
+          console.log(`Joystick moved: X: ${gestureState.dx}, Y: ${gestureState.dy}`);
+        },
+      }),
       onPanResponderRelease: () => {
         Animated.spring(joystickOffset, {
           toValue: { x: 0, y: 0 },
@@ -55,44 +35,66 @@ const RemoteSimulator = () => {
           useNativeDriver: false
         }).start();
       }
-    })
-  ).current;
+    });
+  };
+
+  const leftJoystickPanResponder = createPanResponder(leftJoystickOffset);
+  const rightJoystickPanResponder = createPanResponder(rightJoystickOffset);
+
+  // 模拟蓝牙设备搜索和连接
+  const handleBluetoothPress = () => {
+    console.log('蓝牙按钮 pressed');
+    // 此处需要你自己实现具体的蓝牙搜索和连接逻辑
+    // 这是假设的代码，真正的实现需要用到特定的蓝牙库
+    // getBluetoothDevices().then(devices => {
+    //   setBluetoothDevices(devices);
+    //   setBluetoothModalVisible(true);
+    // });
+    setBluetoothModalVisible(true);
+  };
+
+  // 渲染蓝牙设备模态
+  const renderBluetoothModal = () => (
+    <Modal
+      visible={bluetoothModalVisible}
+      onRequestClose={() => setBluetoothModalVisible(false)}
+      animationType="slide"
+      transparent={true}
+    >
+      <View style={styles.modalView}>
+        <Text>可用的蓝牙设备:</Text>
+        {/* 设备列表应该通过状态来动态生成 */}
+        <Text>设备1</Text>
+        <Text>设备2</Text>
+        <Button title="关闭" onPress={() => setBluetoothModalVisible(false)} />
+      </View>
+    </Modal>
+  );
 
   return (
     <View style={styles.container}>
-      <View style={styles.joystickContainer}>
-        <Animated.View
-          style={[styles.joystick, { transform: joystickOffset.getTranslateTransform() }]}
-          {...joystickPanResponder.panHandlers}
-        >
-          <View style={styles.joystickPuck} />
-        </Animated.View>
-      </View>
+      {renderBluetoothModal()}
+      <Animated.View
+        style={[styles.joystick, {
+          transform: leftJoystickOffset.getTranslateTransform()
+        }]}
+        {...leftJoystickPanResponder.panHandlers}
+      >
+        <View style={styles.joystickPuck} />
+      </Animated.View>
 
-      <View style={styles.actionButtons}>
-        {['X', 'O', 'Square', 'Triangle'].map((action) => (
-          <TouchableOpacity
-            key={action}
-            onPressIn={() => animateButtonPressIn(action)}
-            onPressOut={() => animateButtonPressOut(action)}
-            onPress={() => handleActionButtonPress(action)}
-            style={[styles.actionButton, styles.circleButton]}
-          >
-            <Animated.Text style={[styles.buttonText, { opacity: buttonsFade[action] }]}>
-              {action}
-            </Animated.Text>
-          </TouchableOpacity>
-        ))}
-      </View>
+      <TouchableOpacity onPress={handleBluetoothPress} style={styles.bluetoothButton}>
+        <Text>蓝牙</Text>
+      </TouchableOpacity>
 
-      <View style={styles.joystickContainer}>
-        <Animated.View
-          style={[styles.joystick, { transform: joystickOffset.getTranslateTransform() }]}
-          {...joystickPanResponder.panHandlers}
-        >
-          <View style={styles.joystickPuck} />
-        </Animated.View>
-      </View>
+      <Animated.View
+        style={[styles.joystick, {
+          transform: rightJoystickOffset.getTranslateTransform()
+        }]}
+        {...rightJoystickPanResponder.panHandlers}
+      >
+        <View style={styles.joystickPuck} />
+      </Animated.View>
     </View>
   );
 };
@@ -100,15 +102,10 @@ const RemoteSimulator = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+    justifyContent: 'space-around',
+    alignItems: 'center',
     flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    padding: 20,
-    backgroundColor: '#fff'
-  },
-  joystickContainer: {
-    justifyContent: 'center',
-    alignItems: 'center',
+    backgroundColor: '#fff',
   },
   joystick: {
     width: 100,
@@ -126,26 +123,27 @@ const styles = StyleSheet.create({
     borderRadius: 15,
     backgroundColor: '#bbb',
   },
-  actionButtons: {
-    flexDirection: 'row',
-    alignItems: 'center'
+  bluetoothButton: {
+    padding: 20,
+    borderRadius: 10,
+    backgroundColor: '#007bff',
   },
-  actionButton: {
-    margin: 10,
-    width: 60,
-    height: 60,
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: 'darkgrey',
-    borderRadius: 30,
+  modalView: {
+    margin: 20,
+    backgroundColor: "white",
+    borderRadius: 20,
+    padding: 35,
+    alignItems: "center",
+    shadowColor: "#000",
+    shadowOffset: {
+      width: 0,
+      height: 2
+    },
+    shadowOpacity: 0.25,
+    shadowRadius: 3.84,
+    elevation: 5
   },
-  buttonText: {
-    fontSize: 20,
-    color: 'white',
-  },
-  circleButton: {
-    borderRadius: 30,
-  },
+  // 其他需要的样式...
 });
 
 export default RemoteSimulator;

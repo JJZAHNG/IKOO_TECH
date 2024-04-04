@@ -16,7 +16,11 @@
     ],
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.anonymous.BeeCode"
+      "bundleIdentifier": "com.anonymous.BeeCode",
+      "infoPlist": {
+        "NSBluetoothPeripheralUsageDescription": "我们需要您的蓝牙权限来连接外设",
+        "NSBluetoothAlwaysUsageDescription": "我们需要您的蓝牙权限来连接外设"
+      }
     },
     "android": {
       "adaptiveIcon": {
