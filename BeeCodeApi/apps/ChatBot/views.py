@@ -1,23 +1,34 @@
-from rest_framework.views import APIView
-from rest_framework.response import Response
-from rest_framework import status
-from apps.ChatBot import eurine4
+from rest_framework.viewsets import ViewSet
+from utils.common_response import APIResponse
+from rest_framework.decorators import action
+BOT_RESPONSE_DICT = {
+        1:"This is code 1 response!",
+        2:"This is code 2 response!",
+        3:"This is code 3 response!",
+        4:"This is code 4 response!",
+        5:"This is code 5 response!",
+        6:"This is code 6 response!",
+        7:"This is code 7 response!",
+        8:"This is code 8 response!",
+        9:"This is code 9 response!"
+        }
+ERROR_MSG = "PLEASE ENTER THE CORRECT CODE"
 
-class BotChat(APIView):
-    def post(self, request, *args, **kwargs):
+
+
+
+class BotChat(ViewSet):
+
+    @action(methods=['POST'], detail=False)
+    def bot(self, request, *args, **kwargs):
         # 获取前端传递的文本数据
         text_data = request.data.get('text', None)
-
-        # 确保文本数据存在
-        if text_data is None:
-            return Response(
-                {"error": "No text provided"},
-                status=status.HTTP_400_BAD_REQUEST
-            )
-        else:
-            result = eurine4.eurine_response(text_data)
-            # 返回响应
-            return Response(
-                {"message": "Text received", "text": result},
-                status=status.HTTP_200_OK
-            )
+        print(type(text_data))
+        try:
+            if text_data and int(text_data) in BOT_RESPONSE_DICT.keys():
+                return APIResponse(code=200, msg=BOT_RESPONSE_DICT.get(int(text_data)))
+            else:
+                return APIResponse(code=850, msg=ERROR_MSG)
+        except Exception as e:
+            e = str(e)
+            return APIResponse(code=860, msg=e)

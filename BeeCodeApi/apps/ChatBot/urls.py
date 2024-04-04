@@ -1,7 +1,9 @@
-from django.urls import path
-from .views import BotChat
+from rest_framework.routers import SimpleRouter
+from ChatBot import views
 
-urlpatterns = [
-    # ... 其他 urlpattern
-    path('bot-chat/', BotChat.as_view(), name='bot-chat'),
-]
+router = SimpleRouter()
+# 客服咨询接口
+router.register('chat', views.BotChat, 'chat')
+
+urlpatterns = []
+urlpatterns += router.urls
