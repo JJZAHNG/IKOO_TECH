@@ -1,48 +1,96 @@
-// LoginScreen.styles.js
-import { StyleSheet, Dimensions } from 'react-native';
-
-// 获取屏幕宽高
-const { width, height } = Dimensions.get('window');
+import { StyleSheet } from 'react-native';
 
 export default StyleSheet.create({
   container: {
     flex: 1,
-    flexDirection: 'row', // 横向排列
-    alignItems: 'center',
     justifyContent: 'center',
+    paddingHorizontal: 10,
   },
-  imageContainer: {
-    width: width * 0.5, // 左侧图片容器占据屏幕宽度的一半
-    height: height,
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: '#eaeaea', // 示例背景色，可根据实际情况修改
+
+  passwordContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-around',
+    width: '100%',
   },
-  inputContainer: {
-    width: width * 0.5, // 右侧输入容器也占据屏幕宽度的一半
-    height: height,
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: '#fff', // 示例背景色，可根据实际情况修改
-  },
+
   input: {
-    width: '80%',
-    padding: 10,
-    marginVertical: 10, // 为输入框添加上下边距
-    borderWidth: 1,
-    borderColor: '#ccc',
-    borderRadius: 5,
+    height: 60,
+    borderRadius: 25,
+    margin: 12,
+    borderWidth: 3.5,
+    borderColor: '#fcd217',
+    paddingVertical: 10,
+    paddingStart: 20,
   },
-  button: {
-    width: '80%',
-    padding: 15,
-    backgroundColor: '#0066ff', // 按钮颜色，可根据实际情况修改
-    alignItems: 'center',
-    marginTop: 20,
-    borderRadius: 5,
+
+  passwordInput: {
+    flex: 0.75,
   },
-  buttonText: {
-    color: '#fff',
+
+  smsButton: {
+    flex: 0.25,
+    backgroundColor: '#fcd217',
+    height: 60, 
+    borderRadius: 25, 
+    margin: 12,
+    elevation: 8,
+    paddingVertical: 14,
+    paddingHorizontal: 12,
+    justifyContent: 'center',
+    alignItems: 'center'
+  },
+
+  smsButtonText: {
     fontSize: 16,
+    color: "#fff",
+    fontWeight: 'bold',
+    textAlign: "center",
   },
-});
+
+  signInText: {
+    marginTop: 20,
+    color: '#841584',
+    textAlign: 'center',
+    fontWeight: 'bold',
+  },
+
+  buttonContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-around',
+    width: '100%',
+    padding: 10,
+  },
+
+  button: {
+    height: 60,
+    borderRadius: 25,
+    margin: 12,
+    elevation: 8,
+    paddingVertical: 14,
+    paddingHorizontal: 12,
+  },
+
+  button_login: {
+    backgroundColor: '#77dd77',
+  },
+
+  button_register: {
+    backgroundColor: '#fcd217',
+  },
+
+  buttonText: {
+    fontSize: 20,
+    color: "#fff",
+    fontWeight: "bold",
+    alignSelf: "center",
+  },
+
+  // Add a new style for the development button
+  button_development: {
+    marginTop: 10, // You can adjust this value as needed
+    backgroundColor: 'green', // Choose a color that distinguishes it from other buttons
+    padding: 15,
+    borderRadius: 5,
+    alignItems: 'center',
+  },
+})

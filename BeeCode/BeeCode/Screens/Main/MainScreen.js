@@ -18,6 +18,7 @@ const MainScreen = ({ navigation }) => {
   const handleButtonB = () => {
     console.log('Pressed Button 网络课堂')
     // Navigate to related page
+    navigation.navigate('Profile');
   }
 
   const handleButtonC = () => {
@@ -78,6 +79,20 @@ const MainScreen = ({ navigation }) => {
       <StatusBar hidden={true} />
       {/* Placeholder for the left 30% of the screen */}
       <View style={styles.leftPlaceholder} />
+      <View style={{ position: 'absolute', top: 10, left: 10 }}>
+        <TouchableOpacity
+        style={{
+          width: 50,
+          height: 50,
+          borderRadius: 25,
+          backgroundColor: '#fcbf49', // 按钮颜色
+          justifyContent: 'center',
+          alignItems: 'center',
+        }}
+        onPress={() => navigation.navigate('Profile')}>
+          <Text style={{ color: '#fff', fontSize: 16 }}>个人</Text>
+        </TouchableOpacity>
+      </View>
 
       {/* Right side 70% of the screen with buttons */}
       <View style={styles.rightContainer}>
