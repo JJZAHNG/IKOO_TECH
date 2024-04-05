@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import {
   View,
   TouchableOpacity,
@@ -9,8 +9,9 @@ import {
   Modal,
   Button,
   FlatList,
+  PermissionsAndroid,
 } from 'react-native';
-
+import BluetoothClassic from 'react-native-bluetooth-classic';
 
 const RemoteSimulator = () => {
   // 创建两个摇杆的动画值
@@ -19,6 +20,42 @@ const RemoteSimulator = () => {
   // 蓝牙设置
   const [isBluetoothModalVisible, setBluetoothModalVisible] = useState(false);
   const [bluetoothDevices, setBluetoothDevices] = useState([]);
+
+  useEffect(() => {
+    const requestBluetoothPermission = async () => {
+      try {
+        const granted = await PermissionsAndroid.request(
+          PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION,
+          {
+            title: "Bluetooth Permission",
+            message: "This app needs access to your location to use Bluetooth",
+            buttonNeutral: "Ask Me Later",
+            buttonNegative: "Cancel",
+            buttonPositive: "OK"
+          }
+        );
+        if (granted === PermissionsAndroid.RESULTS.GRANTED) {
+          console.log("Bluetooth permission granted");
+        } else {
+          console.log("Bluetooth permission denied");
+        }
+      } catch (err) {
+        console.warn(err);
+      }
+    };
+
+    requestBluetoothPermission();
+  }, []);
+
+  // 搜索蓝牙设备并更新设备列表
+  const searchForDevices = async () => {
+    try {
+      const unpairedDevices = await BluetoothClassic.discoverUnpairedDevices();
+      setBluetoothDevices(unpairedDevices);
+    } catch (error) {
+      console.error(error);
+    }
+  };
 
   // 摇杆的PanResponder配置
   const createPanResponder = (joystickOffset) => {
@@ -55,12 +92,7 @@ const RemoteSimulator = () => {
   // 模拟蓝牙设备搜索和连接
   const handleBluetoothPress = () => {
     console.log('蓝牙按钮 pressed');
-    const fakeDevices = [
-      { id: 'device1', name: '设备1' },
-      { id: 'device2', name: '设备2' },
-      // 添加更多设备...
-    ];
-    setBluetoothDevices(fakeDevices);
+    searchForDevices();
     setBluetoothModalVisible(true);
   };
 
