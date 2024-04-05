@@ -1,23 +1,10 @@
 import React, { useState, useEffect, useRef } from 'react';
-import {
-  View,
-  TouchableOpacity,
-  Text,
-  Animated,
-  PanResponder,
-  StyleSheet,
-  Modal,
-  Button,
-  FlatList,
-  PermissionsAndroid,
-} from 'react-native';
+import { Platform, View, TouchableOpacity, Text, Animated, PanResponder, StyleSheet, Modal, Button, FlatList, PermissionsAndroid, Alert } from 'react-native';
 import BluetoothClassic from 'react-native-bluetooth-classic';
 
 const RemoteSimulator = () => {
-  // 创建两个摇杆的动画值
   const leftJoystickOffset = useRef(new Animated.ValueXY()).current;
   const rightJoystickOffset = useRef(new Animated.ValueXY()).current;
-  // 蓝牙设置
   const [isBluetoothModalVisible, setBluetoothModalVisible] = useState(false);
   const [bluetoothDevices, setBluetoothDevices] = useState([]);
 
@@ -38,6 +25,7 @@ const RemoteSimulator = () => {
           console.log("Bluetooth permission granted");
         } else {
           console.log("Bluetooth permission denied");
+          Alert.alert("Bluetooth permission denied");
         }
       } catch (err) {
         console.warn(err);
@@ -45,47 +33,32 @@ const RemoteSimulator = () => {
     };
 
     requestBluetoothPermission();
+    
+    // 添加设备发现监听器
+    const discoveryListener = BluetoothClassic.onDeviceDiscovered(event => {
+      console.log(`A new device was discovered: ${event.device}`);
+      setBluetoothDevices(prevDevices => [...prevDevices, event.device]);
+    });
+
+    // 清除监听器，当组件卸载时执行
+    return () => {
+      discoveryListener.remove();
+    };
   }, []);
 
-  // 搜索蓝牙设备并更新设备列表
   const searchForDevices = async () => {
-    try {
-      const unpairedDevices = await BluetoothClassic.discoverUnpairedDevices();
-      setBluetoothDevices(unpairedDevices);
-    } catch (error) {
-      console.error(error);
+    if (Platform.OS === 'ios') {
+      console.log('Bluetooth discovery is not available on iOS');
+      Alert.alert('Error', 'Bluetooth discovery is not available on iOS');
+    } else {
+      try {
+        await BluetoothClassic.startDiscovery();
+      } catch (error) {
+        console.error(error);
+        Alert.alert('Error', 'There was an error starting discovery.');
+      }
     }
   };
-
-  // 摇杆的PanResponder配置
-  const createPanResponder = (joystickOffset) => {
-    return PanResponder.create({
-      onStartShouldSetPanResponder: () => true,
-      onPanResponderGrant: () => {
-        Animated.spring(joystickOffset, {
-          toValue: { x: 0, y: 0 },
-          useNativeDriver: false
-        }).start();
-      },
-      onPanResponderMove: Animated.event([null, {
-        dx: joystickOffset.x, // x轴方向的移动
-        dy: joystickOffset.y, // y轴方向的移动
-      }], {
-        useNativeDriver: false,
-        listener: (event, gestureState) => {
-          console.log(`Joystick moved: X: ${gestureState.dx}, Y: ${gestureState.dy}`);
-        },
-      }),
-      onPanResponderRelease: () => {
-        Animated.spring(joystickOffset, {
-          toValue: { x: 0, y: 0 },
-          friction: 5,
-          useNativeDriver: false
-        }).start();
-      }
-    });
-  };
-
   const leftJoystickPanResponder = createPanResponder(leftJoystickOffset);
   const rightJoystickPanResponder = createPanResponder(rightJoystickOffset);
 
