@@ -7,6 +7,21 @@ const RemoteSimulator = () => {
   const rightJoystickOffset = useRef(new Animated.ValueXY()).current;
   const [isBluetoothModalVisible, setBluetoothModalVisible] = useState(false);
   const [bluetoothDevices, setBluetoothDevices] = useState([]);
+  const createPanResponder = (joystickOffset) => {
+    return PanResponder.create({
+      onStartShouldSetPanResponder: () => true,
+      onPanResponderMove: Animated.event([null, {
+        dx: joystickOffset.x,
+        dy: joystickOffset.y,
+      }], { useNativeDriver: false }),
+      onPanResponderRelease: () => {
+        Animated.spring(joystickOffset, {
+          toValue: { x: 0, y: 0 },
+          useNativeDriver: false
+        }).start();
+      }
+    });
+  };
 
   useEffect(() => {
     const requestBluetoothPermission = async () => {
@@ -46,21 +61,26 @@ const RemoteSimulator = () => {
     };
   }, []);
 
-  const searchForDevices = async () => {
-    if (Platform.OS === 'ios') {
-      console.log('Bluetooth discovery is not available on iOS');
-      Alert.alert('Error', 'Bluetooth discovery is not available on iOS');
-    } else {
-      try {
+
+    const searchForDevices = async () => {
+    try {
+      const isEnabled = await BluetoothClassic.isBluetoothEnabled();
+      if (!isEnabled) {
+        Alert.alert('Bluetooth is not enabled', 'Please enable Bluetooth and try again.');
+        // 可以选择直接打开蓝牙设置，让用户手动打开
+        BluetoothClassic.openBluetoothSettings();
+      } else {
+        // Bluetooth is enabled, start discovery
         await BluetoothClassic.startDiscovery();
-      } catch (error) {
-        console.error(error);
-        Alert.alert('Error', 'There was an error starting discovery.');
+        // 这里不需要设置bluetoothDevices，因为设备发现事件会更新它
       }
+    } catch (error) {
+      console.error(error);
+      Alert.alert('Error', 'There was an error starting discovery.');
     }
   };
-  const leftJoystickPanResponder = createPanResponder(leftJoystickOffset);
-  const rightJoystickPanResponder = createPanResponder(rightJoystickOffset);
+  const leftJoystickPanResponder = useRef(createPanResponder(leftJoystickOffset)).current;
+  const rightJoystickPanResponder = useRef(createPanResponder(rightJoystickOffset)).current;
 
   // 模拟蓝牙设备搜索和连接
   const handleBluetoothPress = () => {
