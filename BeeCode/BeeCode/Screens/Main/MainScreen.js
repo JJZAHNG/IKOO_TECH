@@ -89,7 +89,7 @@ const MainScreen = ({ navigation }) => {
           justifyContent: 'center',
           alignItems: 'center',
         }}
-        onPress={() => navigation.navigate('Profile')}>
+        onPress={() => navigation.navigate('ProfileScreen')}>
           <Text style={{ color: '#fff', fontSize: 16 }}>个人</Text>
         </TouchableOpacity>
       </View>

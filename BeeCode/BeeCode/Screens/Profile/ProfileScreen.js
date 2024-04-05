@@ -4,6 +4,7 @@ import { View, Text, TouchableOpacity, TextInput, StyleSheet } from 'react-nativ
 const ProfileScreen = () => {
   const [username, setUsername] = useState('用户名');
   const [password, setPassword] = useState('******');
+  const [isVIP, setVIP] = useState('会员状态');
 
   const handleAvatarChange = () => {
     // 在这里添加上传头像的逻辑
@@ -20,6 +21,11 @@ const ProfileScreen = () => {
     alert('更改密码');
   };
 
+  const handleVIP = () => {
+    // 是否会员
+    alert('升级会员');
+  }
+
   return (
     <View style={styles.container}>
       <TouchableOpacity style={styles.avatarContainer} onPress={handleAvatarChange}>
@@ -35,6 +41,12 @@ const ProfileScreen = () => {
         <Text style={styles.infoText}>{password}</Text>
         <TouchableOpacity onPress={handlePasswordChange}>
           <Text style={styles.editText}>修改</Text>
+        </TouchableOpacity>
+      </View>
+      <View style={styles.infoRow}>
+        <Text style={styles.infoText}>{isVIP}</Text>
+        <TouchableOpacity onPress={handleVIP}>
+          <Text style={styles.editText}>升级会员</Text>
         </TouchableOpacity>
       </View>
     </View>
