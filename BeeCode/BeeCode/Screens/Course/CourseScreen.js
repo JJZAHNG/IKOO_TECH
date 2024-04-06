@@ -1,15 +1,15 @@
 import React, { useState } from 'react';
-import { View, TouchableOpacity, Text, ScrollView, Image, Alert, SafeAreaView } from 'react-native';
+import { View, TouchableOpacity, Text, ScrollView, Image, Alert } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context'; // 确保从这个包中导入
 import axios from 'axios';
 import styles from './CourseScreen.styles';
 
 const CourseScreen = ({ navigation }) => {
   const [courses, setCourses] = useState([]);
 
-  // 根据分类获取课程
   const fetchCoursesByCategory = async (category) => {
     try {
-      const response = await axios.get(`http://127.0.0.1:8000/api/courses/?course_category=${category}`);
+      const response = await axios.get(`http://your-api-url/api/courses/?course_category=${category}`);
       setCourses(response.data);
     } catch (error) {
       console.error('Failed to fetch courses:', error);
@@ -17,19 +17,24 @@ const CourseScreen = ({ navigation }) => {
     }
   };
 
-  // 渲染课程方块
   const renderCourseBlocks = () => {
-    return courses.map((course) => (
-      <TouchableOpacity key={course.id} style={styles.matrixButton} onPress={() => console.log(course.course_content)}>
-        <Image style={styles.matrixButtonBackground} source={{ uri: course.course_cover }} />
-        <Text style={styles.matrixButtonText}>{course.course_title}</Text>
-      </TouchableOpacity>
+    return courses.map((course, index) => (
+      <View key={index} style={styles.matrixButton}>
+        <Image
+          style={{ width: '100%', height: '100%' }}
+          source={{ uri: course.course_cover }}
+        />
+        <Text style={styles.matrixButtonText}>
+          {course.course_title || `Matrix ${index + 1}`}
+        </Text>
+      </View>
     ));
   };
 
   return (
     <SafeAreaView style={styles.container}>
-      <ScrollView style={styles.scrollContainer}>
+      {/* 按钮和课程方块应该在同一个 ScrollView 内 */}
+      <ScrollView style={styles.scrollContainer} contentContainerStyle={{ alignItems: 'center' }}>
         <TouchableOpacity onPress={() => fetchCoursesByCategory(1)} style={styles.button}>
           <Text style={styles.buttonText}>Button 1</Text>
         </TouchableOpacity>
@@ -39,8 +44,8 @@ const CourseScreen = ({ navigation }) => {
         <TouchableOpacity onPress={() => fetchCoursesByCategory(3)} style={styles.button}>
           <Text style={styles.buttonText}>Button 3</Text>
         </TouchableOpacity>
+        {renderCourseBlocks()}
       </ScrollView>
-      <View style={styles.mainButtonsContainer}>{renderCourseBlocks()}</View>
     </SafeAreaView>
   );
 };
