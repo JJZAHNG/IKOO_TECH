@@ -1,7 +1,7 @@
 // Import React and necessary hooks
 import React, { useState, useEffect} from 'react';
 // Import components from React Native
-import { View, TextInput, Text, Button, ScrollView, Animated, Dimensions, StatusBar, TouchableOpacity } from 'react-native';
+import { Image, View, TextInput, Text, Button, ScrollView, Animated, Dimensions, StatusBar, TouchableOpacity, ImageBackground } from 'react-native';
 
 
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -11,19 +11,51 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import config from '../../config.js'; 
 
 
+const backgroundImage = require('./LoginScreen_background.jpg');
+const keyImage = require('./key.jpg');
+const wechatImage = require('./wechat.jpg');
+const smsImage = require('./sms.jpg');
+const signupImage = require('./signup.jpg');
+
 
 
 const LoginScreen = ({ navigation }) => {
   console.log('LoginScreen is rendering');
   const [accountNumber, setAccountNumber] = useState('');
   const [password, setPassword] = useState('');
+  const [activeTab, setActiveTab] = useState('account');
+  const [phoneNumber, setPhoneNumber] = useState('');
+  const [smsCode, setSmsCode] = useState('');
+  const [account, setAccount] = useState('');
+
+
+
+  useEffect(() => {
+    const changeOrientation = async () => {
+      await ScreenOrientation.lockAsync(ScreenOrientation.OrientationLock.LANDSCAPE);
+    };
+    changeOrientation();
+
+    return () => {
+      ScreenOrientation.unlockAsync(); // Unlock the orientation on cleanup
+    };
+  }, []);
+
+  const handleSignUp = () => {
+    console.log("handle sign up");
+  };
+
+  const handleWechat = () => {
+    console.log("handle wechat");
+  };
+
 
   const handleDevelopmentAccess = () => {
     // Logic for direct navigation to MainScreen for development purposes
     navigation.navigate('Main');
   };
 
-  const handleLogin = async () => {
+  const handleAccountLogin = async () => {
     console.log("Login pressed");
 
     try {
@@ -69,57 +101,88 @@ const LoginScreen = ({ navigation }) => {
     navigation.navigate('SMSLogin')
   };
 
-  useEffect(() => {
-      console.log('Component did mount or update');
-      ScreenOrientation.lockAsync(ScreenOrientation.OrientationLock.PORTRAIT);
 
-      return () => {
-        ScreenOrientation.unlockAsync();
-      };
-  }, []);
 
   return (
-    <SafeAreaView style={styles.container}>
+    <ImageBackground source={backgroundImage} style={{flex: 1}}>
+      <SafeAreaView style={styles.container}>
+        <StatusBar hidden={true} />
 
-      
-      <TextInput
-        style={styles.input}
-        onChangeText={setAccountNumber}
-        value={accountNumber}
-        placeholder="电话号码 / 账号"
-        keyboardType="numeric"
-      />
+        <View style={styles.viewEmpty}></View>
 
-      <View style={styles.passwordContainer}>
-        <TextInput
-          style={[styles.input, styles.passwordInput]}
-          onChangeText={setPassword}
-          value={password}
-          placeholder="密码"
-          secureTextEntry
-        />
+        <View style={{ width: '60%', flexDirection: 'cloumn', alignItems: 'center' }}>
+          <View style={styles.tabEmpty}></View>
 
-        <TouchableOpacity onPress={handleSMSLogin} style={styles.smsButton}>
-          <Text style={styles.smsButtonText}>短信登录</Text>
-        </TouchableOpacity>
+          
+          <View style={styles.contentContainer}>
+            {activeTab === 'account' && (
+              <>
+                <TextInput
+                  style={styles.input}
+                  value={account}
+                  onChangeText={setAccount}
+                  placeholder="    账户"
+                />
+                <TextInput
+                  style={styles.input}
+                  value={password}
+                  onChangeText={setPassword}
+                  placeholder="    密码"
+                  secureTextEntry
+                />
+                <TouchableOpacity style={styles.loginButton} onPress={handleAccountLogin}>
+                  <Text style={styles.buttonText}>登录</Text>
+                </TouchableOpacity>
+              </>
+            )}
 
-      </View>
+            {activeTab === 'sms' && (
+              <>
+                <TextInput
+                  style={styles.input}
+                  value={phoneNumber}
+                  onChangeText={setPhoneNumber}
+                  placeholder="    电话号码"
+                />
+                <TextInput
+                  style={styles.input}
+                  value={smsCode}
+                  onChangeText={setSmsCode}
+                  placeholder="    短信验证码"
+                />
+                <TouchableOpacity style={styles.loginButton} onPress={handleSMSLogin}>
+                  <Text style={styles.buttonText}>登录</Text>
+                </TouchableOpacity>
+              </>
+            )}
+          </View>
+          <View style={styles.optionContainer}>
+            {activeTab === 'account' && (
+              <>
+                <TouchableOpacity onPress={() => setActiveTab('sms')}>
+                  <Image source={smsImage} style={styles.buttonImage} />
+                </TouchableOpacity>
+              </>
+            )}
 
-      
-      
-      <TouchableOpacity onPress={handleLogin} style={[styles.button, styles.button_login]}>
-        <Text style={styles.buttonText}>登录</Text>
-      </TouchableOpacity>
+            {activeTab === 'sms' && (
+              <>
+                <TouchableOpacity onPress={() => setActiveTab('account')}>
+                  <Image source={keyImage} style={styles.buttonImage} />
+                </TouchableOpacity>
+              </>
+            )}
 
-      <TouchableOpacity onPress={handleSignIn} style={[styles.button, styles.button_register]}>
-        <Text style={styles.buttonText}>注册</Text>
-      </TouchableOpacity>
-
-      {/* Development Button */}
-      <TouchableOpacity onPress={handleDevelopmentAccess} style={styles.button_development}>
-        <Text style={styles.buttonText}>开发</Text>
-      </TouchableOpacity>
-    </SafeAreaView>
+            <TouchableOpacity onPress={handleSignUp}>
+              <Image source={signupImage} style={styles.buttonImage} />
+            </TouchableOpacity>
+            <TouchableOpacity onPress={handleWechat}>
+              <Image source={wechatImage} style={styles.buttonImage} />
+            </TouchableOpacity>
+          </View>    
+        </View>
+      </SafeAreaView>
+    </ImageBackground>
   );
 };
 

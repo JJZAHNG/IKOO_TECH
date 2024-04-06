@@ -70,7 +70,7 @@ const App = () => {
         // }}
         initialRouteName={initialRouteName}>
         <Stack.Screen name="Login" component={LoginScreen} options={{headerShown: false}}/>
-        <Stack.Screen name="SMSLogin" component={SMSLoginScreen} />
+        <Stack.Screen name="SMSLogin" component={SMSLoginScreen} options={{headerShown: false}}/>
         <Stack.Screen
           name="Main"
           component={MainScreen}
