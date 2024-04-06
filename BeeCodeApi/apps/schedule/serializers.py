@@ -1,6 +1,6 @@
 from rest_framework import serializers
 from .models import Course_Classify,Course,Course_Cover
-
+from django.conf import settings
 
 
 
@@ -14,13 +14,20 @@ class Course_Classify_Serializer(serializers.ModelSerializer):
 
 
 class CourseSerializer(serializers.ModelSerializer):
-    course_content_user = serializers.SerializerMethodField()
-
+    # course_content_user = serializers.SerializerMethodField()
+    cover_content = serializers.SerializerMethodField()
+    content_img = serializers.SerializerMethodField()
     class Meta:
-        model = Course_Cover
-        fields = ['id', 'course_cover_name', 'course_content_user']
+        model = Course
+        fields = ['id','course_name','course_synopsis','cover_content','content_img']
 
-    def get_course_content_user(self, obj):
-        res = [course.course_content for course in obj.course_set.all()]
-        image_urls = [image.url for image in res]
-        return image_urls
+    def get_cover_content(self,obj):
+        user_icon = settings.BACKEND_URL + '/media/' + str(obj.cover.course_cover_name)
+        return user_icon
+
+    def get_content_img(self,obj):
+        imgs = obj.course_img.all()
+        comments_text = []
+        for img in imgs:
+            comments_text.append(settings.BACKEND_URL + '/media/' + str(img.course_content))
+        return comments_text
