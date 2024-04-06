@@ -1,50 +1,58 @@
-import React, { useState } from 'react';
-import { View, Text, TouchableOpacity, TextInput, StyleSheet } from 'react-native';
+import React, { useState, useEffect } from 'react';
+import { View, Text, TouchableOpacity, Image, StyleSheet } from 'react-native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const ProfileScreen = () => {
-  const [username, setUsername] = useState('用户名');
-  const [password, setPassword] = useState('******');
-  const [isVIP, setVIP] = useState('会员状态');
+  const [userData, setUserData] = useState({
+    username: '加载中...',
+    icon: null,
+    isVIP: '加载中...',
+  });
+
+  useEffect(() => {
+    const getUserData = async () => {
+      const storedUserData = await AsyncStorage.getItem('userData');
+      if (storedUserData) {
+        setUserData(JSON.parse(storedUserData));
+      }
+    };
+
+    getUserData();
+  }, []);
 
   const handleAvatarChange = () => {
-    // 在这里添加上传头像的逻辑
     alert('更改头像');
   };
 
   const handleUsernameChange = () => {
-    // 在这里添加修改用户名的逻辑
     alert('更改用户名');
   };
 
-  const handlePasswordChange = () => {
-    // 在这里添加修改密码的逻辑
-    alert('更改密码');
-  };
-
   const handleVIP = () => {
-    // 是否会员
     alert('升级会员');
   }
 
   return (
     <View style={styles.container}>
       <TouchableOpacity style={styles.avatarContainer} onPress={handleAvatarChange}>
-        <Text style={styles.avatarText}>头像</Text>
+        {userData.icon ? (
+          <Image source={{ uri: userData.icon }} style={styles.avatarImage} />
+        ) : (
+          <Text style={styles.avatarText}>头像</Text>
+        )}
       </TouchableOpacity>
       <View style={styles.infoRow}>
-        <Text style={styles.infoText}>{username}</Text>
+        <Text style={styles.infoText}>{userData.username}</Text>
         <TouchableOpacity onPress={handleUsernameChange}>
           <Text style={styles.editText}>修改</Text>
         </TouchableOpacity>
       </View>
       <View style={styles.infoRow}>
-        <Text style={styles.infoText}>{password}</Text>
-        <TouchableOpacity onPress={handlePasswordChange}>
-          <Text style={styles.editText}>修改</Text>
-        </TouchableOpacity>
+        <Text style={styles.infoText}>******</Text>
+        {/* 密码不应该显示和存储，这里只是占位符 */}
       </View>
       <View style={styles.infoRow}>
-        <Text style={styles.infoText}>{isVIP}</Text>
+        <Text style={styles.infoText}>{userData.isVIP}</Text>
         <TouchableOpacity onPress={handleVIP}>
           <Text style={styles.editText}>升级会员</Text>
         </TouchableOpacity>
@@ -52,6 +60,7 @@ const ProfileScreen = () => {
     </View>
   );
 };
+
 
 const styles = StyleSheet.create({
   container: {
@@ -84,6 +93,11 @@ const styles = StyleSheet.create({
   editText: {
     fontSize: 16,
     color: '#007bff',
+  },
+  avatarImage: {
+    width: 100,
+    height: 100,
+    borderRadius: 50,
   },
 });
 
