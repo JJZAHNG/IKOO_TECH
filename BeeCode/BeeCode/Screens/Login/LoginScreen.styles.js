@@ -6,120 +6,31 @@ export default StyleSheet.create({
     flexDirection: 'row'
   },
   
-  viewEmpty: {
+  rowEmpty: {
     width: '40%',
   },
 
-  viewTextinputContainer: {
+  TextinputContainer: {
     width: '60%',
   },
 
-  passwordContainer: {
-    flexDirection: 'row',
-    justifyContent: 'space-around',
-    width: '100%',
-  },
-
-  passwordInput: {
-    flex: 0.75,
-  },
-
-  smsButton: {
-    flex: 0.25,
-    backgroundColor: '#fcd217',
-    height: 60, 
-    borderRadius: 25, 
-    margin: 12,
-    elevation: 8,
-    paddingVertical: 14,
-    paddingHorizontal: 12,
-    justifyContent: 'center',
+  columnContainer: {
+    width: '60%', 
+    flexDirection: 'cloumn', 
     alignItems: 'center'
   },
 
-  smsButtonText: {
-    fontSize: 16,
-    color: "#fff",
-    fontWeight: 'bold',
-    textAlign: "center",
-  },
-
-  signInText: {
-    marginTop: 20,
-    color: '#841584',
-    textAlign: 'center',
-    fontWeight: 'bold',
-  },
-
-  buttonContainer: {
-    flexDirection: 'row',
-    justifyContent: 'space-around',
-    width: '100%',
-    padding: 10,
-  },
-
-  button: {
-    height: 60,
-    borderRadius: 25,
-    margin: 12,
-    elevation: 8,
-    paddingVertical: 14,
-    paddingHorizontal: 12,
-  },
-
-  button_login: {
-    backgroundColor: '#77dd77',
-  },
-
-  button_register: {
-    backgroundColor: '#fcd217',
-  },
-
-  buttonText: {
-    fontSize: 20,
-    color: "#fff",
-    fontWeight: "bold",
-    alignSelf: "center",
-  },
-
-  // Add a new style for the development button
-  button_development: {
-    marginTop: 10, // You can adjust this value as needed
-    backgroundColor: 'green', // Choose a color that distinguishes it from other buttons
-    padding: 15,
-    borderRadius: 5,
-    alignItems: 'center',
-  },
-  tabContainer: {
-    width: '60%',
-    flexDirection: 'row',
-    marginBottom: 10,
-    height: '10%',
-    justifyContent: 'space-evenly'
-  },
-
-  tabEmpty: {
+  columnEmpty: {
     height: '23%'
   },
-  
-  tab: {
-    marginHorizontal: 10,
-    paddingVertical: 10,
-    paddingHorizontal: 20,
-    backgroundColor: 'lightgrey',
-    borderRadius: 10,
-  },
-  tabText: {
-    fontSize: 14,
-    fontWeight: '800',
-  },
-  contentContainer: {
+
+  textInputContainer: {
     width: '100%',
-    height: '50%',
+    height: '30%',
     alignItems: 'center',
   },
 
-  input: {
+  textInput: {
     width: '60%',
     marginVertical: 8,
     borderWidth: 1,
@@ -129,6 +40,7 @@ export default StyleSheet.create({
     paddingVertical: 8,
     backgroundColor: 'rgba(255, 255, 255, 0.7)',
 
+    // Elevation for IOS
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
@@ -137,8 +49,30 @@ export default StyleSheet.create({
     // Elevation for Android
     elevation: 5,
   },
+
+
+  loginContainer: {
+    flexDirection: 'column',
+    justifyContent: 'space-around',
+    height: '20%',
+    width: '100%',
+    alignItems: 'center',
+  },
+  
+  forgetPasswordContainer: {
+    width: '60%',
+    alignItems: 'flex-end',
+  },
+
+  forgetPasswordText: {
+    paddingTop: 5,
+    color: 'white',
+    fontWeight: '800',
+    fontSize: 12,
+  }, 
+
   loginButton: {
-    marginTop: 10,
+    marginTop: 40,
     backgroundColor: 'white',
     padding: 10,
     borderRadius: 25,
@@ -153,7 +87,8 @@ export default StyleSheet.create({
     // Elevation for Android
     elevation: 5,
   },
-  buttonText: {
+
+  loginText: {
     color: 'black',
     fontWeight: '800',
     fontSize: 16,
@@ -163,12 +98,29 @@ export default StyleSheet.create({
     flexDirection: 'row', // Aligns buttons horizontally
     justifyContent: 'space-evenly', // Evenly space the buttons within the container
     alignItems: 'center', // Center the buttons vertically
-    height: '15%', // Adjust based on your design needs
+    height: '27%', // Adjust based on your design needs
     width: '60%',
   },
+
+
+  buttonContainer: {
+    alignItems: 'center', // Centers items horizontally in the container
+    justifyContent: 'center', // Centers items vertically in the container
+    width: 80, // Adjust the width as needed
+    height: 100, // Adjust the height to fit both image and text
+  },
+
   buttonImage: {
-    width: 50, 
-    height: 50, 
+    width: 40, 
+    height: 40, 
     borderRadius: 25,
+  },
+  
+  buttonText: {
+    marginTop: 4, // Space between the image and text
+    fontSize: 10, // Adjust text size as needed
+    fontWeight: '700',
+    textAlign: 'center', // Ensure text is centered under the image
+    color: 'white', // Adjust text color as needed
   },
 })
