@@ -7,11 +7,11 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import config from '../../config.js'; 
 
 
-const backgroundImage = require('./LoginScreen_background.jpg');
-const keyImage = require('./key.jpg');
-const wechatImage = require('./wechat.jpg');
-const smsImage = require('./sms.jpg');
-const signupImage = require('./signup.jpg');
+const backgroundImage = require('./res/LoginScreen_background.jpg');
+const keyImage = require('./res/key.jpg');
+const wechatImage = require('./res/wechat.jpg');
+const smsImage = require('./res/sms.jpg');
+const signupImage = require('./res/signup.jpg');
 
 
 
