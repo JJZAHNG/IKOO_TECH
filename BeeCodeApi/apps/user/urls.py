@@ -16,7 +16,9 @@ router.register('forget_pwd', views.ForgetpwdView, 'forget_pwd')
 router.register('achievements', views.AchievementViewSet, 'achievements')
 # 朋友圈系列
 router.register('posts', views.PostViewSet, 'posts')
+
 router.register('comments', views.CommentViewSet, 'comments')
+# 用户点赞
 router.register('likes', views.LikeViewSet, 'likes')
 
 urlpatterns = []

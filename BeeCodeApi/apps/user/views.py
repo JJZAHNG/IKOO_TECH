@@ -5,6 +5,7 @@ from django.core.exceptions import ObjectDoesNotExist
 from django.utils.datastructures import MultiValueDictKeyError
 from user import models, serializers
 from libs.tx_sms import get_code
+from libs.pagination.paginations import PostPageNumberPagination
 from django.core.cache import cache
 from rest_framework.mixins import CreateModelMixin
 from celery_task.user_task import send_message
@@ -14,6 +15,8 @@ from .models import User, Achievement
 from .serializers import AchievementSerializer
 from rest_framework_jwt.authentication import JSONWebTokenAuthentication
 from rest_framework.permissions import IsAuthenticated
+from .models import Post, Comment, Like
+from .serializers import PostSerializer, CommentSerializer, LikeSerializer
 
 # Create your views here.
 # 1.手机号短信登录
@@ -70,7 +73,8 @@ class UserLoginView(GenericViewSet):
         username = ser.context.get('username')
         token = ser.context.get('token')
         icon = ser.context.get('icon')
-        return APIResponse(username=username, token=token, icon=icon)
+        user_id = ser.context.get('user_id')
+        return APIResponse(user_id=user_id,username=username, token=token, icon=icon)
 
     # 多方式登陆
     @action(methods=['POST'], detail=False)
@@ -154,35 +158,70 @@ class AchievementViewSet(GenericViewSet):
         elif signin_count == 15:
             return APIResponse(code=706, msg='签到达人')
         return APIResponse(code=201,msg='没有成就')
-
+        # 后续补充 查表操作
 
 
 # 朋友圈系列
 # user/views.py
-from .models import Post, Comment, Like
-from .serializers import PostSerializer, CommentSerializer, LikeSerializer
-
 class PostViewSet(viewsets.ModelViewSet):
     queryset = Post.objects.all()
-    serializer_class = PostSerializer
-    # 添加权限和认证等
+    serializer_class = serializers.CirCleHomeSerializer
+    pagination_class = PostPageNumberPagination
 
+
+    def get_serializer_class(self):
+        if self.action == 'circle_of_friends_home':
+            return serializers.UserPostSerializer
+        else:
+            return super().get_serializer_class()
+
+    # 点进去之后展示的数据
+    @action(methods=['post'],detail=False)
+    def circle_of_friends_home(self,request):
+        queryset = self.get_queryset()
+        serializer = self.get_serializer(queryset, many=True)
+        return APIResponse(serializer.data)
+
+
+
+# 添加评论功能
 class CommentViewSet(viewsets.ModelViewSet):
     queryset = Comment.objects.all()
     serializer_class = CommentSerializer
-    # 添加权限和认证等
 
+    def get_serializer_class(self):
+        if self.action == 'article_detail':
+            return serializers.ArticleSerializer
+        else:
+            return super().get_serializer_class()
+
+
+    @action(methods=['post'],detail=False)
+    def perform_create(self, request):
+        serializers = self.serializer_class(data=request.data)
+        serializers.is_valid(raise_exception=True)
+        serializers.save()
+        return APIResponse('评论成功')
+
+
+    @action(methods=['post'],detail=False)
+    def article_detail(self,request):
+        queryset = self.get_queryset()
+        serializer = self.get_serializer(queryset, many=True)
+        return APIResponse(serializer.data)
+
+
+# 点赞功能
 class LikeViewSet(viewsets.ModelViewSet):
     queryset = Like.objects.all()
     serializer_class = LikeSerializer
-    # 添加权限和认证等
 
-    def perform_create(self, serializer):
-        # 确保同一个用户不会对同一个帖子点赞两次
-        user = self.request.user
-        post = serializer.validated_data['post']
-        like, created = Like.objects.get_or_create(user=user, post=post)
-        if not created:
-            raise serializers.ValidationError('You have already liked this post.')
-        serializer.save(user=user, post=post)
+    @action(methods=['post'],detail=False)
+    def list_view(self,request):
+        serializers = self.serializer_class(data=request.data)
+        serializers.is_valid(raise_exception=True)
+        serializers.save()
+        return APIResponse('点赞成功')
+
+
 

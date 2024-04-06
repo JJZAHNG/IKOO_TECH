@@ -10,6 +10,9 @@ import re
 import datetime
 from .models import Achievement
 from .models import Post, Comment, Like
+from django.db.models import Sum
+from libs.sensitivity import sensitivity_
+from django.db import transaction
 
 
 class UniversalSerializer(serializers.Serializer):
@@ -55,7 +58,6 @@ class UserLoginSerializer(UniversalSerializer):
 
 
 # 手机号登录
-
 class SMSLoginSerializer(serializers.Serializer):
     mobile = serializers.CharField()
     code = serializers.CharField()
@@ -77,6 +79,7 @@ class SMSLoginSerializer(serializers.Serializer):
         self.context['token'] = token
         self.context['icon'] = settings.BACKEND_URL + \
                                '/media/' + str(user.icon)
+        self.context['user_id'] = user.id
 
         return attrs
 
@@ -171,31 +174,45 @@ class RegisterSerializer(serializers.ModelSerializer):
 # 设置新密码
 class SetPwdSerializer(serializers.ModelSerializer):
     tow_password = serializers.CharField(write_only=True)
+    code = serializers.CharField(write_only=True)
 
     class Meta:
         model = models.User
-        fields = ['username', 'password', 'tow_password']
+        fields = ['username', 'password', 'tow_password', 'code', 'mobile']
 
     def validate_password(self, value):
         if len(value) < 8:
             raise serializers.ValidationError('密码长度要大于8个字符')
         return value
 
+
+
     def validate(self, attrs):
+        username = attrs.get('username')
+        mobile = attrs.get('mobile')
+        code = attrs.get('code')
         password = attrs.get('password')
         tow_password = attrs.get('tow_password')
-        if password != tow_password:
-            raise serializers.ValidationError('两次密码不一致')
-        return attrs
+        old_code = cache.get('cache_mobile_%s' % mobile)
+        if models.User.objects.filter(username=username,mobile=mobile).first():
+            if password == tow_password:
+                if code == old_code or (settings.DEBUG and code == '1111'):  # 测试阶段 万能验证码
+                    # 入库前剔除code字段 username必填
+                    attrs.pop('code')
+                    attrs['username'] = mobile
+                    return attrs
+                else:
+                    raise ValidationError('验证码错误')
+            raise ValidationError('两次密码不一致')
+        raise ValidationError('账号或手机号不存在')
 
     def update(self, instance, validated_data):
-        print(instance)
         new_password = validated_data.get('password')
-        username = validated_data.get('username')
-        instance.username = username
         instance.password = make_password(new_password)
         instance.save()
         return instance
+    # 修改密码的另一种
+    #     instance.set_password(new_password)
 
 
 class AchievementSerializer(serializers.ModelSerializer):
@@ -204,36 +221,213 @@ class AchievementSerializer(serializers.ModelSerializer):
         fields = ['pk']
 
     def validate(self, attrs):
+        # print(datetime.datetime.now())
         user = self.context.get('user')
         username = models.User.objects.filter(username=user).first()
-        today_records = Achievement.objects.filter(user_id=username.id,earned_at__date=datetime.datetime.now())
+        today_records = Achievement.objects.filter(user_id=username.id, earned_at__date=datetime.datetime.now())
         if today_records:
             raise serializers.ValidationError('今天已经签到过')
         return attrs
 
     def update(self, instance, validated_data):
         user = models.User.objects.filter(username=instance).first()
-        today_record, created = Achievement.objects.get_or_create(user_id=user.id)
+        # today_record, created = Achievement.objects.get_or_create(user_id=user.id)
+        today_record, created = Achievement.objects.update_or_create(user_id=user.id, earned_at=datetime.datetime.now())
         if not created:
             today_record.signin += 1
             today_record.save()
-            return instance
+        return instance
 
 
 # 朋友圈系列
 class PostSerializer(serializers.ModelSerializer):
+    # 添加用户图像字段
+    user_profile_image = serializers.SerializerMethodField()
+    username = serializers.SerializerMethodField()
+    comment_user = serializers.SerializerMethodField()
+    comment_user_img = serializers.SerializerMethodField()
+    comment_user_text = serializers.SerializerMethodField()
+    comment_user_text_time = serializers.SerializerMethodField()
+    user_like_num = serializers.SerializerMethodField()
+    post_like_num = serializers.SerializerMethodField()
+    user_img = serializers.SerializerMethodField()
+
     class Meta:
         model = Post
-        fields = '__all__'
+        fields = ['title', 'username', 'user_profile_image', 'created_at', 'text', 'comment_user', 'comment_user_img',
+                  'comment_user_text', 'user_like_num', 'comment_user_text_time', 'post_like_num', 'user_img']
+        # fields = ['title','username','user_profile_image','image']
+
+    # 评论的用户名
+    def get_comment_user(self, obj):
+        return obj.comment_set.first().user.username
+
+    # 评论的用户图像
+    def get_comment_user_img(self, obj):
+        user = obj.comment_set.first().user
+        user_icon = settings.BACKEND_URL + '/media/' + str(user.icon)
+        return user_icon
+
+    # 评论内容
+    def get_comment_user_text(self, obj):
+        posts = obj.comment_set.all()
+        comments_text = []
+        for comment in posts:
+            comments_text.append(comment.text)
+        return comments_text
+
+    # 评论的时间
+    def get_comment_user_text_time(self, obj):
+        return obj.comment_set.first().created_at
+
+    # 评论点赞数
+    def get_post_like_num(self, obj):
+        return obj.likes.first().post_like_num
+
+    def get_username(self, obj):
+        return obj.user.username
+
+    # 发表文章用户的头像
+    def get_user_profile_image(self, obj):
+        # 获取发帖用户的图像
+        user = obj.user
+        user_icon = settings.BACKEND_URL + '/media/' + str(user.icon)
+        return user_icon
+
+    # 发表的图片
+    def get_user_img(self, obj):
+        imgs = obj.post_s.all()
+        comments_text = []
+        for img in imgs:
+            comments_text.append(settings.BACKEND_URL + '/media/' + str(img.img))
+        return comments_text
+
+    # 文章点赞数量
+    def get_user_like_num(self, obj):
+        return obj.likes.first().comment_like_num
+
+
+class CirCleHomeSerializer(PostSerializer):
+    class Meta:
+        model = Post
+        fields = ['id', 'text', 'title', 'username', 'user_img', 'user_profile_image', 'user_like_num']
+
+
+class UserPostSerializer(PostSerializer):
+    # 评论和用户及其用户的照片
+    comment_user = serializers.SerializerMethodField()
+
+    class Meta:
+        model = Post
+        fields = ['id', 'text', 'title', 'username', 'user_img', 'user_profile_image', 'comment_user']
+
+    def get_comment_user(self, obj):
+        # 评论的用户名
+        user = obj.comment_set.first().user.username
+        # 评论点赞数
+        comment_like_num = Like.objects.filter(user__username=user).aggregate(total_likes=Sum('post_like_num'))[
+            'total_likes']
+        # 用户评论内容
+        user_comments_text = Comment.objects.filter(user__username=user).values_list('text', flat=True)
+        # 子评论用户名称
+        reply_user = models.Reply.objects.filter(comment__user__username=user)
+        # 回复的点赞
+        reply_dict = {'reply_user_': [], 'reply_text': [], 'like': ''}
+        for reply in reply_user:
+            reply_user_ = reply.user.username
+            reply_text = reply.text
+            reply_dict['like'] = reply.reply_num
+            reply_dict['reply_user_'].append(reply_user_)
+            reply_dict['reply_text'].append(reply_text)
+        # 子评论用户回复内容
+        # reply_text = models.Reply.objects.filter(user=user).values_list('text', flat=True)
+
+        comment_info = {
+            'username': user,
+            'comment_like_num': comment_like_num,
+            'comment_text': {
+                'text': user_comments_text,
+                'reply_user': reply_dict
+
+            }
+        }
+        return comment_info
 
 
 class CommentSerializer(serializers.ModelSerializer):
     class Meta:
         model = Comment
-        fields = '__all__'
+        fields = ['user', 'post', 'text', 'created_at']
+        extra_kwargs = {
+            'post': {'write_only': False},
+            'user': {'write_only': False}
+        }
+
+    def validate(self, attrs):
+        text = attrs.get('text')
+        if sensitivity_.contains_sensitive_word(text):
+            raise ValidationError('你输入的是敏感词汇请重新输入')
+        return attrs
+
+    def create(self, validated_data):
+        user_id = validated_data.get('user')
+        post_id = validated_data.get('post')
+        text = validated_data.get('text')
+        user_like = models.Like.objects.create(user_id=user_id, post_id=post_id, text=text)
+        user_like.save()
+        return validated_data
+
+
+class ArticleSerializer(serializers.ModelSerializer):
+    username = serializers.SerializerMethodField()
+    son_comment = serializers.SerializerMethodField()
+
+    # 当前用户id
+    # 当前文章id
+    class Meta:
+        model = Comment
+        fields = ['username', 'created_at', 'text', 'son_comment']
+
+    def get_username(self, obj):
+        return obj.user.username
+
+    def get_son_comment(self, obj):
+        user_ = obj.parent
+        for i in user_:
+            if i:
+                l = {}
+                l['parent_name'] = obj.parent.user.username
+                l['text'] = obj.text
+
+            else:
+                l = {}
+                l['username'] = self.get_username(obj)
+                l['text'] = obj.text
+            return l
+
+    # 文章点赞
 
 
 class LikeSerializer(serializers.ModelSerializer):
     class Meta:
         model = Like
-        fields = '__all__'
+        fields = ['user', 'post']
+        # user_id
+        # 文章 id
+
+    def validate(self, attrs):
+        user = attrs.get('user')
+        post = attrs.get('post')
+        existing_like = Like.objects.filter(user_id=user, post_id=post).count()
+        if existing_like:
+            raise serializers.ValidationError("你已经点过赞了该帖子。")
+        return attrs
+
+    def create(self, validated_data):
+        user_id = validated_data.get('user')
+        post_id = validated_data.get('post')
+        with transaction.atomic():
+            user_like = models.Like.objects.create(user_id=user_id, post_id=post_id)
+            user_like.comment_like_num += 1
+            user_like.save()
+        return validated_data
