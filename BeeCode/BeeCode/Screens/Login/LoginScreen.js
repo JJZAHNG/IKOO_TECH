@@ -22,19 +22,35 @@ const LoginScreen = ({ navigation }) => {
   const [activeTab, setActiveTab] = useState('account');
   const [phoneNumber, setPhoneNumber] = useState('');
   const [smsCode, setSmsCode] = useState('');
+  const [isTimerRunning, setIsTimerRunning] = useState(false);
+  const [timerSeconds, setTimerSeconds] = useState(60); // 60 seconds timer
 
 
 
   useEffect(() => {
+    // Screen orientation locking logic
     const changeOrientation = async () => {
       await ScreenOrientation.lockAsync(ScreenOrientation.OrientationLock.LANDSCAPE);
     };
     changeOrientation();
-
+  
+    // Timer logic
+    let interval;
+    if (isTimerRunning && timerSeconds > 0) {
+      interval = setInterval(() => {
+        setTimerSeconds((prevSeconds) => prevSeconds - 1);
+      }, 1000);
+    } else if (timerSeconds === 0) {
+      setIsTimerRunning(false);
+      setTimerSeconds(60); // Reset timer
+    }
+  
+    // Cleanup function
     return () => {
+      clearInterval(interval); // Clear the timer interval
       ScreenOrientation.unlockAsync(); // Unlock the orientation on cleanup
     };
-  }, []);
+  }, [isTimerRunning, timerSeconds]); 
 
   const handleSignUp = () => {
     console.log("handle sign up");
@@ -90,6 +106,12 @@ const LoginScreen = ({ navigation }) => {
     }
   };
 
+  const handleSendSMS = () => {
+    // Trigger SMS sending logic here
+    console.log("Sending SMS to:", phoneNumber);
+    setIsTimerRunning(true);
+  };
+
 
   return (
     <ImageBackground source={backgroundImage} style={{flex: 1}}>
@@ -109,13 +131,13 @@ const LoginScreen = ({ navigation }) => {
                   style={styles.textInput}
                   value={accountNumber}
                   onChangeText={setAccountNumber}
-                  placeholder="    账户"
+                  placeholder="账户"
                 />
                 <TextInput
                   style={styles.textInput}
                   value={password}
                   onChangeText={setPassword}
-                  placeholder="    密码"
+                  placeholder="密码"
                   secureTextEntry
                 />
               </>
@@ -123,17 +145,30 @@ const LoginScreen = ({ navigation }) => {
 
             {activeTab === 'sms' && (
               <>
+              <View style={styles.inputWithButton}>
                 <TextInput
                   style={styles.textInput}
                   value={phoneNumber}
                   onChangeText={setPhoneNumber}
-                  placeholder="    电话号码"
+                  placeholder="电话号码"
+                  keyboardType="numeric" // Ensure numeric keyboard for phone numbers
+                  maxLength={11} // Maximum length for the phone number
                 />
+
+                <TouchableOpacity 
+                  onPress={handleSendSMS} 
+                  disabled={phoneNumber.length !== 11 || isTimerRunning} 
+                  style={[styles.sendSMSButton, (phoneNumber.length !== 11 || isTimerRunning) && { backgroundColor: 'lightgrey' }]}
+                >
+                  <Text style={styles.sendSMSText}>{isTimerRunning ? `${timerSeconds}s` : "发送验证码"}</Text>
+                </TouchableOpacity>
+              </View>
+                
                 <TextInput
                   style={styles.textInput}
                   value={smsCode}
                   onChangeText={setSmsCode}
-                  placeholder="    短信验证码"
+                  placeholder="短信验证码"
                 />
                 
               </>

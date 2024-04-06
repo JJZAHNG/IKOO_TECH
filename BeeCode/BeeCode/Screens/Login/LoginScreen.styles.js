@@ -33,12 +33,11 @@ export default StyleSheet.create({
   textInput: {
     width: '60%',
     marginVertical: 8,
-    borderWidth: 1,
-    borderColor: 'transparent',
     borderRadius: 25,
-    paddingHorizontal: 10,
+    paddingHorizontal: 20,
     paddingVertical: 8,
     backgroundColor: 'rgba(255, 255, 255, 0.7)',
+    fontSize: 18,
 
     // Elevation for IOS
     shadowColor: '#000',
@@ -122,5 +121,30 @@ export default StyleSheet.create({
     fontWeight: '700',
     textAlign: 'center', // Ensure text is centered under the image
     color: 'white', // Adjust text color as needed
+  },
+
+  inputWithButton: {
+    flexDirection: 'row',
+    ustifyContent: 'center', 
+    alignItems: 'center', // Center children vertically
+    borderRadius: 25,
+    position: 'relative', // Needed for absolute positioning of the button
+
+  },
+  
+  
+  sendSMSButton: {
+    position: 'absolute', // Position button over the container
+    paddingVertical: 10,
+    paddingHorizontal: 12,
+    backgroundColor: 'rgb(234, 128, 0)',
+    borderRadius: 25,
+    right: 3,
+    height: 38
+  },
+  
+  sendSMSText: {
+    color: 'white',
+    // Apply additional text styling as needed
   },
 })
