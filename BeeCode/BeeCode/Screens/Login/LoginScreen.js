@@ -67,11 +67,16 @@ const LoginScreen = ({ navigation }) => {
 
   const handleLogin = async () => {
     console.log("Login pressed");
-
-    if (activeTab === "account") {
-
-      try {
-        const response = await fetch('http://${config.SERVER_IP}:8000/api/v1/user/login/mul_login/', {
+  
+    try {
+      let response;
+      let data;
+  
+      if (activeTab === "account") {
+        const loginUrl = `http://${config.SERVER_IP}:8000/api/v1/user/login/mul_login/`;
+        console.log(`Attempting to login with account URL: ${loginUrl}`);
+        
+        response = await fetch(loginUrl, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -81,28 +86,41 @@ const LoginScreen = ({ navigation }) => {
             password: password,
           }),
         });
-
-        const data = await response.json();
-
-        if (response.ok) {
-          console.log('Login successful:', data);
-          await AsyncStorage.setItem('isLoggedIn', 'true');
-          console.log('Set isLoggedIn to true...');
-          navigation.navigate("Main");
-        } else {
-          console.error('Login failed:', data);
-          // Handle login failure (e.g., show an error message)
-          await AsyncStorage.setItem('isLoggedIn', 'false');
-          console.log('Set isLoggedIn to false...');
-          alert("Account Number or Password is not correct")
-        }
-      } catch (error) {
-        console.error('Error during login:', error);
-        // Handle network error (e.g., show an error message)
+        
+      } else if (activeTab === "sms") {
+        const smsLoginUrl = `http://${config.SERVER_IP}:8000/api/v1/user/login/sms_login/`;
+        console.log(`Attempting to login with SMS URL: ${smsLoginUrl}`);
+        
+        response = await fetch(smsLoginUrl, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            mobile: phoneNumber,
+            code: smsCode,
+          }),
+        });
       }
-    } else if (activeTab === "sms") {
-      // TODO: Handle SMS login 
-
+  
+      data = await response.json();
+  
+      if (response.ok) {
+        console.log('Login successful:', data);
+        await AsyncStorage.setItem('isLoggedIn', 'true');
+        console.log('Set isLoggedIn to true...');
+        navigation.navigate("Main");
+      } else {
+        console.error('Login failed:', data);
+        // 处理登录失败（例如，显示错误信息）
+        await AsyncStorage.setItem('isLoggedIn', 'false');
+        console.log('Set isLoggedIn to false...');
+        alert("登录信息不正确");
+      }
+    } catch (error) {
+      console.error('Error during login:', error);
+      // 处理网络错误（例如，显示错误信息）
+      alert(`登录错误: ${error}`);
     }
   };
 
