@@ -9,7 +9,7 @@ const CourseScreen = ({ navigation }) => {
 
   const fetchCoursesByCategory = async (category) => {
     try {
-      const response = await axios.get(`http://your-api-url/api/courses/?course_category=${category}`);
+      const response = await axios.get(`http://127.0.0.1:8000/api/v1/course/course_classify/${category}/`);
       setCourses(response.data);
     } catch (error) {
       console.error('Failed to fetch courses:', error);
@@ -32,9 +32,8 @@ const CourseScreen = ({ navigation }) => {
   };
 
   return (
-    <SafeAreaView style={styles.container}>
-      {/* 按钮和课程方块应该在同一个 ScrollView 内 */}
-      <ScrollView style={styles.scrollContainer} contentContainerStyle={{ alignItems: 'center' }}>
+    <View style={styles.container}>
+      <ScrollView style={styles.scrollView}>
         <TouchableOpacity onPress={() => fetchCoursesByCategory(1)} style={styles.button}>
           <Text style={styles.buttonText}>Button 1</Text>
         </TouchableOpacity>
@@ -44,9 +43,11 @@ const CourseScreen = ({ navigation }) => {
         <TouchableOpacity onPress={() => fetchCoursesByCategory(3)} style={styles.button}>
           <Text style={styles.buttonText}>Button 3</Text>
         </TouchableOpacity>
-        {renderCourseBlocks()}
       </ScrollView>
-    </SafeAreaView>
+      <View style={styles.coursesContainer}>
+        {renderCourseBlocks()}
+      </View>
+    </View>
   );
 };
 
