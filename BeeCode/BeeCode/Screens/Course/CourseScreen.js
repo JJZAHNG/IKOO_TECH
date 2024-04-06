@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, TouchableOpacity, Text, ScrollView, Image, Alert } from 'react-native';
+import { View, TouchableOpacity, Text, ScrollView, Image, Alert, SafeAreaView } from 'react-native';
 import axios from 'axios';
 import styles from './CourseScreen.styles';
 
