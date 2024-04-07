@@ -4,6 +4,7 @@ import React, { useState, useEffect} from 'react';
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import LoginScreen from './Screens/Login/LoginScreen';
+import SignupScreen from './Screens/Signup/SignupScreen';
 import MainScreen from './Screens/Main/MainScreen';
 import SMSLoginScreen from './Screens/SMSLogin/SMSLoginScreen';
 import CourseScreen from './Screens/Course/CourseScreen';
@@ -16,7 +17,6 @@ import WorkShopScreen from './Screens/WorkShop/WorkShopScreen';
 import ScratchScreen from './Screens/WorkShop/ScratchScreen'; // 更新为你的正确路径
 import SocialScreen from './Screens/Social/Social'; // 确保路径正确
 import ProfileScreen from './Screens/Profile/ProfileScreen'; // 确保路径正确
-import SignupPage from './Screens/Signup/SignupScreen'; // 注册界面
 
 
 // Create a Stack Navigator
@@ -72,6 +72,7 @@ const App = () => {
         initialRouteName={initialRouteName}>
         <Stack.Screen name="Login" component={LoginScreen} options={{headerShown: false}}/>
         <Stack.Screen name="SMSLogin" component={SMSLoginScreen} options={{headerShown: false}}/>
+        <Stack.Screen name="Signup" component={SignupScreen} options={{headerShown: false}}/>
         <Stack.Screen
           name="Main"
           component={MainScreen}
@@ -82,8 +83,8 @@ const App = () => {
             gestureEnabled: false, // Disables iOS swipe-to-go-back gesture for this screen
           }}
         />
+  
         <Stack.Screen name="Course" component={CourseScreen} options={{title: "课程套件"}} />
-        <Stack.Screen name="Signin" component={SigninScreen} options={{ title: "注册" }} />
 
         {/* 在线咨询界面 */}
         <Stack.Screen name="ChatService" component={ChatService} options={{ title: "在线咨询" }} />
