@@ -21,6 +21,9 @@ router.register('comments', views.CommentViewSet, 'comments')
 # 用户点赞
 router.register('likes', views.LikeViewSet, 'likes')
 
+
+
+
 urlpatterns = [
 
 ]
