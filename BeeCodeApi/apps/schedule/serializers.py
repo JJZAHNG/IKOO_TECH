@@ -14,7 +14,6 @@ class Course_Classify_Serializer(serializers.ModelSerializer):
 
 
 class CourseSerializer(serializers.ModelSerializer):
-    # course_content_user = serializers.SerializerMethodField()
     cover_content = serializers.SerializerMethodField()
     content_img = serializers.SerializerMethodField()
     class Meta:
@@ -29,7 +28,7 @@ class CourseSerializer(serializers.ModelSerializer):
         imgs = obj.course_img.all()
         comments_text = []
         for img in imgs:
-            comments_text.append(settings.BACKEND_URL + '/media/' + str(img.course_content))
+            comments_text.append(settings.BACKEND_URL + '/media/' + str(img.courses_content))
         return comments_text
 
 
@@ -48,7 +47,7 @@ class ClassifySerializer(serializers.ModelSerializer):
         imgs = obj.course_img.all()
         comments_text = []
         for img in imgs:
-            comments_text.append(settings.BACKEND_URL + '/media/' + str(img.course_content))
+            comments_text.append(settings.BACKEND_URL + '/media/' + str(img.courses_content))
         return comments_text
 
 

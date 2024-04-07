@@ -9,7 +9,7 @@ from django.contrib.auth.hashers import make_password, check_password
 import re
 import datetime
 from .models import Achievement
-from .models import Post, Comment, Like,User
+from .models import Post, Comment
 from django.db.models import Sum
 from libs.sensitivity import sensitivity_
 from django.db import transaction
@@ -143,7 +143,7 @@ class UserRegisterSerializer(serializers.ModelSerializer):
         raise ValidationError('该手机号已经被注册')
 
     def create(self, validated_data):
-        print(validated_data)
+
         user = models.User.objects.create_user(**validated_data)
         return user
 
@@ -229,7 +229,6 @@ class AchievementSerializer(serializers.ModelSerializer):
         fields = ['pk']
 
     def validate(self, attrs):
-        # print(datetime.datetime.now())
         user = self.context.get('user')
         username = models.User.objects.filter(username=user).first()
         today_records = Achievement.objects.filter(user_id=username.id, earned_at__date=datetime.datetime.now())
@@ -333,7 +332,7 @@ class UserPostSerializer(PostSerializer):
         # 评论的用户名
         user = obj.comment_set.first().user.username
         # 评论点赞数
-        comment_like_num = Like.objects.filter(user__username=user).aggregate(total_likes=Sum('post_like_num'))[
+        comment_like_num = Post.objects.filter(user__username=user).aggregate(total_likes=Sum('post_like_num'))[
             'total_likes']
         # 用户评论内容
         user_comments_text = Comment.objects.filter(user__username=user).values_list('text', flat=True)
@@ -381,42 +380,76 @@ class CommentSerializer(serializers.ModelSerializer):
         user_id = validated_data.get('user')
         post_id = validated_data.get('post')
         text = validated_data.get('text')
-        user_like = models.Like.objects.create(user_id=user_id, post_id=post_id, text=text)
+        user_like = models.Comment.objects.create(user_id=user_id, post_id=post_id, text=text)
         user_like.save()
         return validated_data
 
 
-class CommSerializer(serializers.ModelSerializer):
-    son_comment = serializers.SerializerMethodField()
+class CommtSerializer(serializers.ModelSerializer):
+    like = serializers.SerializerMethodField()
+    username = serializers.SerializerMethodField()
+    children = serializers.SerializerMethodField()
+
     class Meta:
         model = Comment
-        fields = ['user_id', 'post_id', 'text', 'created_at', 'son_comment']
+        fields = ['post','username','text','created_at','children']
         extra_kwargs = {
-            'text': {'read_only': True},
+            'text':{"read_only":True},
+            'post':{"write_only":True},
+            'user':{"write_only":True}
         }
 
-    # def get_username(self, obj):
-    #     return obj.user.username
+    def get_username(self,obj):
+        return obj.user.username
+
+    def get_like(self,obj):
+        return obj.comment_num
+
+    def get_children(self,args):
+        parent_id = args
+        res = []
+
+        def child_data(obj_id):
+            objs = Comment.objects.filter(parent_id=obj_id)
+            for obj in objs:
+                res.append({'username':obj.user.username,'text':obj.text,'created_at':obj.created_at})
+                child_data(obj.id)
+        child_data(parent_id)
+        return res
+    # def to_representation(self, instance):
+    #
+    #     data = super().to_representation(instance)
+    #     comment_list = Comment.objects.filter(post=instance['post'])
+    #
+    #     comments_data = []
+    #     for comment in comment_list:
+    #         if comment.parent_id:
+    #             # 如果存在parent_id，则这是一个子评论
+    #             reply = {
+    #                 'parent_name': '@ %s ' % comment.parent.user.username,
+    #                 'username': comment.user.username,
+    #                 'created_at': comment.created_at,
+    #                 'text': comment.text
+    #             }
+    #             comments_data.append(reply)
+    #         else:
+    #             # 如果不存在parent_id，则这是一个根评论
+    #             root_comment = {
+    #                 'username': comment.user.username,
+    #                 'created_at': comment.created_at,
+    #                 'text': comment.text
+    #             }
+    #             comments_data.append(root_comment)
+    #
+    #     data['comments'] = comments_data
+    #     return data
+    # def get_son_comment(self, obj):
+        # 获取当前评论的第一级子评论
 
 
-    def get_son_comment(self, obj):
-        # 获取当前评论的所有直接子评论
-        sub_comments = Comment.objects.filter(parent=obj)
-        if sub_comments.exists():
-            # 递归调用 CommentSerializer 序列化所有直接子评论
-            serializer = self.__class__(sub_comments, many=True)
-            data = serializer.data
-            # 对每个子评论递归调用get_son_comment方法以获取其直接子评论
-            for comment_data in data:
-                comment_data['son_comment'] = self.get_son_comment(sub_comments.get(id=comment_data['id']))
-            return data
-        else:
-            # 如果当前评论没有直接子评论，返回空列表
-            return []
 
-        # print(user.parent_id)
         # user_ = obj.parent
-        # # print(obj.parent)
+
         # for i in user_:
         #     if i:
         #         l = {}
@@ -430,26 +463,26 @@ class CommSerializer(serializers.ModelSerializer):
         #     return l
 
 
-class LikeSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Like
-        fields = ['user', 'post']
-        # user_id
-        # 文章 id
-
-    def validate(self, attrs):
-        user = attrs.get('user')
-        post = attrs.get('post')
-        existing_like = Like.objects.filter(user_id=user, post_id=post).count()
-        if existing_like:
-            raise serializers.ValidationError("你已经点过赞了该帖子。")
-        return attrs
-
-    def create(self, validated_data):
-        user_id = validated_data.get('user')
-        post_id = validated_data.get('post')
-        with transaction.atomic():
-            user_like = models.Like.objects.create(user_id=user_id, post_id=post_id)
-            user_like.comment_like_num += 1
-            user_like.save()
-        return validated_data
+# class LikeSerializer(serializers.ModelSerializer):
+#     class Meta:
+#         model = Like
+#         fields = ['user', 'post']
+#         # user_id
+#         # 文章 id
+#
+#     def validate(self, attrs):
+#         user = attrs.get('user')
+#         post = attrs.get('post')
+#         existing_like = Like.objects.filter(user_id=user, post_id=post).count()
+#         if existing_like:
+#             raise serializers.ValidationError("你已经点过赞了该帖子。")
+#         return attrs
+#
+#     def create(self, validated_data):
+#         user_id = validated_data.get('user')
+#         post_id = validated_data.get('post')
+#         with transaction.atomic():
+#             user_like = models.Like.objects.create(user_id=user_id, post_id=post_id)
+#             user_like.comment_like_num += 1
+#             user_like.save()
+#         return validated_data

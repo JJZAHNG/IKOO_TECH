@@ -1,5 +1,4 @@
 import json
-
 from django.db import models
 from django.contrib.auth.models import AbstractUser
 from utils.common_models import BaseModel
@@ -29,13 +28,13 @@ class Course_Cover(models.Model):
 
 
 class Course_Content(models.Model):
-    course_content = models.ImageField(verbose_name='内容', upload_to='content')
+    courses_content = models.ImageField(verbose_name='内容', upload_to='content')
     class Meta:
         db_table = 'BeeCode_Course_Content'
         verbose_name_plural = '课件'
 
     def __str__(self):
-        return 'id为%s的内容为%s'%(self.id,self.course_content)
+        return 'id为%s的内容为%s'%(self.id,self.courses_content)
 
 
 # 课程表

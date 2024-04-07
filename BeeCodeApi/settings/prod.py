@@ -80,13 +80,13 @@ DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
         'NAME': 'beecode_db',
-        'HOST': '127.0.0.1',
+        'HOST': 'rm-bp16n7owypkw5g322do.mysql.rds.aliyuncs.com',
         'PORT': 3306,
-        'USER': 'root',
-        # 'PASSWORD': '123456',
-        'PASSWORD':'a1234567',
-        'OPTIONS': {
-            "init_command": "SET sql_mode='STRICT_TRANS_TABLES'"
+        'USER': 'superadmin',
+        'PASSWORD': 'JJz123abcwasd',
+        # 'PASSWORD':'a1234567',
+        'OPTIONS':{
+            "init_command":"SET sql_mode='STRICT_TRANS_TABLES'"
         }
 
     }

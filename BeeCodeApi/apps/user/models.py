@@ -177,6 +177,7 @@ class Post(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='posts')
     title = models.CharField(max_length=255, verbose_name='标题', null=True, blank=True)  # 新增标题字段
     text = models.TextField(verbose_name='帖子内容')
+    comment_like_num = models.IntegerField(verbose_name='文章点赞数', default=0)
     created_at = models.DateTimeField(auto_now_add=True, verbose_name='发布时间')
     post_s = models.ManyToManyField(PostImage)
 
@@ -193,7 +194,7 @@ class Comment(models.Model):
     post = models.ForeignKey(Post, on_delete=models.CASCADE)
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     text = models.TextField(verbose_name='评论内容')
-    # comment_num = models.IntegerField(verbose_name='评论点赞数', default=0)
+    post_like_num = models.IntegerField(verbose_name='评论点赞数', default=0)
     created_at = models.DateTimeField(auto_now_add=True, verbose_name='评论时间')
     parent = models.ForeignKey(to='self',on_delete=models.CASCADE,null=True,blank=True)
 
@@ -202,35 +203,8 @@ class Comment(models.Model):
         verbose_name = '评论表'
         verbose_name_plural = verbose_name
 
-
-class Reply(models.Model):  # 新增回复模型
-    comment = models.ForeignKey(Comment, on_delete=models.CASCADE, related_name='replies')
-    user = models.ForeignKey(User, on_delete=models.CASCADE)
-    text = models.TextField(verbose_name='回复内容')
-    reply_num = models.IntegerField(verbose_name='回复的点赞', default=0)
-
-    created_at = models.DateTimeField(auto_now_add=True, verbose_name='回复时间')
-
-    class Meta:
-        db_table = 'BeeCode_reply'
-        verbose_name = '回复表'
-        verbose_name_plural = verbose_name
-
     def __str__(self):
-        return f"{self.user.username} - {self.text[:20]}"
-
-class Like(models.Model):  # 修改点赞模型，关联用户和帖子/评论
-    user = models.ForeignKey(User, on_delete=models.CASCADE)
-    post = models.ForeignKey(Post, on_delete=models.CASCADE, related_name='likes', null=True, blank=True)
-    # comment = models.ForeignKey(Comment, on_delete=models.CASCADE, related_name='likes', null=True, blank=True)
-    comment_like_num = models.IntegerField(verbose_name='文章点赞数',default=0)
-    post_like_num = models.IntegerField(verbose_name='评论点赞数', default=0)
-
-    class Meta:
-        # unique_together = ('user', 'post', 'comment')  # 确保用户对同一帖子或评论只能点赞一次 我能点文章 能点帖子 能点评论
-        db_table = 'BeeCode_like'
-        verbose_name = '点赞表'
-        verbose_name_plural = verbose_name
+        return self.text
 
 
 

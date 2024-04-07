@@ -1,5 +1,5 @@
 from rest_framework.viewsets import GenericViewSet
-from .models import Course_Classify,Course_Cover,Course
+from .models import Course_Classify,Course
 from rest_framework.mixins import ListModelMixin,RetrieveModelMixin
 from .serializers import CourseSerializer,Course_Classify_Serializer,ClassifySerializer
 from utils.common_response import APIResponse

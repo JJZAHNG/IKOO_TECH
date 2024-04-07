@@ -15,8 +15,8 @@ from .models import User, Achievement
 from .serializers import AchievementSerializer
 from rest_framework_jwt.authentication import JSONWebTokenAuthentication
 from rest_framework.permissions import IsAuthenticated
-from .models import Post, Comment, Like
-from .serializers import PostSerializer, CommentSerializer, LikeSerializer
+from .models import Post, Comment
+from .serializers import PostSerializer, CommentSerializer
 
 # Create your views here.
 # 1.手机号短信登录
@@ -28,7 +28,6 @@ class MobileView(ViewSet):
         try:
             # 取出前端传过来的手机号
             mobile = request.query_params['mobile']
-            print(mobile)
             # 去数据库中查询是否存在 且唯一
             models.User.objects.get(mobile=mobile)
 
@@ -136,7 +135,6 @@ class AchievementViewSet(GenericViewSet):
     # 签到表
     @action(detail=False, methods=['post'])
     def earn_achievement(self, request,*args,**kwargs):
-        # print(request.META) # HTTP_USERNAME
         user = request.META.get('HTTP_USERNAME')
         serializer = self.serializer_class(instance=request.user,data=request.data)
         serializer.context['user'] = user
@@ -164,7 +162,7 @@ class AchievementViewSet(GenericViewSet):
 # 朋友圈系列
 # user/views.py
 class PostViewSet(viewsets.ModelViewSet):
-    queryset = Post.objects.all()
+    queryset = Comment.objects.all()
     serializer_class = serializers.CirCleHomeSerializer
     pagination_class = PostPageNumberPagination
 
@@ -175,7 +173,7 @@ class PostViewSet(viewsets.ModelViewSet):
         else:
             return super().get_serializer_class()
 
-    # 点进去之后展示的数据
+
     @action(methods=['post'],detail=False)
     def circle_of_friends_home(self,request):
         queryset = self.get_queryset()
@@ -191,7 +189,7 @@ class CommentViewSet(viewsets.ModelViewSet):
 
     def get_serializer_class(self):
         if self.action == 'article_detail':
-            return serializers.CommSerializer
+            return serializers.CommtSerializer
         else:
             return super().get_serializer_class()
 
@@ -203,25 +201,32 @@ class CommentViewSet(viewsets.ModelViewSet):
         serializers.save()
         return APIResponse('评论成功')
 
+class Comment_View(GenericViewSet):
+    queryset = Comment.objects.all()
+    serializer_class = serializers.CommtSerializer
 
     @action(methods=['post'],detail=False)
     def article_detail(self,request):
-        serializers = self.get_serializer(data=request.data)
-        serializers.is_valid(raise_exception=True)
+
+        queryset = self.get_queryset()
+        serializers = self.get_serializer(instance=queryset,many=True)
         return APIResponse(serializers.data)
 
+    def get_queryset(self):
+        data = self.request.data
+        return super().get_queryset().filter(post_id=data.get('post')).filter(parent_id__isnull=True)
 
 # 点赞功能
-class LikeViewSet(viewsets.ModelViewSet):
-    queryset = Like.objects.all()
-    serializer_class = LikeSerializer
-
-    @action(methods=['post'],detail=False)
-    def list_view(self,request):
-        serializers = self.serializer_class(data=request.data)
-        serializers.is_valid(raise_exception=True)
-        serializers.save()
-        return APIResponse('点赞成功')
+# class LikeViewSet(viewsets.ModelViewSet):
+#     queryset = Like.objects.all()
+#     serializer_class = LikeSerializer
+#
+#     @action(methods=['post'],detail=False)
+#     def list_view(self,request):
+#         serializers = self.serializer_class(data=request.data)
+#         serializers.is_valid(raise_exception=True)
+#         serializers.save()
+#         return APIResponse('点赞成功')
 
 
 

@@ -18,8 +18,10 @@ router.register('achievements', views.AchievementViewSet, 'achievements')
 router.register('posts', views.PostViewSet, 'posts')
 
 router.register('comments', views.CommentViewSet, 'comments')
+# 查看评论
+router.register('comment', views.Comment_View, 'comment')
 # 用户点赞
-router.register('likes', views.LikeViewSet, 'likes')
+# router.register('likes', views.LikeViewSet, 'likes')
 
 
 
