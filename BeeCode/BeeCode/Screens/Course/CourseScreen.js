@@ -1,64 +1,94 @@
-import React, { useState, useEffect} from 'react';
-import { View, TextInput, TouchableOpacity, Text, StyleSheet, Button, ScrollView, Animated, Dimensions, StatusBar } from 'react-native';
+// CourseScreen.js
+
+import React, { useState, useEffect } from 'react';
+import { View, TouchableOpacity, Text, ScrollView, StatusBar, Alert, ImageBackground } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import styles from './CourseScreen.styles';
-
-
+import config from '../../config.js'; 
 
 const CourseScreen = ({ navigation }) => {
-    const screenHeight = Dimensions.get('window').height;
-    const [selectedButton, setSelectedButton] = useState(1); // Assuming the first button is initially selected
+  const [courseDetails, setCourseDetails] = useState({});
+  const [backgroundImage, setBackgroundImage] = useState(null);
 
-    // Dummy buttons for demonstration. Ideally, this could come from props or state.
-    const buttons = [
-        { id: 1, title: '初级 ID - 1' },
-        { id: 2, title: '中级 ID - 2' },
-        { id: 3, title: '高级 ID - 3' },
-    ];
+  useEffect(() => {
+    // 每次courseDetails变化时，都将其记录在控制台，并存储到AsyncStorage
+    if (courseDetails.cover_content) {
+      console.log('保存的课程信息:', courseDetails);
+      saveCourseDetailsToStorage(courseDetails);
+      setBackgroundImage({ uri: courseDetails.cover_content }); // 将图片地址设置为状态
+    }
+  }, [courseDetails]);
 
-    const handleScroll = (event) => {
-        const scrollPosition = event.nativeEvent.contentOffset.y;
-        const centerPosition = scrollPosition + screenHeight / 2;
+  const saveCourseDetailsToStorage = async (details) => {
+    try {
+      const jsonValue = JSON.stringify(details);
+      await AsyncStorage.setItem('courseDetails', jsonValue);
+    } catch (e) {
+      console.error('保存到存储失败', e);
+    }
+  };
 
-        // Logic to determine which button is at the center and thus selected
-        const buttonHeight = screenHeight / buttons.length; // Adjust based on your UI
-        const selectedButtonIndex = Math.floor(centerPosition / buttonHeight);
-        setSelectedButton(buttons[selectedButtonIndex]?.id);
-    };
+  const handleCourseSelection = async (classifyId) => {
+    const postUrl = `http://${config.SERVER_IP}:8000/api/v1/course/classify/classify_course/`;
+    try {
+      const response = await fetch(postUrl, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ classify_id: classifyId }),
+      });
 
-    return (
-        <SafeAreaView style={styles.container}>
-        <StatusBar hidden={true} />
-        <ScrollView
-            style={styles.scrollContainer}
-            onScroll={handleScroll}
-            scrollEventThrottle={16} // Adjust based on your needs for performance
+      const data = await response.json();
+      if (data.msg === '成功') {
+        setCourseDetails(data);
+      } else {
+        Alert.alert('错误', '请求未成功。');
+      }
+    } catch (error) {
+      console.error('请求出错:', error);
+      Alert.alert('请求错误', '无法获取课程数据。');
+    }
+  };
+
+  return (
+    <SafeAreaView style={styles.container}>
+      <StatusBar hidden={true} />
+      <ScrollView style={styles.scrollContainer}>
+        {/* 这里是滚动视图里的按钮 */}
+        {/* 确保按钮列表和逻辑都被包含了 */}
+        {['初级 ID - 1', '中级 ID - 2', '高级 ID - 3'].map((title, index) => (
+          <TouchableOpacity
+            key={index}
+            style={styles.matrixButton}
+            onPress={() => handleCourseSelection(index + 1)}
+          >
+            <Text style={styles.matrixButtonText}>{title}</Text>
+          </TouchableOpacity>
+        ))}
+      </ScrollView>
+      {backgroundImage && (
+        <ImageBackground 
+          source={backgroundImage} 
+          style={styles.backgroundImage}
         >
-            {buttons.map((button) => (
-            <View key={button.id} style={styles.scroolButtonContainer}>
-                <Button
-                title={button.title}
-                onPress={() => console.log(`${button.title} pressed`)}
-                color={selectedButton === button.id ? 'blue' : 'gray'} // Highlight the selected button
-                />
-            </View>
-            ))}
-        </ScrollView>
-        
-
-        <View style={styles.mainButtonsContainer}>
-            {['I', 'II', 'III'].map((matrixNumber) => (
-            <TouchableOpacity
-                key={`Matrix ${matrixNumber}`}
+          {/* 这里是大按钮组 */}
+          <View style={styles.mainButtonsContainer}>
+            {['初级 ID - 1', '中级 ID - 2', '高级 ID - 3'].map((title, index) => (
+              <TouchableOpacity
+                key={index}
                 style={styles.matrixButton}
-                onPress={() => handleMatrixPress(matrixNumber)}
-            >
-                <Text style={styles.matrixButtonText}>{`Matrix ${matrixNumber}`}</Text>
-            </TouchableOpacity>
+                onPress={() => handleCourseSelection(index + 1)}
+              >
+                <Text style={styles.matrixButtonText}>{title}</Text>
+              </TouchableOpacity>
             ))}
-        </View>
-        </SafeAreaView>
-    );
+          </View>
+        </ImageBackground>
+      )}
+    </SafeAreaView>
+  );
 };
 
 export default CourseScreen;
