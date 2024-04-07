@@ -126,27 +126,27 @@ class UserRegisterSerializer(serializers.ModelSerializer):
     def validate(self, attrs):
         password = attrs.get('password')
         password_confirm = attrs.get('password_confirm')
-        if password_confirm != password:
-            raise ValidationError('两次密码不一致')
+
+
         mobile = attrs.get('mobile')
         code = attrs.get('code')
         old_code = cache.get('cache_mobile_%s' % mobile)
         if not models.User.objects.filter(mobile=mobile).first():
-
-            if code == old_code or (settings.DEBUG and code == '1111'):
-                attrs.pop('password_confirm')
-                attrs.pop('code')
-                attrs['username'] = get_code()
-            else:
-                raise ValidationError('验证码错误')
-            return attrs
-
+            if password_confirm == password:
+                if code == old_code or (settings.DEBUG and code == '1111'):
+                    attrs.pop('password_confirm')
+                    attrs.pop('code')
+                    attrs['username'] = get_code()
+                else:
+                    raise ValidationError('验证码错误')
+                return attrs
+            raise ValidationError('两次输入手机号不一致')
         raise ValidationError('该手机号已经被注册')
 
-def create(self, validated_data):
-    print(validated_data)
-    user = models.User.objects.create_user(**validated_data)
-    return user
+    def create(self, validated_data):
+        print(validated_data)
+        user = models.User.objects.create_user(**validated_data)
+        return user
 
 
 class RegisterSerializer(serializers.ModelSerializer):
