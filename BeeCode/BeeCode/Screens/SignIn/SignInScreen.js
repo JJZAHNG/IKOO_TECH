@@ -12,3 +12,7 @@ const keyImage = require('./res/key.jpg');
 const wechatImage = require('./res/wechat.jpg');
 const smsImage = require('./res/sms.jpg');
 const signupImage = require('./res/signup.jpg');
+
+<ImageBackground src={backgroundImage}>
+
+</ImageBackground>
