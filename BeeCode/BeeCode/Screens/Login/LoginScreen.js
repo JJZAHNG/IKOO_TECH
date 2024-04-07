@@ -108,6 +108,7 @@ const LoginScreen = ({ navigation }) => {
       if (response.ok) {
         console.log('Login successful:', data);
         await AsyncStorage.setItem('isLoggedIn', 'true');
+        await AsyncStorage.setItem('userData', JSON.stringify(data));
         console.log('Set isLoggedIn to true...');
         navigation.navigate("Main");
       } else {
