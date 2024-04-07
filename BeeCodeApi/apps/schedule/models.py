@@ -26,12 +26,16 @@ class Course_Cover(models.Model):
         verbose_name_plural='封面图表'
 
 
+
+
 class Course_Content(models.Model):
     course_content = models.ImageField(verbose_name='内容', upload_to='content')
     class Meta:
         db_table = 'BeeCode_Course_Content'
         verbose_name_plural = '课件'
 
+    def __str__(self):
+        return 'id为%s的内容为%s'%(self.id,self.course_content)
 # 课程表
 class Course(BaseModel):
     course_name = models.CharField(max_length=11,verbose_name='课程名称')

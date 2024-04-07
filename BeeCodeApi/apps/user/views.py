@@ -191,7 +191,7 @@ class CommentViewSet(viewsets.ModelViewSet):
 
     def get_serializer_class(self):
         if self.action == 'article_detail':
-            return serializers.ArticleSerializer
+            return serializers.CommSerializer
         else:
             return super().get_serializer_class()
 

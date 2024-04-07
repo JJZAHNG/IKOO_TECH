@@ -13,6 +13,16 @@ from .models import Post, Comment, Like
 from django.db.models import Sum
 from libs.sensitivity import sensitivity_
 from django.db import transaction
+import random
+import string
+
+
+def get_code(number=6):
+    code = ''
+    for _ in range(number):
+        random_letter = random.choice(string.ascii_letters)
+        code += random_letter
+    return code
 
 
 class UniversalSerializer(serializers.Serializer):
@@ -101,12 +111,12 @@ class SMSLoginSerializer(serializers.Serializer):
 
 # 手机号注册
 class UserRegisterSerializer(serializers.ModelSerializer):
-    # code不是表中字段需要重写
     code = serializers.CharField(max_length=4, min_length=4, write_only=True)
+    password_confirm = serializers.CharField(write_only=True)
 
     class Meta:
         model = models.User
-        fields = ['mobile', 'code']
+        fields = ['mobile', 'code', 'password', 'password_confirm']
 
     def validate_mobile(self, var):
         if not re.match('^1[34578]\d{9}$', var):
@@ -114,26 +124,27 @@ class UserRegisterSerializer(serializers.ModelSerializer):
         return var
 
     def validate(self, attrs):
+        password = attrs.get('password')
+        password_confirm = attrs.get('password_confirm')
+
+
         mobile = attrs.get('mobile')
         code = attrs.get('code')
         old_code = cache.get('cache_mobile_%s' % mobile)
+        if not models.User.objects.filter(mobile=mobile).first():
+            if password_confirm == password:
+                if code == old_code or (settings.DEBUG and code == '1111'):
+                    attrs.pop('password_confirm')
+                    attrs.pop('code')
+                    attrs['username'] = get_code()
+                else:
+                    raise ValidationError('验证码错误')
+                return attrs
+            raise ValidationError('两次输入手机号不一致')
+        raise ValidationError('该手机号已经被注册')
 
-        # 校验手机号是否被注册
-        if models.User.objects.filter(mobile=mobile).first():
-            raise ValidationError('该手机号已经被注册')
-
-        # 校验code 是否正确
-        if code == old_code or (settings.DEBUG and code == '1111'):  # 测试阶段 万能验证码
-
-            # 入库前剔除code字段 username必填
-            attrs.pop('code')
-            attrs['username'] = mobile
-        else:
-            raise ValidationError('验证码错误')
-        return attrs
-
-    # 不重写create方法密码存进去是明文
     def create(self, validated_data):
+        print(validated_data)
         user = models.User.objects.create_user(**validated_data)
         return user
 
@@ -185,8 +196,6 @@ class SetPwdSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError('密码长度要大于8个字符')
         return value
 
-
-
     def validate(self, attrs):
         username = attrs.get('username')
         mobile = attrs.get('mobile')
@@ -194,7 +203,7 @@ class SetPwdSerializer(serializers.ModelSerializer):
         password = attrs.get('password')
         tow_password = attrs.get('tow_password')
         old_code = cache.get('cache_mobile_%s' % mobile)
-        if models.User.objects.filter(username=username,mobile=mobile).first():
+        if models.User.objects.filter(username=username, mobile=mobile).first():
             if password == tow_password:
                 if code == old_code or (settings.DEBUG and code == '1111'):  # 测试阶段 万能验证码
                     # 入库前剔除code字段 username必填
@@ -378,7 +387,7 @@ class CommentSerializer(serializers.ModelSerializer):
         return validated_data
 
 
-class ArticleSerializer(serializers.ModelSerializer):
+class CommSerializer(serializers.ModelSerializer):
     username = serializers.SerializerMethodField()
     son_comment = serializers.SerializerMethodField()
 
@@ -386,26 +395,40 @@ class ArticleSerializer(serializers.ModelSerializer):
     # 当前文章id
     class Meta:
         model = Comment
-        fields = ['username', 'created_at', 'text', 'son_comment']
+        fields = ['id', 'username', 'text', 'son_comment', ]
 
     def get_username(self, obj):
         return obj.user.username
 
     def get_son_comment(self, obj):
-        user_ = obj.parent
-        for i in user_:
-            if i:
-                l = {}
-                l['parent_name'] = obj.parent.user.username
-                l['text'] = obj.text
+        # 获取当前评论的所有直接子评论
+        sub_comments = Comment.objects.filter(parent=obj)
+        if sub_comments.exists():
+            # 递归调用 CommentSerializer 序列化所有直接子评论
+            serializer = self.__class__(sub_comments, many=True)
+            data = serializer.data
+            # 对每个子评论递归调用get_son_comment方法以获取其直接子评论
+            for comment_data in data:
+                comment_data['son_comment'] = self.get_son_comment(sub_comments.get(id=comment_data['id']))
+            return data
+        else:
+            # 如果当前评论没有直接子评论，返回空列表
+            return []
 
-            else:
-                l = {}
-                l['username'] = self.get_username(obj)
-                l['text'] = obj.text
-            return l
-
-    # 文章点赞
+        # print(user.parent_id)
+        # user_ = obj.parent
+        # # print(obj.parent)
+        # for i in user_:
+        #     if i:
+        #         l = {}
+        #         l['parent_name'] = obj.parent.user.username
+        #         l['text'] = obj.text
+        #
+        #     else:
+        #         l = {}
+        #         l['username'] = self.get_username(obj)
+        #         l['text'] = obj.text
+        #     return l
 
 
 class LikeSerializer(serializers.ModelSerializer):
