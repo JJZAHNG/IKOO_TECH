@@ -24,10 +24,6 @@ const LoginScreen = ({ navigation }) => {
   const [smsCode, setSmsCode] = useState('');
   const [isTimerRunning, setIsTimerRunning] = useState(false);
   const [timerSeconds, setTimerSeconds] = useState(60); // 60 seconds timer
-  const handleGoToSignin = () => {
-    // 导航到 SigninScreen
-    navigation.navigate('Signin');
-  };
 
 
 
@@ -52,12 +48,12 @@ const LoginScreen = ({ navigation }) => {
     // Cleanup function
     return () => {
       clearInterval(interval); // Clear the timer interval
-      ScreenOrientation.unlockAsync(); // Unlock the orientation on cleanup
     };
   }, [isTimerRunning, timerSeconds]); 
 
   const handleSignUp = () => {
     console.log("handle sign up");
+    navigation.navigate('Signup');
   };
 
   const handleForgetPassword = () => {
@@ -226,7 +222,7 @@ const LoginScreen = ({ navigation }) => {
               </>
             )}
 
-            <TouchableOpacity onPress={handleGoToSignin} style={styles.buttonContainer}>
+            <TouchableOpacity onPress={handleSignUp} style={styles.buttonContainer}>
               <Image source={signupImage} style={styles.buttonImage} />
               <Text style={styles.buttonText}>注册账号</Text>
             </TouchableOpacity>
