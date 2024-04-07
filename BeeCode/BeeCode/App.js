@@ -4,6 +4,7 @@ import React, { useState, useEffect} from 'react';
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import LoginScreen from './Screens/Login/LoginScreen';
+import SignupScreen from './Screens/Signup/SignupScreen';
 import MainScreen from './Screens/Main/MainScreen';
 import SMSLoginScreen from './Screens/SMSLogin/SMSLoginScreen';
 import CourseScreen from './Screens/Course/CourseScreen';
@@ -71,6 +72,7 @@ const App = () => {
         initialRouteName={initialRouteName}>
         <Stack.Screen name="Login" component={LoginScreen} options={{headerShown: false}}/>
         <Stack.Screen name="SMSLogin" component={SMSLoginScreen} options={{headerShown: false}}/>
+        <Stack.Screen name="Signup" component={SignupScreen} options={{headerShown: false}}/>
         <Stack.Screen
           name="Main"
           component={MainScreen}
@@ -81,6 +83,7 @@ const App = () => {
             gestureEnabled: false, // Disables iOS swipe-to-go-back gesture for this screen
           }}
         />
+  
         <Stack.Screen name="Course" component={CourseScreen} options={{title: "课程套件"}} />
 
         {/* 在线咨询界面 */}
