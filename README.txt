@@ -10,7 +10,7 @@
 
 财务：Atyuki Tang
 
-项目负责人：JJZHANG
+项目负责人：JJ ZHANG
 
 
 ## 📌API接口文档
