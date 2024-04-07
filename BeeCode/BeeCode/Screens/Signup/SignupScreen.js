@@ -70,7 +70,7 @@ const SignupPage = ({ navigation }) => {
 
     try {
       const signupUrl = `http://${config.SERVER_IP}:8000/api/v1/user/user_register/user_register/`;
-      console.log(`Attempting to signup with the URL: ${smsUrl}`);
+      console.log(`Attempting to signup with the URL: ${signupUrl}`);
 
       const response = await fetch(signupUrl, {
         method: 'POST',

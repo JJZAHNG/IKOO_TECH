@@ -3,13 +3,15 @@ import { View, TouchableOpacity, Text, ScrollView, Image, Alert } from 'react-na
 import { SafeAreaView } from 'react-native-safe-area-context'; // 确保从这个包中导入
 import axios from 'axios';
 import styles from './CourseScreen.styles';
+import config from '../../config.js'; 
 
 const CourseScreen = ({ navigation }) => {
   const [courses, setCourses] = useState([]);
 
   const fetchCoursesByCategory = async (category) => {
+    const courseURL = `http://${config.SERVER_IP}:8000//api/v1/course/course_classify/${category}/`;
     try {
-      const response = await axios.get(`http://127.0.0.1:8000/api/v1/course/course_classify/${category}/`);
+      const response = await axios.get(courseURL);
       setCourses(response.data);
     } catch (error) {
       console.error('Failed to fetch courses:', error);
@@ -32,23 +34,49 @@ const CourseScreen = ({ navigation }) => {
   };
 
   return (
-    <View style={styles.container}>
-      <ScrollView style={styles.scrollView}>
-        <TouchableOpacity onPress={() => fetchCoursesByCategory(1)} style={styles.button}>
-          <Text style={styles.buttonText}>Button 1</Text>
-        </TouchableOpacity>
-        <TouchableOpacity onPress={() => fetchCoursesByCategory(2)} style={styles.button}>
-          <Text style={styles.buttonText}>Button 2</Text>
-        </TouchableOpacity>
-        <TouchableOpacity onPress={() => fetchCoursesByCategory(3)} style={styles.button}>
-          <Text style={styles.buttonText}>Button 3</Text>
-        </TouchableOpacity>
-      </ScrollView>
-      <View style={styles.coursesContainer}>
-        {renderCourseBlocks()}
+    <ScrollView style={styles.container}>
+      <View style={styles.buttonWrapper}>
+        <View style={styles.mainButtonsContainer}>
+          {/* 小按钮保持原样 */}
+          <TouchableOpacity style={styles.matrixButton} onPress={() => {}}>
+              <Text style={styles.matrixButtonText}>ENTRY</Text>
+            </TouchableOpacity>
+            <TouchableOpacity style={styles.matrixButton} onPress={() => {}}>
+              <Text style={styles.matrixButtonText}>INTERMEDIATE</Text>
+            </TouchableOpacity>
+            <TouchableOpacity style={styles.matrixButton} onPress={() => {}}>
+              <Text style={styles.matrixButtonText}>ADVANCE</Text>
+            </TouchableOpacity>
+          {/* ... */}
+        </View>
+
+        <View style={styles.largeButtonsContainer}>
+          {/* 创建横向排列的大按钮 */}
+          <TouchableOpacity style={styles.largeButton} onPress={() => console.log('大按钮1')}>
+            <Image
+              source={require('./res/demo.png')} // 图片路径相对于当前文件位置
+              style={styles.largeButtonImage}
+            />
+            <Text style={styles.largeButtonText}>大按钮1</Text>
+          </TouchableOpacity>
+          <TouchableOpacity style={styles.largeButton} onPress={() => console.log('大按钮2')}>
+            <Image
+              source={require('./res/demo.png')} // 图片路径相对于当前文件位置
+              style={styles.largeButtonImage}
+            />
+            <Text style={styles.largeButtonText}>大按钮2</Text>
+          </TouchableOpacity>
+          <TouchableOpacity style={styles.largeButton} onPress={() => console.log('大按钮3')}>
+            <Image
+              source={require('./res/demo.png')} // 图片路径相对于当前文件位置
+              style={styles.largeButtonImage}
+            />
+            <Text style={styles.largeButtonText}>大按钮3</Text>
+          </TouchableOpacity>
+        </View>
       </View>
-    </View>
+    </ScrollView>
   );
-};
+}
 
 export default CourseScreen;
