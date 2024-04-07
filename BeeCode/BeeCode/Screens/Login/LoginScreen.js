@@ -24,6 +24,10 @@ const LoginScreen = ({ navigation }) => {
   const [smsCode, setSmsCode] = useState('');
   const [isTimerRunning, setIsTimerRunning] = useState(false);
   const [timerSeconds, setTimerSeconds] = useState(60); // 60 seconds timer
+  const handleGoToSignin = () => {
+    // 导航到 SigninScreen
+    navigation.navigate('Signin');
+  };
 
 
 
@@ -222,7 +226,7 @@ const LoginScreen = ({ navigation }) => {
               </>
             )}
 
-            <TouchableOpacity onPress={handleSignUp} style={styles.buttonContainer}>
+            <TouchableOpacity onPress={handleGoToSignin} style={styles.buttonContainer}>
               <Image source={signupImage} style={styles.buttonImage} />
               <Text style={styles.buttonText}>注册账号</Text>
             </TouchableOpacity>
