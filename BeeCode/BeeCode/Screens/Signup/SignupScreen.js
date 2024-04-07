@@ -73,7 +73,7 @@ const SignupPage = ({ navigation }) => {
         },
         body: JSON.stringify({
           mobile: phoneNumber,
-          code: verificationCode,
+          code: smsCode,
           password: password,
           re_password: confirmPassword,
         }),
