@@ -10,7 +10,10 @@ const SigninScreen = ({ navigation }) => {
 
 const handleSendVerificationCode = async () => {
     try {
-      const response = await fetch('http://${config.SERVER_IP}:8000/api/v1/user/mobile/send_message/', {
+      const smsUrl = `http://${config.SERVER_IP}:8000/api/v1/user/mobile/send_message/`;
+      console.log(`Attempting to send SMS code with the URL: ${smsUrl}`);
+
+      const response = await fetch(signupUrl, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -39,7 +42,10 @@ const handleSendVerificationCode = async () => {
     }
 
     try {
-      const response = await fetch('http://${config.SERVER_IP}:8000/api/v1/user/user_register/user_register/', {
+      const signupUrl = `http://${config.SERVER_IP}:8000/api/v1/user/user_register/user_register/`;
+      console.log(`Attempting to signup with the URL: ${smsUrl}`);
+
+      const response = await fetch(signupUrl, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
