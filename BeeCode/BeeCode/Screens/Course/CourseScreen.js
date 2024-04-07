@@ -11,9 +11,9 @@ const CourseScreen = ({ navigation }) => {
 
     // Dummy buttons for demonstration. Ideally, this could come from props or state.
     const buttons = [
-        { id: 1, title: 'Button 1' },
-        { id: 2, title: 'Button 2' },
-        { id: 3, title: 'Button 3' },
+        { id: 1, title: '初级 ID - 1' },
+        { id: 2, title: '中级 ID - 2' },
+        { id: 3, title: '高级 ID - 3' },
     ];
 
     const handleScroll = (event) => {
