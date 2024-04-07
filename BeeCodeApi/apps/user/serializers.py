@@ -9,7 +9,7 @@ from django.contrib.auth.hashers import make_password, check_password
 import re
 import datetime
 from .models import Achievement
-from .models import Post, Comment, Like
+from .models import Post, Comment, Like,User
 from django.db.models import Sum
 from libs.sensitivity import sensitivity_
 from django.db import transaction
@@ -126,7 +126,6 @@ class UserRegisterSerializer(serializers.ModelSerializer):
     def validate(self, attrs):
         password = attrs.get('password')
         password_confirm = attrs.get('password_confirm')
-
 
         mobile = attrs.get('mobile')
         code = attrs.get('code')
@@ -388,17 +387,17 @@ class CommentSerializer(serializers.ModelSerializer):
 
 
 class CommSerializer(serializers.ModelSerializer):
-    username = serializers.SerializerMethodField()
     son_comment = serializers.SerializerMethodField()
-
-    # 当前用户id
-    # 当前文章id
     class Meta:
         model = Comment
-        fields = ['id', 'username', 'text', 'son_comment', ]
+        fields = ['user_id', 'post_id', 'text', 'created_at', 'son_comment']
+        extra_kwargs = {
+            'text': {'read_only': True},
+        }
 
-    def get_username(self, obj):
-        return obj.user.username
+    # def get_username(self, obj):
+    #     return obj.user.username
+
 
     def get_son_comment(self, obj):
         # 获取当前评论的所有直接子评论

@@ -36,6 +36,8 @@ class Course_Content(models.Model):
 
     def __str__(self):
         return 'id为%s的内容为%s'%(self.id,self.course_content)
+
+
 # 课程表
 class Course(BaseModel):
     course_name = models.CharField(max_length=11,verbose_name='课程名称')

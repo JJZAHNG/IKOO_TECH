@@ -202,8 +202,6 @@ class Comment(models.Model):
         verbose_name = '评论表'
         verbose_name_plural = verbose_name
 
-    def __str__(self):
-        return f"{self.user.username} - {self.text[:20]}"
 
 class Reply(models.Model):  # 新增回复模型
     comment = models.ForeignKey(Comment, on_delete=models.CASCADE, related_name='replies')

@@ -206,9 +206,9 @@ class CommentViewSet(viewsets.ModelViewSet):
 
     @action(methods=['post'],detail=False)
     def article_detail(self,request):
-        queryset = self.get_queryset()
-        serializer = self.get_serializer(queryset, many=True)
-        return APIResponse(serializer.data)
+        serializers = self.get_serializer(data=request.data)
+        serializers.is_valid(raise_exception=True)
+        return APIResponse(serializers.data)
 
 
 # 点赞功能

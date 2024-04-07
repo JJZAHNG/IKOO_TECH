@@ -31,3 +31,25 @@ class CourseSerializer(serializers.ModelSerializer):
         for img in imgs:
             comments_text.append(settings.BACKEND_URL + '/media/' + str(img.course_content))
         return comments_text
+
+
+class ClassifySerializer(serializers.ModelSerializer):
+    cover_content = serializers.SerializerMethodField()
+    content_img = serializers.SerializerMethodField()
+    class Meta:
+        model = Course
+        fields = ['course_name','course_synopsis','course_price','content_img','cover_content']
+
+    def get_cover_content(self,obj):
+        user_icon = settings.BACKEND_URL + '/media/' + str(obj.cover.course_cover_name)
+        return user_icon
+
+    def get_content_img(self,obj):
+        imgs = obj.course_img.all()
+        comments_text = []
+        for img in imgs:
+            comments_text.append(settings.BACKEND_URL + '/media/' + str(img.course_content))
+        return comments_text
+
+
+
