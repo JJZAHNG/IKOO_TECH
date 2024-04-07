@@ -1,82 +1,64 @@
-import React, { useState } from 'react';
-import { View, TouchableOpacity, Text, ScrollView, Image, Alert } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context'; // 确保从这个包中导入
-import axios from 'axios';
+import React, { useState, useEffect} from 'react';
+import { View, TextInput, TouchableOpacity, Text, StyleSheet, Button, ScrollView, Animated, Dimensions, StatusBar } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import styles from './CourseScreen.styles';
-import config from '../../config.js'; 
+
+
 
 const CourseScreen = ({ navigation }) => {
-  const [courses, setCourses] = useState([]);
+    const screenHeight = Dimensions.get('window').height;
+    const [selectedButton, setSelectedButton] = useState(1); // Assuming the first button is initially selected
 
-  const fetchCoursesByCategory = async (category) => {
-    const courseURL = `http://${config.SERVER_IP}:8000//api/v1/course/course_classify/${category}/`;
-    try {
-      const response = await axios.get(courseURL);
-      setCourses(response.data);
-    } catch (error) {
-      console.error('Failed to fetch courses:', error);
-      Alert.alert('Error', 'Failed to fetch courses.');
-    }
-  };
+    // Dummy buttons for demonstration. Ideally, this could come from props or state.
+    const buttons = [
+        { id: 1, title: 'Button 1' },
+        { id: 2, title: 'Button 2' },
+        { id: 3, title: 'Button 3' },
+    ];
 
-  const renderCourseBlocks = () => {
-    return courses.map((course, index) => (
-      <View key={index} style={styles.matrixButton}>
-        <Image
-          style={{ width: '100%', height: '100%' }}
-          source={{ uri: course.course_cover }}
-        />
-        <Text style={styles.matrixButtonText}>
-          {course.course_title || `Matrix ${index + 1}`}
-        </Text>
-      </View>
-    ));
-  };
+    const handleScroll = (event) => {
+        const scrollPosition = event.nativeEvent.contentOffset.y;
+        const centerPosition = scrollPosition + screenHeight / 2;
 
-  return (
-    <ScrollView style={styles.container}>
-      <View style={styles.buttonWrapper}>
+        // Logic to determine which button is at the center and thus selected
+        const buttonHeight = screenHeight / buttons.length; // Adjust based on your UI
+        const selectedButtonIndex = Math.floor(centerPosition / buttonHeight);
+        setSelectedButton(buttons[selectedButtonIndex]?.id);
+    };
+
+    return (
+        <SafeAreaView style={styles.container}>
+        <StatusBar hidden={true} />
+        <ScrollView
+            style={styles.scrollContainer}
+            onScroll={handleScroll}
+            scrollEventThrottle={16} // Adjust based on your needs for performance
+        >
+            {buttons.map((button) => (
+            <View key={button.id} style={styles.scroolButtonContainer}>
+                <Button
+                title={button.title}
+                onPress={() => console.log(`${button.title} pressed`)}
+                color={selectedButton === button.id ? 'blue' : 'gray'} // Highlight the selected button
+                />
+            </View>
+            ))}
+        </ScrollView>
+        
+
         <View style={styles.mainButtonsContainer}>
-          {/* 小按钮保持原样 */}
-          <TouchableOpacity style={styles.matrixButton} onPress={() => {}}>
-              <Text style={styles.matrixButtonText}>ENTRY</Text>
+            {['I', 'II', 'III'].map((matrixNumber) => (
+            <TouchableOpacity
+                key={`Matrix ${matrixNumber}`}
+                style={styles.matrixButton}
+                onPress={() => handleMatrixPress(matrixNumber)}
+            >
+                <Text style={styles.matrixButtonText}>{`Matrix ${matrixNumber}`}</Text>
             </TouchableOpacity>
-            <TouchableOpacity style={styles.matrixButton} onPress={() => {}}>
-              <Text style={styles.matrixButtonText}>INTERMEDIATE</Text>
-            </TouchableOpacity>
-            <TouchableOpacity style={styles.matrixButton} onPress={() => {}}>
-              <Text style={styles.matrixButtonText}>ADVANCE</Text>
-            </TouchableOpacity>
-          {/* ... */}
+            ))}
         </View>
-
-        <View style={styles.largeButtonsContainer}>
-          {/* 创建横向排列的大按钮 */}
-          <TouchableOpacity style={styles.largeButton} onPress={() => console.log('大按钮1')}>
-            <Image
-              source={require('./res/demo.png')} // 图片路径相对于当前文件位置
-              style={styles.largeButtonImage}
-            />
-            <Text style={styles.largeButtonText}>大按钮1</Text>
-          </TouchableOpacity>
-          <TouchableOpacity style={styles.largeButton} onPress={() => console.log('大按钮2')}>
-            <Image
-              source={require('./res/demo.png')} // 图片路径相对于当前文件位置
-              style={styles.largeButtonImage}
-            />
-            <Text style={styles.largeButtonText}>大按钮2</Text>
-          </TouchableOpacity>
-          <TouchableOpacity style={styles.largeButton} onPress={() => console.log('大按钮3')}>
-            <Image
-              source={require('./res/demo.png')} // 图片路径相对于当前文件位置
-              style={styles.largeButtonImage}
-            />
-            <Text style={styles.largeButtonText}>大按钮3</Text>
-          </TouchableOpacity>
-        </View>
-      </View>
-    </ScrollView>
-  );
-}
+        </SafeAreaView>
+    );
+};
 
 export default CourseScreen;
