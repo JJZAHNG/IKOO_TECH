@@ -3,6 +3,7 @@ import {View, TextInput, Text, StatusBar, TouchableOpacity, ImageBackground, Dim
 import { SafeAreaView } from 'react-native-safe-area-context';
 import * as ScreenOrientation from 'expo-screen-orientation';
 import styles from './SignupScreen.styles.js';
+import { Alert } from 'react-native';
 import config from '../../config.js'; 
 //import Orientation from 'react-native-orientation-locker'; // 看看哪个好
 
@@ -90,7 +91,7 @@ const SignupPage = ({ navigation }) => {
         // 显示注册成功信息，并在3秒后跳转到登录界面
         Alert.alert('注册成功', '注册成功...准备跳转登录...');
         setTimeout(() => {
-          navigation.navigate('LoginScreen'); // 确保你的登录页面的路由名称正确
+          navigation.navigate('Login'); // 确保你的登录页面的路由名称正确
         }, 3000); // 等待3秒
       } else {
         Alert.alert('注册失败', data.msg || '请重试');
