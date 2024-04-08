@@ -1,6 +1,6 @@
 from rest_framework import serializers
 from user import models
-from django.db.models import Q
+from django.db.models import Q,F
 from rest_framework.exceptions import ValidationError
 from rest_framework_jwt.serializers import jwt_payload_handler, jwt_encode_handler
 from django.conf import settings
@@ -248,7 +248,6 @@ class AchievementSerializer(serializers.ModelSerializer):
 
 # 朋友圈系列
 class PostSerializer(serializers.ModelSerializer):
-    # 添加用户图像字段
     user_profile_image = serializers.SerializerMethodField()
     username = serializers.SerializerMethodField()
     comment_user = serializers.SerializerMethodField()
@@ -257,12 +256,11 @@ class PostSerializer(serializers.ModelSerializer):
     comment_user_text_time = serializers.SerializerMethodField()
     user_like_num = serializers.SerializerMethodField()
     post_like_num = serializers.SerializerMethodField()
-    user_img = serializers.SerializerMethodField()
+    content_cover = serializers.SerializerMethodField()
 
     class Meta:
         model = Post
-        fields = ['title', 'username', 'user_profile_image', 'created_at', 'text', 'comment_user', 'comment_user_img',
-                  'comment_user_text', 'user_like_num', 'comment_user_text_time', 'post_like_num', 'user_img']
+        fields = []
         # fields = ['title','username','user_profile_image','image']
 
     # 评论的用户名
@@ -302,7 +300,7 @@ class PostSerializer(serializers.ModelSerializer):
         return user_icon
 
     # 发表的图片
-    def get_user_img(self, obj):
+    def get_content_cover(self, obj):
         imgs = obj.post_s.all()
         comments_text = []
         for img in imgs:
@@ -315,84 +313,49 @@ class PostSerializer(serializers.ModelSerializer):
 
 
 class CirCleHomeSerializer(PostSerializer):
+    post_love_num = serializers.IntegerField(source='comment_like_num')
     class Meta:
         model = Post
-        fields = ['id', 'text', 'title', 'username', 'user_img', 'user_profile_image', 'user_like_num']
+        fields = ['id', 'title', 'username', 'user_profile_image','content_cover', 'post_love_num','created_at']
 
 
-class UserPostSerializer(PostSerializer):
-    # 评论和用户及其用户的照片
-    comment_user = serializers.SerializerMethodField()
-
+class ContentSerializer(PostSerializer):
     class Meta:
         model = Post
-        fields = ['id', 'text', 'title', 'username', 'user_img', 'user_profile_image', 'comment_user']
+        fields = ['id', 'title', 'username','text', 'user_profile_image', 'content_cover', 'created_at']
 
-    def get_comment_user(self, obj):
-        # 评论的用户名
-        user = obj.comment_set.first().user.username
-        # 评论点赞数
-        comment_like_num = Post.objects.filter(user__username=user).aggregate(total_likes=Sum('post_like_num'))[
-            'total_likes']
-        # 用户评论内容
-        user_comments_text = Comment.objects.filter(user__username=user).values_list('text', flat=True)
-        # 子评论用户名称
-        reply_user = models.Reply.objects.filter(comment__user__username=user)
-        # 回复的点赞
-        reply_dict = {'reply_user_': [], 'reply_text': [], 'like': ''}
-        for reply in reply_user:
-            reply_user_ = reply.user.username
-            reply_text = reply.text
-            reply_dict['like'] = reply.reply_num
-            reply_dict['reply_user_'].append(reply_user_)
-            reply_dict['reply_text'].append(reply_text)
-        # 子评论用户回复内容
-        # reply_text = models.Reply.objects.filter(user=user).values_list('text', flat=True)
-
-        comment_info = {
-            'username': user,
-            'comment_like_num': comment_like_num,
-            'comment_text': {
-                'text': user_comments_text,
-                'reply_user': reply_dict
-
-            }
-        }
-        return comment_info
 
 
 class CommentSerializer(serializers.ModelSerializer):
+    comment_id = serializers.CharField(write_only=True,allow_null=True,required=False)
     class Meta:
         model = Comment
-        fields = ['user', 'post', 'text', 'created_at']
+        fields = ['user', 'post', 'text','comment_id']
         extra_kwargs = {
-            'post': {'write_only': False},
-            'user': {'write_only': False}
+            'post': {'write_only': True},
+            'user': {'write_only': True},
+            'text': {'write_only': True}
         }
 
-    def validate(self, attrs):
-        text = attrs.get('text')
-        if sensitivity_.contains_sensitive_word(text):
+    def validate_text(self, obj):
+        if sensitivity_.contains_sensitive_word(obj):
             raise ValidationError('你输入的是敏感词汇请重新输入')
-        return attrs
+        return obj
 
     def create(self, validated_data):
-        user_id = validated_data.get('user')
-        post_id = validated_data.get('post')
-        text = validated_data.get('text')
-        user_like = models.Comment.objects.create(user_id=user_id, post_id=post_id, text=text)
+        user_like = models.Comment.objects.create(user=validated_data.get('user'),post=validated_data.get('post'),text=validated_data.get('text'),parent_id=validated_data.get('comment_id'))
+        user_like.comment_num = F('comment_num') + 1
         user_like.save()
         return validated_data
 
 
 class CommtSerializer(serializers.ModelSerializer):
-    like = serializers.SerializerMethodField()
     username = serializers.SerializerMethodField()
     children = serializers.SerializerMethodField()
-
+    comment_like_num = serializers.IntegerField(source='post_like_num')
     class Meta:
         model = Comment
-        fields = ['post','username','text','created_at','children']
+        fields = ['id','post','username','text','created_at','comment_like_num','children','comment_num']
         extra_kwargs = {
             'text':{"read_only":True},
             'post':{"write_only":True},
@@ -412,56 +375,10 @@ class CommtSerializer(serializers.ModelSerializer):
         def child_data(obj_id):
             objs = Comment.objects.filter(parent_id=obj_id)
             for obj in objs:
-                res.append({'username':obj.user.username,'text':obj.text,'created_at':obj.created_at})
+                res.append({'id':obj.id,'username':obj.user.username,'text':obj.text,'created_at':obj.created_at,'comment_reply_num,':obj.post_like_num,'comment_id':obj.parent_id})
                 child_data(obj.id)
         child_data(parent_id)
         return res
-    # def to_representation(self, instance):
-    #
-    #     data = super().to_representation(instance)
-    #     comment_list = Comment.objects.filter(post=instance['post'])
-    #
-    #     comments_data = []
-    #     for comment in comment_list:
-    #         if comment.parent_id:
-    #             # 如果存在parent_id，则这是一个子评论
-    #             reply = {
-    #                 'parent_name': '@ %s ' % comment.parent.user.username,
-    #                 'username': comment.user.username,
-    #                 'created_at': comment.created_at,
-    #                 'text': comment.text
-    #             }
-    #             comments_data.append(reply)
-    #         else:
-    #             # 如果不存在parent_id，则这是一个根评论
-    #             root_comment = {
-    #                 'username': comment.user.username,
-    #                 'created_at': comment.created_at,
-    #                 'text': comment.text
-    #             }
-    #             comments_data.append(root_comment)
-    #
-    #     data['comments'] = comments_data
-    #     return data
-    # def get_son_comment(self, obj):
-        # 获取当前评论的第一级子评论
-
-
-
-        # user_ = obj.parent
-
-        # for i in user_:
-        #     if i:
-        #         l = {}
-        #         l['parent_name'] = obj.parent.user.username
-        #         l['text'] = obj.text
-        #
-        #     else:
-        #         l = {}
-        #         l['username'] = self.get_username(obj)
-        #         l['text'] = obj.text
-        #     return l
-
 
 # class LikeSerializer(serializers.ModelSerializer):
 #     class Meta:

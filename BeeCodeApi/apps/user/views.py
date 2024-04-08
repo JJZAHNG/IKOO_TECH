@@ -16,7 +16,7 @@ from .serializers import AchievementSerializer
 from rest_framework_jwt.authentication import JSONWebTokenAuthentication
 from rest_framework.permissions import IsAuthenticated
 from .models import Post, Comment
-from .serializers import PostSerializer, CommentSerializer
+
 
 # Create your views here.
 # 1.手机号短信登录
@@ -161,53 +161,46 @@ class AchievementViewSet(GenericViewSet):
 
 # 朋友圈系列
 # user/views.py
+# 展示所有朋友圈内容
 class PostViewSet(viewsets.ModelViewSet):
-    queryset = Comment.objects.all()
+    queryset = Post.objects.all()
     serializer_class = serializers.CirCleHomeSerializer
     pagination_class = PostPageNumberPagination
 
 
     def get_serializer_class(self):
-        if self.action == 'circle_of_friends_home':
-            return serializers.UserPostSerializer
+        if self.action == 'content_home':
+            return serializers.ContentSerializer
+        elif self.action == 'add_comment_content':
+            return serializers.CommentSerializer
         else:
             return super().get_serializer_class()
 
 
+    # 朋友圈内容  携带帖子的id
     @action(methods=['post'],detail=False)
-    def circle_of_friends_home(self,request):
-        queryset = self.get_queryset()
-        serializer = self.get_serializer(queryset, many=True)
+    def content_home(self,request):
+        res = self.get_queryset().filter(pk=request.data.get('post')).first()
+        serializer = self.get_serializer(instance=res)
         return APIResponse(serializer.data)
 
-
-
-# 添加评论功能
-class CommentViewSet(viewsets.ModelViewSet):
-    queryset = Comment.objects.all()
-    serializer_class = CommentSerializer
-
-    def get_serializer_class(self):
-        if self.action == 'article_detail':
-            return serializers.CommtSerializer
-        else:
-            return super().get_serializer_class()
-
-
+    # 添加评论
     @action(methods=['post'],detail=False)
-    def perform_create(self, request):
-        serializers = self.serializer_class(data=request.data)
-        serializers.is_valid(raise_exception=True)
-        serializers.save()
+    def add_comment_content(self,request):
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
         return APIResponse('评论成功')
 
+
+
+# 展示评论内容
 class Comment_View(GenericViewSet):
     queryset = Comment.objects.all()
     serializer_class = serializers.CommtSerializer
 
     @action(methods=['post'],detail=False)
     def article_detail(self,request):
-
         queryset = self.get_queryset()
         serializers = self.get_serializer(instance=queryset,many=True)
         return APIResponse(serializers.data)

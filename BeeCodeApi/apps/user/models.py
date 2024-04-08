@@ -164,6 +164,7 @@ class Achievement(models.Model):
     def __str__(self):
         return f"{self.user.username} - {self.name}"
 
+# 文章图片
 class PostImage(models.Model):
     img = models.ImageField(upload_to='posts/images/', verbose_name='帖子图片')
 
@@ -195,6 +196,7 @@ class Comment(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     text = models.TextField(verbose_name='评论内容')
     post_like_num = models.IntegerField(verbose_name='评论点赞数', default=0)
+    comment_num = models.IntegerField(verbose_name='文章评论数',default=0)
     created_at = models.DateTimeField(auto_now_add=True, verbose_name='评论时间')
     parent = models.ForeignKey(to='self',on_delete=models.CASCADE,null=True,blank=True)
 
@@ -205,7 +207,6 @@ class Comment(models.Model):
 
     def __str__(self):
         return self.text
-
 
 
 class Favorite(models.Model):  # 新增收藏模型，关联用户和帖子
@@ -220,3 +221,4 @@ class Favorite(models.Model):  # 新增收藏模型，关联用户和帖子
 
     def __str__(self):
         return f"{self.user.username} - {self.post.id}"
+

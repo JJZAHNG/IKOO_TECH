@@ -15,10 +15,7 @@ BOT_RESPONSE_DICT = {
 ERROR_MSG = "PLEASE ENTER THE CORRECT CODE"
 
 
-
-
 class BotChat(ViewSet):
-
     @action(methods=['POST'], detail=False)
     def bot(self, request, *args, **kwargs):
         # 获取前端传递的文本数据

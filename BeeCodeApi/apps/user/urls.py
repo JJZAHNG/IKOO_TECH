@@ -14,14 +14,12 @@ router.register('user_register', views.RegisterView, 'user_register')
 router.register('forget_pwd', views.ForgetpwdView, 'forget_pwd')
 # 个人成就
 router.register('achievements', views.AchievementViewSet, 'achievements')
-# 朋友圈系列
+# 朋友圈系列--
+# 添加评论 查询所有评论
 router.register('posts', views.PostViewSet, 'posts')
-
-router.register('comments', views.CommentViewSet, 'comments')
-# 查看评论
+# 查询所有评论
 router.register('comment', views.Comment_View, 'comment')
-# 用户点赞
-# router.register('likes', views.LikeViewSet, 'likes')
+
 
 
 
