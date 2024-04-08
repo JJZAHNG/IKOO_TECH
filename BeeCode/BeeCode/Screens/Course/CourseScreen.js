@@ -31,6 +31,22 @@ const CourseScreen = ({ navigation }) => {
 
       const data = await response.json();
       if (data.msg === '成功') {
+          // 使用map遍历code数组，替换cover_content中的IP地址
+        if (data.code && Array.isArray(data.code)) {
+          data.code = data.code.map((item) => {
+          if (item.cover_content) {
+            item.cover_content = item.cover_content.replace('http://127.0.0.1', 'http://192.168.110.84');
+          }
+          if (item.content_img && Array.isArray(item.content_img)) {
+            item.content_img = item.content_img.map((img) => {
+              // 假设content_img中是URL字符串
+              return img.replace('http://127.0.0.1', 'http://192.168.110.84');
+              // 如果content_img中包含对象，并且URL在对象的某个属性中，你需要修改这里的逻辑
+            });
+          }
+           return item;
+          });
+        }
         setCourseDetails(data);
         // 保存数据到 AsyncStorage
         AsyncStorage.setItem('courseDetails', JSON.stringify(data));
