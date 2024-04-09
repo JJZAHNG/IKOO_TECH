@@ -6,6 +6,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import * as ScreenOrientation from 'expo-screen-orientation';
 import styles from './MainScreen.styles';
 import CourseScreen from '../Course/CourseScreen';
+import StreamingClassroomScreen from '../Streaming/StreamingClassroomScreen';
 
 const backgroundImage = require('./res/MainScreen_background.jpg');
 const courseImage = require('./res/course_image.jpg'); // 课程套件
@@ -16,6 +17,8 @@ const testAnalysisImage = require('./res/testAnalysis_image.jpg'); // 测评分�
 const chatServiceImage = require('./res/chatService_image.jpg'); // 在线咨询
 const socialCenterImage = require('./res/socialCenter_image.jpg'); // 会员中心
 const settingsImage = require('./res/settings_image.jpg'); // 设置中心
+
+
 
 
 // Placeholder SecondScreen component
@@ -33,8 +36,8 @@ const MainScreen = ({ navigation }) => {
 
   const handleButtonB = () => {
     console.log('Pressed Button 网络课堂');
-    // Navigate to related page
-    navigation.navigate('Profile');
+    // Navigate to StreamingClassroomScreen
+    navigation.navigate('StreamingClassroomScreen');
   }
 
   const handleButtonC = () => {

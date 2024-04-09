@@ -17,6 +17,8 @@ import WorkShopScreen from './Screens/WorkShop/WorkShopScreen';
 import ScratchScreen from './Screens/WorkShop/ScratchScreen'; // 更新为你的正确路径
 import SocialScreen from './Screens/Social/Social'; // 确保路径正确
 import ProfileScreen from './Screens/Profile/ProfileScreen'; // 确保路径正确
+import StreamingClassroomScreen from './Screens/Streaming/StreamingClassroomScreen';
+
 
 
 // Create a Stack Navigator
@@ -94,9 +96,10 @@ const App = () => {
         <Stack.Screen name="ScratchScreen" component={ScratchScreen} options={{ title: "Scratch编程" }} />
         {/* 添加遥控器界面 */}
         <Stack.Screen name="RemoteSimulator" component={RemoteSimulator} options={{ title: "遥控器" }} />
-        <Stack.Screen name="SocialScreen" component={SocialScreen} options={{ title: "朋友圈" }} />
+        <Stack.Screen name="SocialScreen" component={SocialScreen} options={{ title: "BEE社区" }} />
 
         <Stack.Screen name="ProfileScreen" component={ProfileScreen} options={{ title: "个人中心" }} />
+        <Stack.Screen name="StreamingClassroomScreen" component={StreamingClassroomScreen} options={{ title: '网络课堂' }}/>
 
       </Stack.Navigator>
     </NavigationContainer>
