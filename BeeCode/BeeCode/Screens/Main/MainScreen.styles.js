@@ -1,8 +1,8 @@
 import { StyleSheet } from "react-native";
 import { Dimensions } from 'react-native';
 const screenWidth = Dimensions.get('window').width;
-const textSize = screenWidth > 750 ? 20 : 16; 
-console.log('Screen Width: ', screenWidth);
+const textSize = screenWidth > 850 ? 20 : 18; 
+console.log('Screen width: ', screenWidth);
 
 export default StyleSheet.create({
   container: {
@@ -14,43 +14,53 @@ export default StyleSheet.create({
     position: 'absolute', // Position the container absolutely within its parent
     right: 0, // Anchor to the right edge of the screen
     bottom: 0, // Anchor to the bottom edge of the screen
-    width: '78%', // Take up 75% of the screen's width
-    height: '85%', // Take up 70% of the screen's height
+    width: '78%', 
+    height: '85%',
     flexDirection: 'row',
     padding: 20,
     marginRight: 10,
   },
   AccountButtonContainer: {
     position: 'absolute', 
-    top: 10, 
-    left: 10 
+    top: 3, 
+    left: 13 
   },
   AccountButton: {
-    width: 50,
-    height: 50,
+    width: 0.15 * screenWidth,
+    height: 0.05 * screenWidth,
     borderRadius: 25,
     backgroundColor: '#fcbf49', // 按钮颜色
-    justifyContent: 'center',
+    flexDirection: 'row',
+    justifyContent: 'flex-start',
     alignItems: 'center',
+    paddingStart: 2,
+  },
+  profileImage: {
+    width: 0.045 * screenWidth,
+    height: 0.045 * screenWidth,
+    borderRadius: 25,
   },
   AccountButtonText: {
     color: '#fff', 
     // fontSize: 16
     fontSize: textSize - 4, 
+    paddingStart: 10,
 
   },
+
   columnA: {
-    width: '35%',
+    width: '30%',
     marginRight: 10, // Add space between the columns
   },
   buttonColumns: {
     flexDirection: 'row',
     flex: 1,
+    width: '65%',
   },
   buttonColumn: {
     flex: 1,
     justifyContent: 'space-between',
-    paddingHorizontal: 5, // Adjust spacing as needed
+    paddingHorizontal: 10, // Adjust spacing as needed
   },
   button: {
     alignItems: 'flex-cen',
