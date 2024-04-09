@@ -1,51 +1,65 @@
 
 import React, { useEffect } from 'react';
-import { View, TouchableOpacity, Text, StatusBar, BackHandler } from 'react-native';
+import { View, TouchableOpacity, Text, StatusBar, BackHandler, ImageBackground } from 'react-native';
 
 import { SafeAreaView } from 'react-native-safe-area-context';
 import * as ScreenOrientation from 'expo-screen-orientation';
 import styles from './MainScreen.styles';
 
+const backgroundImage = require('./res/MainScreen_background.jpg');
+// const courseImage = require('./res/course_image.jpg'); // 课程套件
+// const profileImage = require('./res/profile_image.jpg'); // 网络课堂
+// const workShopImage = require('./res/workShop_image.jpg'); // 快速编程
+// const testAnalysisImage = require('./res/testAnalysis_image.jpg'); // 测评分析
+// const chatServiceImage = require('./res/chatService_image.jpg'); // 在线咨询
+// const socialCenterImage = require('./res/socialCenter_image.jpg'); // 会员中心
+// const settingsImage = require('./res/settings_image.jpg'); // 设置中心
+
+
 // Placeholder SecondScreen component
 const MainScreen = ({ navigation }) => {
+  const handleAccountButton = () => {
+    console.log('Pressed Button 个人中心');
+    navigation.navigate('ProfileScreen');
+  }
 
   const handleButtonA = () => {
-    console.log('Pressed Button 课程套件')
-    navigation.navigate('Course')
+    console.log('Pressed Button 课程套件');
+    navigation.navigate('Course');
     // Navigate to related page
   }
 
   const handleButtonB = () => {
-    console.log('Pressed Button 网络课堂')
+    console.log('Pressed Button 网络课堂');
     // Navigate to related page
     navigation.navigate('Profile');
   }
 
   const handleButtonC = () => {
-    console.log('Pressed Button 快速编程')
+    console.log('Pressed Button 快速编程');
     // Navigate to related page
     navigation.navigate('WorkShop'); // 更新为导航到 WorkShopScreen
   }
 
   const handleButtonD = () => {
-    console.log('Pressed Button 测评分析')
+    console.log('Pressed Button 测评分析');
     // Navigate to related page
   }
 
   const handleButtonE = () => {
-    console.log('Pressed Button 在线咨询')
+    console.log('Pressed Button 在线咨询');
     // Navigate to related page
     navigation.navigate('ChatService'); // 使用 'ChatService' 导航到聊天界面
   }
 
   const handleButtonF = () => {
-    console.log('Pressed Button 会员中心')
+    console.log('Pressed Button 会员中心');
     // Navigate to related page
     navigation.navigate('SocialScreen');
   }
 
   const handleButtonG = () => {
-    console.log('Pressed Button 设置中心')
+    console.log('Pressed Button 设置中心');
     // Navigate to related page
     navigation.navigate('Setting');
   }
@@ -75,90 +89,142 @@ const MainScreen = ({ navigation }) => {
 
   // An example of what the data object could look like
   return (
-    <SafeAreaView style={styles.container}>
-      <StatusBar hidden={true} />
-      {/* Placeholder for the left 30% of the screen */}
-      <View style={styles.leftPlaceholder} />
-      <View style={{ position: 'absolute', top: 10, left: 10 }}>
-        <TouchableOpacity
-        style={{
-          width: 50,
-          height: 50,
-          borderRadius: 25,
-          backgroundColor: '#fcbf49', // 按钮颜色
-          justifyContent: 'center',
-          alignItems: 'center',
-        }}
-        onPress={() => navigation.navigate('ProfileScreen')}>
-          <Text style={{ color: '#fff', fontSize: 16 }}>个人</Text>
-        </TouchableOpacity>
-      </View>
-
-      {/* Right side 70% of the screen with buttons */}
-      <View style={styles.rightContainer}>
-        {/* Wider column "A" */}
-        <View style={styles.columnA}>
-          <TouchableOpacity 
-            style={[styles.button, styles.buttonA]}
-            onPress={handleButtonA}>
-            <Text style={styles.buttonText_big_bold}>课程套件</Text>
-            <Text style={styles.buttonText_small_light}>AI编程, 智慧成长</Text>
+    <ImageBackground source={backgroundImage} style={{flex: 1}}>
+      <SafeAreaView style={styles.container}>
+        <StatusBar hidden={true} />
+        {/* Placeholder for the left 30% of the screen */}
+        <View style={styles.leftPlaceholder} />
+        <View style={styles.AccountButtonContainer}>
+          <TouchableOpacity
+          style={styles.AccountButton}
+          onPress={handleAccountButton}>
+            <Text style={styles.AccountButtonText}>个人</Text>
           </TouchableOpacity>
         </View>
 
-        {/* Remaining columns */}
-        <View style={styles.buttonColumns}>
-          {/* Column with buttons "B" and "C" */}
-          <View style={styles.buttonColumn}>
+        {/* Right side 70% of the screen with buttons */}
+        <View style={styles.rightContainer}>
+          {/* Wider column "A" */}
+          <View style={styles.columnA}>
             <TouchableOpacity 
-              style={[styles.button, styles.buttonB]}
-              onPress={handleButtonB}>
-              <Text style={styles.buttonText_normal_bold}>网络课堂</Text>
-              <Text style={styles.buttonText_small_light}>在家学习编程</Text>
-
-            </TouchableOpacity>
-            <TouchableOpacity 
-            style={[styles.button, styles.buttonC]}
-            onPress={handleButtonC}>
-              <Text style={styles.buttonText_normal_bold}>快速编程</Text>
-              <Text style={styles.buttonText_small_light}>自由编写脚本</Text>
+              style={[styles.button, styles.buttonA]}
+              onPress={handleButtonA}>
+              <Text 
+                style={styles.buttonText_big_bold} 
+                numberOfLines={1} 
+                ellipsizeMode="tail"
+              >课程套件</Text>
+              <Text 
+                style={styles.buttonText_small_light}
+                numberOfLines={1} 
+                ellipsizeMode="tail"
+              >AI编程, 智慧成长</Text>
             </TouchableOpacity>
           </View>
 
-          {/* Column with buttons "D" and "E" */}
-          <View style={styles.buttonColumn}>
-            <TouchableOpacity
-              style={[styles.button, styles.buttonD]}
-              onPress={handleButtonD}>
-              <Text style={styles.buttonText_normal_bold}>测评分析</Text>
-              <Text style={styles.buttonText_small_light}>学习评估报告</Text>
-            </TouchableOpacity>
-            <TouchableOpacity 
-              style={[styles.button, styles.buttonE]}
-              onPress={handleButtonE}>
-              <Text style={styles.buttonText_normal_bold}>在线咨询</Text>
-              <Text style={styles.buttonText_small_light}>获取专业解答</Text>
-            </TouchableOpacity>
-          </View>
+          {/* Remaining columns */}
+          <View style={styles.buttonColumns}>
+            {/* Column with buttons "B" and "C" */}
+            <View style={styles.buttonColumn}>
+              <TouchableOpacity 
+                style={[styles.button, styles.buttonB]}
+                onPress={handleButtonB}>
+                <Text 
+                  style={styles.buttonText_normal_bold}
+                  numberOfLines={1} 
+                  ellipsizeMode="tail"
+                >网络课堂</Text>
+                <Text 
+                  style={styles.buttonText_small_light}
+                  numberOfLines={1} 
+                  ellipsizeMode="tail"
+                >在家学习编程</Text>
 
-          {/* Column with buttons "F" and "G" */}
-          <View style={styles.buttonColumn}>
-            <TouchableOpacity 
-              style={[styles.button, styles.buttonF]}
-              onPress={handleButtonF}>
-              <Text style={styles.buttonText_normal_bold}>会员中心</Text>
-              <Text style={styles.buttonText_small_light}>记录学习历程</Text>
-            </TouchableOpacity>
-            <TouchableOpacity 
-              style={[styles.button, styles.buttonG]}
-              onPress={handleButtonG}>
-              <Text style={styles.buttonText_normal_bold}>设置中心</Text>
-              <Text style={styles.buttonText_small_light}>个性化设置</Text>
-            </TouchableOpacity>
+              </TouchableOpacity>
+              <TouchableOpacity 
+              style={[styles.button, styles.buttonC]}
+              onPress={handleButtonC}>
+                <Text 
+                  style={styles.buttonText_normal_bold}
+                  numberOfLines={1} 
+                  ellipsizeMode="tail"
+                >快速编程</Text>
+                <Text 
+                  style={styles.buttonText_small_light}
+                  numberOfLines={1} 
+                  ellipsizeMode="tail"
+                >自由编写脚本</Text>
+              </TouchableOpacity>
+            </View>
+
+            {/* Column with buttons "D" and "E" */}
+            <View style={styles.buttonColumn}>
+              <TouchableOpacity
+                style={[styles.button, styles.buttonD]}
+                onPress={handleButtonD}>
+                <Text 
+                  style={styles.buttonText_normal_bold}
+                  numberOfLines={1} 
+                  ellipsizeMode="tail"
+                >测评分析</Text>
+                <Text 
+                  style={styles.buttonText_small_light}
+                  numberOfLines={1} 
+                  ellipsizeMode="tail"
+                >学习评估报告</Text>
+              </TouchableOpacity>
+              <TouchableOpacity 
+                style={[styles.button, styles.buttonE]}
+                onPress={handleButtonE}>
+                <Text 
+                  style={styles.buttonText_normal_bold}
+                  numberOfLines={1} 
+                  ellipsizeMode="tail"
+                >在线咨询</Text>
+                <Text 
+                  style={styles.buttonText_small_light}
+                  numberOfLines={1} 
+                  ellipsizeMode="tail"
+                >获取专业解答</Text>
+              </TouchableOpacity>
+            </View>
+
+            {/* Column with buttons "F" and "G" */}
+            <View style={styles.buttonColumn}>
+              <TouchableOpacity 
+                style={[styles.button, styles.buttonF]}
+                onPress={handleButtonF}>
+                <Text 
+                  style={styles.buttonText_normal_bold}
+                  numberOfLines={1} 
+                  ellipsizeMode="tail"
+                >会员中心</Text>
+                <Text 
+                  style={styles.buttonText_small_light}
+                  numberOfLines={1} 
+                  ellipsizeMode="tail"
+                >记录学习历程</Text>
+              </TouchableOpacity>
+              <TouchableOpacity 
+                style={[styles.button, styles.buttonG]}
+                onPress={handleButtonG}>
+                <Text 
+                  style={styles.buttonText_normal_bold}
+                  numberOfLines={1} 
+                  ellipsizeMode="tail"
+                >设置中心</Text>
+                <Text 
+                  style={styles.buttonText_small_light}
+                  numberOfLines={1} 
+                  ellipsizeMode="tail"
+                >个性化设置</Text>
+              </TouchableOpacity>
+            </View>
           </View>
         </View>
-      </View>
-    </SafeAreaView>
+      </SafeAreaView>
+    </ImageBackground>
+
   );
 };
 

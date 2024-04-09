@@ -77,8 +77,7 @@ const App = () => {
           name="Main"
           component={MainScreen}
           options={{
-            title: "主页",
-            headerBackVisible: false,
+            headerShown: false,            
             headerLeft: () => null, // Disables the back button in the header
             gestureEnabled: false, // Disables iOS swipe-to-go-back gesture for this screen
           }}
