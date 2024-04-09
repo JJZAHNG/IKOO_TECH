@@ -208,6 +208,16 @@ class Comment(models.Model):
     def __str__(self):
         return self.text
 
+# 文章点赞表
+class PostLike(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='post_likes')
+    post = models.ForeignKey(Post, on_delete=models.CASCADE, related_name='post_likes')
+
+# 评论点赞表
+class CommentLike(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='comment_likes')
+    comment = models.ForeignKey(Comment, on_delete=models.CASCADE, related_name='comment_likes')
+
 
 class Favorite(models.Model):  # 新增收藏模型，关联用户和帖子
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='favorites')

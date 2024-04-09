@@ -16,6 +16,8 @@ from .serializers import AchievementSerializer
 from rest_framework_jwt.authentication import JSONWebTokenAuthentication
 from rest_framework.permissions import IsAuthenticated
 from .models import Post, Comment
+from django.db import transaction
+from django.db.models import F
 
 
 # Create your views here.
@@ -211,15 +213,57 @@ class Comment_View(GenericViewSet):
 
 # 点赞功能
 class LikeViewSet(viewsets.ModelViewSet):
-    queryset = Comment.objects.all()
-    serializer_class = serializers.Comment_like_Serializer
+    queryset = Post.objects.all()
+    serializer_class = serializers.CommentLikeSerializer
 
-    @action(methods=['post'],detail=False)
-    def list_view(self,request):
-        serializers = self.serializer_class(data=request.data)
-        serializers.is_valid(raise_exception=True)
-        serializers.save()
-        return APIResponse('点赞成功')
 
+    def get_object(self, queryset=None):
+        if self.action == 'like_post':
+            queryset = self.filter_queryset(self.get_queryset())
+            obj = queryset.get(pk=self.request.data.get('post'))
+            self.check_object_permissions(self.request, obj)
+            return obj
+        elif self.action == 'like_comment':
+            queryset = self.filter_queryset(self.get_queryset())
+            obj = queryset.get(pk=self.request.data.get('comment'))
+            self.check_object_permissions(self.request, obj)
+            return obj
+
+    def get_queryset(self):
+        if self.action == 'like_comment':
+            return Comment.objects.all()
+        else:
+            return super().get_queryset()
+
+    def get_serializer_class(self):
+        if self.action == 'like_post':
+            return serializers.PostLikeSerializer
+        else:
+            return super().get_serializer_class()
+
+    @action(methods=['post'], detail=False)
+    def like_post(self, request):
+        post = self.get_object()
+        if post.post_likes.filter(user_id=request.data.get('user')).exists():
+            return APIResponse(code=701,msg='文章已经点过赞')
+
+        with transaction.atomic():
+            post.post_likes.create(user_id=request.data.get('user'))
+            Post.objects.filter(pk=post.pk).update(comment_like_num=F('comment_like_num') + 1)
+
+        return APIResponse('文章点赞成功')
+
+    @action(methods=['post'], detail=False)
+    def like_comment(self, request):
+        comment = self.get_object()
+
+        if comment.comment_likes.filter(user_id=request.data.get('user')).exists():
+            return APIResponse(code=702,msg='评论已点赞')
+
+        with transaction.atomic():
+            comment.comment_likes.create(user_id=request.data.get('user'))
+            Comment.objects.filter(pk=comment.pk).update(post_like_num=F('post_like_num') + 1)
+
+        return APIResponse('评论点赞成功')
 
 

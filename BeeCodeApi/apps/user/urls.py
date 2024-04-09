@@ -19,9 +19,8 @@ router.register('achievements', views.AchievementViewSet, 'achievements')
 router.register('posts', views.PostViewSet, 'posts')
 # 查询所有评论
 router.register('comment', views.Comment_View, 'comment')
-
-
-
+# 点赞功能
+router.register('post_like', views.LikeViewSet, 'post_like')
 
 
 urlpatterns = [

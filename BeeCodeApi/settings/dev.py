@@ -7,8 +7,7 @@ from .user_settings import *
 
 # 校验路径：
 import sys
-print("正在校验路径...")
-print(sys.path)
+
 
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -45,8 +44,7 @@ INSTALLED_APPS = [
     'courses',
     'ChatBot',
     'schedule',
-    'channels', 
-    'channels_redis',
+
 ]
 
 
@@ -272,4 +270,5 @@ CHANNEL_LAYERS = {
     },
 }
 # 指定ASGI应用程序模块，Channels将会用它来查找消费者
-ASGI_APPLICATION = 'BeeCodeApi.asgi.application'
+
+# ASGI_APPLICATION = 'BeeCodeApi.asgi.application'
