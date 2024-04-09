@@ -210,16 +210,16 @@ class Comment_View(GenericViewSet):
         return super().get_queryset().filter(post_id=data.get('post')).filter(parent_id__isnull=True)
 
 # 点赞功能
-# class LikeViewSet(viewsets.ModelViewSet):
-#     queryset = Like.objects.all()
-#     serializer_class = LikeSerializer
-#
-#     @action(methods=['post'],detail=False)
-#     def list_view(self,request):
-#         serializers = self.serializer_class(data=request.data)
-#         serializers.is_valid(raise_exception=True)
-#         serializers.save()
-#         return APIResponse('点赞成功')
+class LikeViewSet(viewsets.ModelViewSet):
+    queryset = Comment.objects.all()
+    serializer_class = serializers.Comment_like_Serializer
+
+    @action(methods=['post'],detail=False)
+    def list_view(self,request):
+        serializers = self.serializer_class(data=request.data)
+        serializers.is_valid(raise_exception=True)
+        serializers.save()
+        return APIResponse('点赞成功')
 
 
 

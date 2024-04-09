@@ -311,19 +311,25 @@ class PostSerializer(serializers.ModelSerializer):
     def get_user_like_num(self, obj):
         return obj.likes.first().comment_like_num
 
+    #
 
 class CirCleHomeSerializer(PostSerializer):
+    post_comment_num = serializers.SerializerMethodField()
     post_love_num = serializers.IntegerField(source='comment_like_num')
     class Meta:
         model = Post
-        fields = ['id', 'title', 'username', 'user_profile_image','content_cover', 'post_love_num','created_at']
+        fields = ['id', 'title', 'username', 'user_profile_image','content_cover', 'post_love_num','created_at','post_comment_num']
+
+
+    def get_post_comment_num(self, obj):
+        return Comment.objects.filter(post=obj).count()
 
 
 class ContentSerializer(PostSerializer):
+
     class Meta:
         model = Post
         fields = ['id', 'title', 'username','text', 'user_profile_image', 'content_cover', 'created_at']
-
 
 
 class CommentSerializer(serializers.ModelSerializer):
@@ -380,26 +386,27 @@ class CommtSerializer(serializers.ModelSerializer):
         child_data(parent_id)
         return res
 
-# class LikeSerializer(serializers.ModelSerializer):
-#     class Meta:
-#         model = Like
-#         fields = ['user', 'post']
-#         # user_id
-#         # 文章 id
-#
-#     def validate(self, attrs):
-#         user = attrs.get('user')
-#         post = attrs.get('post')
-#         existing_like = Like.objects.filter(user_id=user, post_id=post).count()
-#         if existing_like:
-#             raise serializers.ValidationError("你已经点过赞了该帖子。")
-#         return attrs
-#
-#     def create(self, validated_data):
-#         user_id = validated_data.get('user')
-#         post_id = validated_data.get('post')
-#         with transaction.atomic():
-#             user_like = models.Like.objects.create(user_id=user_id, post_id=post_id)
-#             user_like.comment_like_num += 1
-#             user_like.save()
-#         return validated_data
+
+class Comment_like_Serializer(serializers.ModelSerializer):
+    class Meta:
+        model = Comment
+        fields = ['user', 'post']
+
+
+    def validate(self, attrs):
+        user = attrs.get('user')
+        post = attrs.get('post')
+        existing_like = Comment.objects.filter(user_id=user, post_id=post).count()
+        if existing_like:
+            raise serializers.ValidationError("你已经点过赞了该帖子。")
+        return attrs
+
+
+    def create(self, validated_data):
+        user_id = validated_data.get('user')
+        post_id = validated_data.get('post')
+        with transaction.atomic():
+            user_like = models.Comment.objects.create(user_id=user_id, post_id=post_id)
+            user_like.comment_like_num += 1
+            user_like.save()
+        return validated_data
