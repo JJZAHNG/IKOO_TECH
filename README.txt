@@ -6,7 +6,7 @@
 
 后端：JJ ZHANG， HAONAN TIAN， CHANGSHAN SHI
 
-设计：JACK WANG
+设计：JACK WANG, Jessica Zhou
 
 财务：Atyuki Tang
 
