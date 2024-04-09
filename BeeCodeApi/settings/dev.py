@@ -37,7 +37,9 @@ INSTALLED_APPS = [
     'orders',
     'courses',
     'ChatBot',
-    'schedule'
+    'schedule',
+    'channels', 
+    'channels_redis',
 ]
 
 
@@ -248,3 +250,19 @@ JWT_AUTH = {
     # token过期时间过期时间7天
     'JWT_EXPIRATION_DELTA': datetime.timedelta(days=2),
 }
+
+
+# 直播间
+# 使用Channels作为默认的WS协议
+ASGI_APPLICATION = 'your_project.routing.application'
+
+CHANNEL_LAYERS = {
+    'default': {
+        'BACKEND': 'channels_redis.core.RedisChannelLayer',
+        'CONFIG': {
+            "hosts": [('127.0.0.1', 6379)],  # 配置为你的Redis服务器地址
+        },
+    },
+}
+# 指定ASGI应用程序模块，Channels将会用它来查找消费者
+ASGI_APPLICATION = 'BeeCodeApi.asgi.application'
