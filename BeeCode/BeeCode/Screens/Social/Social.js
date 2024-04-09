@@ -1,75 +1,106 @@
-import React, { useEffect } from 'react';
-import { View, Text, ScrollView, StyleSheet, Dimensions } from 'react-native';
-import * as ScreenOrientation from 'expo-screen-orientation';
+import React, { useState } from 'react';
+import { View, Text, FlatList, Image, StyleSheet, Dimensions, TouchableOpacity } from 'react-native';
+
+// 本地图片路径
+const testContentCover = require('./test_media/test_content_cover.jpeg');
+const testProfilePhoto = require('./test_media/test_profile_photo.jpeg');
+
+// 初始数据
+let DATA = new Array(6).fill(null).map((_, index) => ({
+  id: String(index),
+  user: `User${index + 1}`,
+  likes: 100,
+  comments: 50,
+  userImage: testProfilePhoto,
+  postImage: testContentCover,
+}));
 
 const SocialScreen = () => {
-  useEffect(() => {
-    // 当SocialScreen组件加载时，记录消息
-    console.log("BEE社区正在被加载...");
+  const [data, setData] = useState(DATA);
 
-    // 模拟向后端发送请求
-    fetchDataFromBackend();
+  // 分屏逻辑：横向3分，竖向2分
+  const windowWidth = Dimensions.get('window').width;
+  const cardWidth = windowWidth / 3 - 10; // 每列3个，减去边距
+  const cardHeight = 250; // 定义卡片的高度
 
-    // 锁定横屏
-    lockScreenOrientation();
-  }, []);
-
-  const fetchDataFromBackend = async () => {
-    // 在这里发送请求到后端API
-    // 假设API URL是 http://your-backend.com/api/social
-    console.log("从后端获取数据...");
-
-    // 以下是fetch请求的示例，你需要根据自己的后端API调整
-    // try {
-    //   const response = await fetch('http://your-backend.com/api/social');
-    //   const data = await response.json();
-    //   // 处理数据...
-    // } catch (error) {
-    //   console.error('请求失败', error);
-    // }
+  // 当用户滚动到列表底部时加载更多数据
+  const handleLoadMore = () => {
+    // 假设这是从后端获取的新数据，这里我们复用初始数据作为演示
+    const moreData = DATA.map((item, index) => ({
+      ...item,
+      id: String(parseInt(item.id) + data.length), // 确保ID的唯一性
+    }));
+    
+    // 更新数据
+    setData(data.concat(moreData));
   };
 
-  const lockScreenOrientation = async () => {
-    await ScreenOrientation.lockAsync(ScreenOrientation.OrientationLock.LANDSCAPE);
-  };
+  const renderItem = ({ item }) => (
+    <View style={[styles.cardContainer, { width: cardWidth, height: cardHeight }]}>
+      <Image style={styles.postImage} source={item.postImage} />
+      <View style={styles.infoContainer}>
+        <Image style={styles.userImage} source={item.userImage} />
+        <View style={styles.userInfo}>
+          <Text style={styles.userName}>{item.user}</Text>
+          <Text style={styles.stats}>{`${item.likes} Likes`}</Text>
+          <Text style={styles.stats}>{`${item.comments} Comments`}</Text>
+        </View>
+      </View>
+    </View>
+  );
 
   return (
-    <ScrollView style={styles.container} contentContainerStyle={styles.contentContainer}>
-      <View style={styles.rectangleContainer}>
-        <View style={styles.rectangle} />
-        <View style={styles.rectangle} />
-      </View>
-      <View style={styles.rectangleContainer}>
-        <View style={styles.rectangle} />
-        <View style={styles.rectangle} />
-      </View>
-    </ScrollView>
+    <FlatList
+      data={data}
+      renderItem={renderItem}
+      keyExtractor={item => item.id}
+      numColumns={3} // 设置每行显示三个元素
+      onEndReached={handleLoadMore} // 触底时加载更多
+      onEndReachedThreshold={0.5} // 列表还剩下50%未显示时加载更多
+      contentContainerStyle={styles.flatListContentContainer}
+    />
   );
 };
 
 const styles = StyleSheet.create({
-  container: {
+  flatListContentContainer: {
+    paddingHorizontal: 5,
+    paddingTop: 5,
+  },
+  cardContainer: {
+    margin: 5,
+    backgroundColor: '#fff',
+    borderRadius: 10,
+    overflow: 'hidden',
+  },
+  postImage: {
     flex: 1,
+    width: '100%',
   },
-  contentContainer: {
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  rectangleContainer: {
+  infoContainer: {
     flexDirection: 'row',
-    justifyContent: 'space-evenly',
     alignItems: 'center',
-    width: Dimensions.get('window').width,
+    justifyContent: 'space-around', // 分散对齐
+    padding: 5,
   },
-  rectangle: {
-    width: '40%',
-    height: 200, // 根据需要调整
-    backgroundColor: '#ddd',
-    margin: 10,
+  userImage: {
+    width: 50,
+    height: 50,
+    borderRadius: 25,
+  },
+  userInfo: {
+    flexDirection: 'row',
+    alignItems: 'center',
     justifyContent: 'center',
-    alignItems: 'center',
   },
-  // 你可能需要添加或调整更多样式
+  userName: {
+    fontWeight: 'bold',
+    marginRight: 8,
+  },
+  stats: {
+    fontSize: 12,
+    marginRight: 8,
+  },
 });
 
 export default SocialScreen;
