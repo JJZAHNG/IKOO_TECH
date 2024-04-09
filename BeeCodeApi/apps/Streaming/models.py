@@ -1,8 +1,9 @@
 from django.db import models
-from django.contrib.auth.models import User
+# from django.contrib.auth.models import User
+from django.conf import settings
 
 class LiveClass(models.Model):
-    host = models.ForeignKey(User, on_delete=models.CASCADE, related_name='live_classes')
+    host = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='live_classes')
     title = models.CharField(max_length=255)
     description = models.TextField(blank=True)
     is_live = models.BooleanField(default=False)
@@ -10,6 +11,7 @@ class LiveClass(models.Model):
     end_time = models.DateTimeField(null=True, blank=True)
     # 如果使用第三方流媒体服务，可能需要存储直播流信息
     stream_url = models.URLField(blank=True)
+    # demo_field = models.BooleanField(blank=True, default=True)
 
     def __str__(self):
         return self.title

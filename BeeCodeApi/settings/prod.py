@@ -44,6 +44,7 @@ INSTALLED_APPS = [
     'courses',
     'ChatBot',
     'schedule',
+    'Streaming',
     'channels',
     'channels_redis',
 ]

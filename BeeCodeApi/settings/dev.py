@@ -44,7 +44,9 @@ INSTALLED_APPS = [
     'courses',
     'ChatBot',
     'schedule',
-
+    'Streaming',
+    'channels',
+    'channels_redis',
 ]
 
 
@@ -271,4 +273,4 @@ CHANNEL_LAYERS = {
 }
 # 指定ASGI应用程序模块，Channels将会用它来查找消费者
 
-# ASGI_APPLICATION = 'BeeCodeApi.asgi.application'
+ASGI_APPLICATION = 'BeeCodeApi.asgi.application'
