@@ -1,15 +1,21 @@
 import { StyleSheet } from "react-native";
+import { Dimensions } from 'react-native';
+const screenWidth = Dimensions.get('window').width;
+const textSize = screenWidth > 750 ? 20 : 16; 
+console.log('Screen Width: ', screenWidth);
 
 export default StyleSheet.create({
   container: {
     flex: 1,
     flexDirection: 'row',
   },
-  leftPlaceholder: {
-    width: '25%',
-  },
+ 
   rightContainer: {
-    width: '75%',
+    position: 'absolute', // Position the container absolutely within its parent
+    right: 0, // Anchor to the right edge of the screen
+    bottom: 0, // Anchor to the bottom edge of the screen
+    width: '78%', // Take up 75% of the screen's width
+    height: '85%', // Take up 70% of the screen's height
     flexDirection: 'row',
     padding: 20,
     marginRight: 10,
@@ -29,7 +35,9 @@ export default StyleSheet.create({
   },
   AccountButtonText: {
     color: '#fff', 
-    fontSize: 16
+    // fontSize: 16
+    fontSize: textSize - 4, 
+
   },
   columnA: {
     width: '35%',
@@ -45,12 +53,12 @@ export default StyleSheet.create({
     paddingHorizontal: 5, // Adjust spacing as needed
   },
   button: {
-    alignItems: 'flex-start',
+    alignItems: 'flex-cen',
     justifyContent: 'flex-start',
     borderRadius: 30,
-    padding: 15,
     marginBottom: 10,
     flex: 1,
+    overflow: 'hidden',
 
     // Shadow Settings
     elevation: 4, // Shadow for Android
@@ -60,44 +68,57 @@ export default StyleSheet.create({
     shadowRadius: 2,
   },
   buttonText_normal_bold: {
-    fontSize: 20,
+    //fontSize: 20, 
+    fontSize: textSize, 
+
     fontWeight: '900',
     color: '#fff',
+    paddingLeft: 15,
+    paddingTop: 15,
   },
 
   buttonText_big_bold: {
-    fontSize: 26,
+    // fontSize: 26,
+    fontSize: textSize + 6, 
+
     fontWeight: '900',
     color: '#fff',
+    paddingLeft: 15,
+    paddingTop: 15,
   },
 
   buttonText_small_light: {
-    fontSize: 11,
+    // fontSize: 12,
+    fontSize: textSize - 8, 
     fontWeight: '600',
     color: '#fff',
+    paddingLeft: 15,
   },
 
   buttonA: {
-    backgroundColor: '#77dd77',
-    flex: 1, // Take up the full height of the column
-    marginBottom: 10, // No margin at the bottom for "A"
+    backgroundColor: 'lightgrey',
   },
   buttonB: {
-    backgroundColor: '#ff6961',
+    backgroundColor: 'lightgrey',
   },
   buttonC: {
-    backgroundColor: '#fdb147',
+    backgroundColor: 'lightgrey',
   },
   buttonD: {
-    backgroundColor: '#ffec61',
+    backgroundColor: 'lightgrey',
   },
   buttonE: {
-    backgroundColor: '#a7d129',
+    backgroundColor: 'lightgrey',
   },
   buttonF: {
-    backgroundColor: '#29b6f6',
+    backgroundColor: 'lightgrey',
   },
   buttonG: {
-    backgroundColor: '#ba68c8',
+    backgroundColor: 'lightgrey',
+  },
+  buttonImage: {
+    flex: 1,
+    width: '100%', // Ensure the image covers the button width
+    height: '100%', 
   },
 });
