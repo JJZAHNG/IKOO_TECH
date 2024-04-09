@@ -1,6 +1,6 @@
 
 import React, { useEffect } from 'react';
-import { View, TouchableOpacity, Text, StatusBar, BackHandler, ImageBackground } from 'react-native';
+import { View, TouchableOpacity, Text, StatusBar, BackHandler, ImageBackground, Image } from 'react-native';
 
 import { SafeAreaView } from 'react-native-safe-area-context';
 import * as ScreenOrientation from 'expo-screen-orientation';
@@ -17,6 +17,7 @@ const testAnalysisImage = require('./res/testAnalysis_image.jpg'); // 测评分�
 const chatServiceImage = require('./res/chatService_image.jpg'); // 在线咨询
 const socialCenterImage = require('./res/socialCenter_image.jpg'); // 会员中心
 const settingsImage = require('./res/settings_image.jpg'); // 设置中心
+const tempUSerImage = require('./res/user.jpg');
 
 
 
@@ -100,10 +101,15 @@ const MainScreen = ({ navigation }) => {
         <StatusBar hidden={true} />
         {/* Placeholder for the left 30% of the screen */}
         <View style={styles.AccountButtonContainer}>
+          
           <TouchableOpacity
           style={styles.AccountButton}
           onPress={handleAccountButton}>
-            <Text style={styles.AccountButtonText}>个人</Text>
+            <Image
+              source={tempUSerImage} 
+              style={styles.profileImage}
+            />
+            <Text style={styles.AccountButtonText}>狼狼</Text>
           </TouchableOpacity>
         </View>
 
