@@ -21,8 +21,10 @@ router.register('posts', views.PostViewSet, 'posts')
 router.register('comment', views.Comment_View, 'comment')
 # 点赞功能
 router.register('post_like', views.LikeViewSet, 'post_like')
-
-
+# 收藏功能
+router.register('collect',views.CollectView,'collect')
+# 个人中心
+router.register('acctCenter',views.Personal_CenterView,'acctCenter')
 urlpatterns = [
 
 ]
