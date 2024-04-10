@@ -436,7 +436,7 @@ class Personal_CenterSerializer(serializers.ModelSerializer):
         return 0
 
     def get_project(self,obj):
-        ...
+        return 111
 
     def get_star(self,obj):
         if obj.star:

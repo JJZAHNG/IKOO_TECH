@@ -9,6 +9,7 @@ websocket_urlpatterns = [
     re_path(r'ws/streaming/(?P<room_name>\w+)/$', ChatConsumer.as_asgi()),
 ]
 
+
 application = ProtocolTypeRouter({
     'websocket': URLRouter(websocket_urlpatterns),
 })
