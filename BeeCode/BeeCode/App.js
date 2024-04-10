@@ -20,6 +20,9 @@ import ProfileScreen from './Screens/Profile/ProfileScreen'; // 确保路径正�
 import StreamingClassroomScreen from './Screens/Streaming/StreamingClassroomScreen';
 
 
+// 在App.js中临时替换（测试组件是否可用）
+import { Text } from 'react-native';
+const SimpleComponent = () => <Text>Simple Component</Text>;
 
 // Create a Stack Navigator
 const Stack = createNativeStackNavigator();
@@ -107,3 +110,4 @@ const App = () => {
 };
 
 export default App;
+

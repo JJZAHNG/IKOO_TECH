@@ -1,8 +1,7 @@
-// StreamingClassroomScreen.js
-
-import React, { useState, useRef } from 'react';
 import { View, TouchableOpacity, Text, StyleSheet } from 'react-native';
 import Video from 'react-native-video';
+import React, { useState, useRef } from 'react';
+
 
 const StreamingClassroomScreen = () => {
   const [paused, setPaused] = useState(true); // 控制播放和暂停
@@ -10,6 +9,12 @@ const StreamingClassroomScreen = () => {
 
   // 此处添加你的直播流URL
   const streamUrl = 'http://devimages.apple.com.edgekey.net/streaming/examples/bipbop_4x3/gear2/prog_index.m3u8';
+
+  // 定义一些空函数来替代未定义的函数
+  const handleLoadStart = () => {};
+  const handleLoad = () => {};
+  const handleBuffer = () => {};
+  const handleVideoError = () => {};
 
   return (
     <View style={styles.container}>
@@ -38,28 +43,30 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: '#000', // 一个深色背景可以使视频更加突出
+    backgroundColor: '#000', // A dark background to make the video stand out
   },
   video: {
-    width: '90%', // 视频宽度占屏幕宽度的90%
-    aspectRatio: 16 / 9, // 设置一个通用的宽高比例，例如16:9
+    width: '90%', // The video width occupies 90% of the screen width
+    aspectRatio: 16 / 9, // Set a common aspect ratio, such as 16:9
   },
   button: {
-    position: 'absolute', // 按钮位置绝对定位
-    bottom: 30, // 距离底部30单位
-    backgroundColor: '#1c90f3', // 按钮颜色
+    position: 'absolute', // The button position is absolutely positioned
+    bottom: 30, // 30 units from the bottom
+    backgroundColor: '#1c90f3', // Button color
     padding: 15,
     borderRadius: 25,
-    alignSelf: 'center', // 确保自我对齐在中心，即使容器样式发生变化
-    elevation: 2, // 在安卓上添加一些阴影效果
-    shadowColor: '#000', // iOS的阴影颜色
-    shadowOffset: { width: 0, height: 2 }, // iOS的阴影偏移
-    shadowOpacity: 0.25, // iOS的阴影不透明度
-    shadowRadius: 3.84, // iOS的阴影半径
+    alignSelf: 'center', // Ensure self-alignment in the center, even if the container style changes
+    elevation: 2, // Add some shadow effect on Android
+    shadowColor: '#000', // Shadow color for iOS
+    shadowOffset: { width: 0, height: 2 }, // Shadow offset for iOS
+    shadowOpacity: 0.25, // Shadow opacity for iOS
+    shadowRadius: 3.84, // Shadow radius for iOS
   },
   buttonText: {
-    color: '#ffffff', // 按钮文本颜色为白色
-    fontSize: 18, // 按钮文本字体大小
-    fontWeight: 'bold', // 文本字体加粗
+    color: '#ffffff', // Button text color is white
+    fontSize: 18, // Button text font size
+    fontWeight: 'bold', // Bold text font
   },
 });
+
+export default StreamingClassroomScreen;

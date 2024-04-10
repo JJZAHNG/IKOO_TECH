@@ -21,7 +21,6 @@ const tempUSerImage = require('./res/user.jpg');
 
 
 
-
 // Placeholder SecondScreen component
 const MainScreen = ({ navigation }) => {
   const handleAccountButton = () => {
