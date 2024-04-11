@@ -68,5 +68,9 @@
     <string>Light</string>
     <key>UIViewControllerBasedStatusBarAppearance</key>
     <false/>
+    <key>NSBluetoothPeripheralUsageDescription</key>
+    <string>需要使用蓝牙来连接到周边的设备</string>
+    <key>NSLocationWhenInUseUsageDescription</key>
+    <string>需要使用位置信息来扫描附近的蓝牙设备</string>
   </dict>
 </plist>

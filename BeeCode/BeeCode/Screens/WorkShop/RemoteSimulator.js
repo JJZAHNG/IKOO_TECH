@@ -1,187 +1,176 @@
-import React, { useState, useEffect, useRef } from 'react';
-import { Platform, View, TouchableOpacity, Text, Animated, PanResponder, StyleSheet, Modal, Button, FlatList, PermissionsAndroid, Alert } from 'react-native';
-import BluetoothClassic from 'react-native-bluetooth-classic';
+import React, { useState, useEffect } from 'react';
+import { Platform, PermissionsAndroid } from 'react-native';
+import { View, Modal, Text, FlatList, TouchableOpacity, StyleSheet, ImageBackground } from 'react-native';
+import BleManager from 'react-native-ble-manager';
 
 const RemoteSimulator = () => {
-  const leftJoystickOffset = useRef(new Animated.ValueXY()).current;
-  const rightJoystickOffset = useRef(new Animated.ValueXY()).current;
-  const [isBluetoothModalVisible, setBluetoothModalVisible] = useState(false);
-  const [bluetoothDevices, setBluetoothDevices] = useState([]);
-  const createPanResponder = (joystickOffset) => {
-    return PanResponder.create({
-      onStartShouldSetPanResponder: () => true,
-      onPanResponderMove: Animated.event([null, {
-        dx: joystickOffset.x,
-        dy: joystickOffset.y,
-      }], { useNativeDriver: false }),
-      onPanResponderRelease: () => {
-        Animated.spring(joystickOffset, {
-          toValue: { x: 0, y: 0 },
-          useNativeDriver: false
-        }).start();
-      }
-    });
-  };
+  const [modalVisible, setModalVisible] = useState(false);
+  const [devices, setDevices] = useState([]);
 
-  useEffect(() => {
-    const requestBluetoothPermission = async () => {
-      try {
-        const granted = await PermissionsAndroid.request(
-          PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION,
-          {
-            title: "Bluetooth Permission",
-            message: "This app needs access to your location to use Bluetooth",
-            buttonNeutral: "Ask Me Later",
-            buttonNegative: "Cancel",
-            buttonPositive: "OK"
-          }
-        );
-        if (granted === PermissionsAndroid.RESULTS.GRANTED) {
-          console.log("Bluetooth permission granted");
-        } else {
-          console.log("Bluetooth permission denied");
-          Alert.alert("Bluetooth permission denied");
-        }
-      } catch (err) {
-        console.warn(err);
+  // 请求定位权限，用于蓝牙扫描
+  const requestLocationPermission = async () => {
+    if (Platform.OS === 'android' && Platform.Version >= 23) {
+      const granted = await PermissionsAndroid.request(
+        PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION,
+        {
+          title: 'Location Permission Required',
+          message: 'This app needs location permissions to scan for bluetooth devices.',
+        },
+      );
+      if (granted !== PermissionsAndroid.RESULTS.GRANTED) {
+        Alert.alert('Location permission denied');
+        return false;
       }
+      return true;
+    }
+    return true;
+  };
+  
+
+  
+  useEffect(() => {
+    requestLocationPermission();
+    BleManager.start({ showAlert: false });
+
+    const handleDiscoverPeripheral = (peripheral) => {
+      console.log('Discovered new BLE peripheral', peripheral);
+      if (!peripheral.name) {
+        peripheral.name = 'UNKNOWN';
+      }
+      setDevices((devices) => {
+        const deviceIds = devices.map((device) => device.id);
+        if (!deviceIds.includes(peripheral.id)) {
+          return [...devices, peripheral];
+        }
+        return devices;
+      });
     };
 
-    requestBluetoothPermission();
-    
-    // 添加设备发现监听器
-    const discoveryListener = BluetoothClassic.onDeviceDiscovered(event => {
-      console.log(`A new device was discovered: ${event.device}`);
-      setBluetoothDevices(prevDevices => [...prevDevices, event.device]);
-    });
+    const scanDevices = () => {
+      BleManager.scan([], 5, true).then(() => {
+        console.log('Scanning...');
+        setDevices([]);
+      }).catch((error) => {
+        console.error('Scan error', error);
+      });
+    };
 
-    // 清除监听器，当组件卸载时执行
+    const discoverListener = BleManager.addListener('BleManagerDiscoverPeripheral', handleDiscoverPeripheral);
+
+    // 扫描设备
+    scanDevices();
+
     return () => {
-      discoveryListener.remove();
+      discoverListener.remove();
     };
   }, []);
 
-
-    const searchForDevices = async () => {
-    try {
-      const isEnabled = await BluetoothClassic.isBluetoothEnabled();
-      if (!isEnabled) {
-        Alert.alert('Bluetooth is not enabled', 'Please enable Bluetooth and try again.');
-        // 可以选择直接打开蓝牙设置，让用户手动打开
-        BluetoothClassic.openBluetoothSettings();
-      } else {
-        // Bluetooth is enabled, start discovery
-        await BluetoothClassic.startDiscovery();
-        // 这里不需要设置bluetoothDevices，因为设备发现事件会更新它
-      }
-    } catch (error) {
-      console.error(error);
-      Alert.alert('Error', 'There was an error starting discovery.');
-    }
-  };
-  const leftJoystickPanResponder = useRef(createPanResponder(leftJoystickOffset)).current;
-  const rightJoystickPanResponder = useRef(createPanResponder(rightJoystickOffset)).current;
-
-  // 模拟蓝牙设备搜索和连接
-  const handleBluetoothPress = () => {
-    console.log('蓝牙按钮 pressed');
-    searchForDevices();
-    setBluetoothModalVisible(true);
+  // 点击按钮，开始扫描设备
+  const handleScanButtonPress = () => {
+    setModalVisible(true);
+    scanDevices();
   };
 
-  // 渲染蓝牙设备模态
-  const renderBluetoothModal = () => (
-    <Modal
-      visible={isBluetoothModalVisible}
-      onRequestClose={() => setBluetoothModalVisible(false)}
-      animationType="slide"
-      transparent={true}
-    >
-      <View style={styles.modalView}>
-        <Text>可用的蓝牙设备:</Text>
-        <FlatList
-          data={bluetoothDevices}
-          keyExtractor={(item) => item.id}
-          renderItem={({ item }) => <Text>{item.name}</Text>}
-        />
-        <Button title="关闭" onPress={() => setBluetoothModalVisible(false)} />
-      </View>
-    </Modal>
-  );
+  // 连接到设备
+  const connectToDevice = (device) => {
+    BleManager.connect(device.id)
+      .then(() => {
+        console.log('Connected to ' + device.name);
+        // ... 执行后续操作
+      })
+      .catch((error) => {
+        console.error('Connection error', error);
+      });
+  };
 
   return (
-    <View style={styles.container}>
-      {renderBluetoothModal()}
-      <Animated.View
-        style={[styles.joystick, {
-          transform: leftJoystickOffset.getTranslateTransform()
-        }]}
-        {...leftJoystickPanResponder.panHandlers}
-      >
-        <View style={styles.joystickPuck} />
-      </Animated.View>
-
-      <TouchableOpacity onPress={handleBluetoothPress} style={styles.bluetoothButton}>
-        <Text style={styles.buttonText}>蓝牙</Text>
+    <ImageBackground source={require('./res/remote_background.jpg')} style={styles.background}>
+      <View style={styles.container}>
+        <View style={styles.sideContainer} />
+        <View style={styles.centerContainer}>
+        {/* 按钮用于触发蓝牙设备扫描 */}
+        <TouchableOpacity style={styles.circleButton} onPress={handleScanButtonPress}>
+        <Text>Scan Bluetooth</Text>
       </TouchableOpacity>
+        </View>
+        <View style={styles.sideContainer} />
 
-      <Animated.View
-        style={[styles.joystick, {
-          transform: rightJoystickOffset.getTranslateTransform()
-        }]}
-        {...rightJoystickPanResponder.panHandlers}
-      >
-        <View style={styles.joystickPuck} />
-      </Animated.View>
-    </View>
+        <Modal
+          animationType="slide"
+          transparent={true}
+          visible={modalVisible}
+          onRequestClose={() => {
+            setModalVisible(!modalVisible);
+          }}>
+          <View style={styles.modalView}>
+            <FlatList
+              data={devices}
+              keyExtractor={(item) => item.id}
+              renderItem={({ item }) => (
+                <TouchableOpacity style={styles.deviceContainer} onPress={() => connectToDevice(item)}>
+                  <Text style={styles.deviceText}>{item.name}</Text>
+                </TouchableOpacity>
+              )}
+            />
+          </View>
+        </Modal>
+      </View>
+    </ImageBackground>
   );
 };
 
 const styles = StyleSheet.create({
+  background: {
+    flex: 1,
+  },
   container: {
     flex: 1,
-    justifyContent: 'space-around',
-    alignItems: 'center',
     flexDirection: 'row',
-    backgroundColor: '#fff',
   },
-  joystick: {
-    width: 100,
-    height: 100,
-    borderRadius: 50,
-    backgroundColor: '#ddd',
+  sideContainer: {
+    flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    borderWidth: 1,
-    borderColor: '#ccc',
   },
-  joystickPuck: {
-    width: 30,
-    height: 30,
-    borderRadius: 15,
-    backgroundColor: '#bbb',
+  centerContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
-  bluetoothButton: {
-    padding: 20,
-    borderRadius: 10,
-    backgroundColor: '#007bff',
+  circleButton: {
+    width: 100,
+    height: 100,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: '#DDD',
+    borderRadius: 50,
   },
   modalView: {
     margin: 20,
-    backgroundColor: "white",
+    backgroundColor: 'white',
     borderRadius: 20,
     padding: 35,
-    alignItems: "center",
-    shadowColor: "#000",
+    alignItems: 'center',
+    shadowColor: '#000',
     shadowOffset: {
       width: 0,
-      height: 2
+      height: 2,
     },
     shadowOpacity: 0.25,
-    shadowRadius: 3.84,
-    elevation: 5
+    shadowRadius: 4,
+    elevation: 5,
+    maxHeight: '80%',
   },
-  // 其他需要的样式...
+  deviceContainer: {
+    padding: 10,
+    marginVertical: 4,
+    marginHorizontal: 2,
+    borderBottomWidth: 1,
+    borderColor: '#CCCCCC',
+  },
+  deviceText: {
+    fontSize: 18,
+  },
 });
 
 export default RemoteSimulator;
