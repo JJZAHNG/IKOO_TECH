@@ -11,6 +11,7 @@ const RemoteSimulator = () => {
 
   const scanDevices = () => {
     console.log('Starting scan...');
+    setModalVisible(true); // open the modal when starting scan
     BleManager.scan([], 5, true)
       .then(() => {
         console.log('Scanning...');
@@ -18,6 +19,7 @@ const RemoteSimulator = () => {
       })
       .catch((error) => {
         console.error('Scan error', error);
+        setModalVisible(false)
       });
   };
 
@@ -54,19 +56,21 @@ const RemoteSimulator = () => {
     initializeBleManager();
   
     // 添加BLE发现设备事件监听器
+    // Updated handleDiscoverPeripheral function to filter devices with a name
     const handleDiscoverPeripheral = (peripheral) => {
       console.log('Discovered new BLE peripheral', peripheral);
-      if (!peripheral.name) {
-        peripheral.name = 'UNKNOWN';
+      // Only add the peripheral if it has a non-null name
+      if (peripheral.name) {
+        setDevices((prevDevices) => {
+          const deviceIds = prevDevices.map((device) => device.id);
+          if (!deviceIds.includes(peripheral.id)) {
+            return [...prevDevices, peripheral];
+          }
+          return prevDevices;
+        });
       }
-      setDevices((prevDevices) => {
-        const deviceIds = prevDevices.map((device) => device.id);
-        if (!deviceIds.includes(peripheral.id)) {
-          return [...prevDevices, peripheral];
-        }
-        return prevDevices;
-      });
     };
+
   
     const discoverListener = BleManager.addListener('BleManagerDiscoverPeripheral', handleDiscoverPeripheral);
   
@@ -100,6 +104,60 @@ const RemoteSimulator = () => {
       stateListener.remove();
     };
   }, []);
+
+  return (
+    <ImageBackground source={require('./res/remote_background.jpg')} style={styles.background}>
+      <View style={styles.container}>
+        {/* First container with a circle */}
+        <View style={styles.sideContainer}>
+          <View style={styles.circleButton}></View>
+        </View>
+
+        {/* Middle container with the Bluetooth connection button */}
+        <View style={styles.centerContainer}>
+          <TouchableOpacity style={styles.circleButton} onPress={scanDevices}>
+            <Text>Connect Bluetooth</Text>
+          </TouchableOpacity>
+        </View>
+
+        {/* Third container, similar to the first */}
+        <View style={styles.sideContainer}>
+          <View style={styles.circleButton}></View>
+        </View>
+      </View>
+
+      {/* Modal to display the list of devices */}
+      <Modal
+        animationType="slide"
+        transparent={true}
+        visible={modalVisible}
+        onRequestClose={() => {
+          setModalVisible(!modalVisible);
+        }}
+      >
+        <View style={styles.modalView}>
+          <FlatList
+            data={devices}
+            keyExtractor={(item) => item.id}
+            renderItem={({ item }) => (
+              <View style={styles.deviceContainer}>
+                <Text style={styles.deviceText}>{item.name}</Text>
+              </View>
+            )}
+          />
+          <TouchableOpacity
+            style={styles.circleButton}
+            onPress={() => setModalVisible(!modalVisible)}
+          >
+            <Text>Close</Text>
+          </TouchableOpacity>
+        </View>
+      </Modal>
+    </ImageBackground>
+  );
+};
+
+
   
 const styles = StyleSheet.create({
   background: {
@@ -154,6 +212,6 @@ const styles = StyleSheet.create({
     fontSize: 18,
   },
 });
-}
+
 
 export default RemoteSimulator;
