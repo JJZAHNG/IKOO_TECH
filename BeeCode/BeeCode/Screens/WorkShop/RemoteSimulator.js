@@ -2,10 +2,25 @@ import React, { useState, useEffect } from 'react';
 import { Platform, PermissionsAndroid } from 'react-native';
 import { View, Modal, Text, FlatList, TouchableOpacity, StyleSheet, ImageBackground } from 'react-native';
 import BleManager from 'react-native-ble-manager';
+import { Alert } from 'react-native';
+
 
 const RemoteSimulator = () => {
   const [modalVisible, setModalVisible] = useState(false);
   const [devices, setDevices] = useState([]);
+
+  const scanDevices = () => {
+    console.log('Starting scan...');
+    BleManager.scan([], 5, true)
+      .then(() => {
+        console.log('Scanning...');
+        setDevices([]);
+      })
+      .catch((error) => {
+        console.error('Scan error', error);
+      });
+  };
+
 
   // 请求定位权限，用于蓝牙扫描
   const requestLocationPermission = async () => {
@@ -25,100 +40,67 @@ const RemoteSimulator = () => {
     }
     return true;
   };
-  
 
-  
   useEffect(() => {
-    requestLocationPermission();
-    BleManager.start({ showAlert: false });
-
+    const initializeBleManager = async () => {
+      const hasPermission = await requestLocationPermission();
+      if (hasPermission) {
+        console.log('Location permission granted, initializing BLE manager...');
+        BleManager.start({ showAlert: false });
+        BleManager.checkState(); // 检查当前的BLE状态
+      }
+    };
+  
+    initializeBleManager();
+  
+    // 添加BLE发现设备事件监听器
     const handleDiscoverPeripheral = (peripheral) => {
       console.log('Discovered new BLE peripheral', peripheral);
       if (!peripheral.name) {
         peripheral.name = 'UNKNOWN';
       }
-      setDevices((devices) => {
-        const deviceIds = devices.map((device) => device.id);
+      setDevices((prevDevices) => {
+        const deviceIds = prevDevices.map((device) => device.id);
         if (!deviceIds.includes(peripheral.id)) {
-          return [...devices, peripheral];
+          return [...prevDevices, peripheral];
         }
-        return devices;
+        return prevDevices;
       });
     };
-
-    const scanDevices = () => {
-      BleManager.scan([], 5, true).then(() => {
-        console.log('Scanning...');
-        setDevices([]);
-      }).catch((error) => {
-        console.error('Scan error', error);
-      });
-    };
-
+  
     const discoverListener = BleManager.addListener('BleManagerDiscoverPeripheral', handleDiscoverPeripheral);
-
-    // 扫描设备
-    scanDevices();
-
+  
     return () => {
       discoverListener.remove();
     };
   }, []);
 
-  // 点击按钮，开始扫描设备
-  const handleScanButtonPress = () => {
-    setModalVisible(true);
-    scanDevices();
-  };
-
-  // 连接到设备
-  const connectToDevice = (device) => {
-    BleManager.connect(device.id)
-      .then(() => {
-        console.log('Connected to ' + device.name);
-        // ... 执行后续操作
-      })
-      .catch((error) => {
-        console.error('Connection error', error);
-      });
-  };
-
-  return (
-    <ImageBackground source={require('./res/remote_background.jpg')} style={styles.background}>
-      <View style={styles.container}>
-        <View style={styles.sideContainer} />
-        <View style={styles.centerContainer}>
-        {/* 按钮用于触发蓝牙设备扫描 */}
-        <TouchableOpacity style={styles.circleButton} onPress={handleScanButtonPress}>
-        <Text>Scan Bluetooth</Text>
-      </TouchableOpacity>
-        </View>
-        <View style={styles.sideContainer} />
-
-        <Modal
-          animationType="slide"
-          transparent={true}
-          visible={modalVisible}
-          onRequestClose={() => {
-            setModalVisible(!modalVisible);
-          }}>
-          <View style={styles.modalView}>
-            <FlatList
-              data={devices}
-              keyExtractor={(item) => item.id}
-              renderItem={({ item }) => (
-                <TouchableOpacity style={styles.deviceContainer} onPress={() => connectToDevice(item)}>
-                  <Text style={styles.deviceText}>{item.name}</Text>
-                </TouchableOpacity>
-              )}
-            />
-          </View>
-        </Modal>
-      </View>
-    </ImageBackground>
-  );
-};
-
+  useEffect(() => {
+    BleManager.start({ showAlert: false });
+  
+    const handleUpdateState = (args) => {
+      console.log('BleManagerDidUpdateState:', args);
+      if (args.state === 'off') {
+        // The Bluetooth is off, prompt the user to enable it
+        Alert.alert(
+          'Bluetooth is off',
+          'Please turn on Bluetooth to allow the app to connect to devices.',
+          [
+            // This button option should take the user to their Bluetooth settings
+            { text: 'Go to Settings', onPress: () => BleManager.enableBluetooth() },
+            { text: 'Cancel', onPress: () => console.log('User canceled Bluetooth enabling'), style: 'cancel' },
+          ],
+        );
+      }
+    };
+  
+    const stateListener = BleManager.addListener('BleManagerDidUpdateState', handleUpdateState);
+  
+    return () => {
+      stateListener.remove();
+    };
+  }, []);
+  
 const styles = StyleSheet.create({
   background: {
     flex: 1,
@@ -172,5 +154,6 @@ const styles = StyleSheet.create({
     fontSize: 18,
   },
 });
+}
 
 export default RemoteSimulator;
