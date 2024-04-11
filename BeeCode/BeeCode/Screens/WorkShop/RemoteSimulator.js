@@ -23,6 +23,32 @@ const RemoteSimulator = () => {
       });
   };
 
+  // 尝试连接到选中的设备
+  const handleDevicePress = (device) => {
+    // 关闭设备列表弹窗
+    setModalVisible(false);
+    
+    // 开始连接过程
+    BleManager.connect(device.id)
+      .then(() => {
+        console.log('Connected to ' + device.name);
+        // 连接成功后的操作...
+        // 可能需要进一步检索服务和特征
+        // BleManager.retrieveServices(device.id).then((peripheralInfo) => {
+        //   console.log('Peripheral info:', peripheralInfo);
+        // });
+        return BleManager.retrieveServices(device, id);
+      })
+      .then((peripheralInfo) => {
+        console.log('Peripheral info', peripheralInfo);
+        // 在这里，你可以根据需要处理服务和特征
+        // 例如，你可以根据特定的服务UUID和特征UUID来读取或写入数据
+      })
+      .catch((error) => {
+        console.error('Connection error', error);
+      });
+  };
+
 
   // 请求定位权限，用于蓝牙扫描
   const requestLocationPermission = async () => {
@@ -140,9 +166,12 @@ const RemoteSimulator = () => {
             data={devices}
             keyExtractor={(item) => item.id}
             renderItem={({ item }) => (
-              <View style={styles.deviceContainer}>
+              <TouchableOpacity
+                style={styles.deviceContainer}
+                onPress={() => handleDevicePress(item)} // 添加此行代码
+              >
                 <Text style={styles.deviceText}>{item.name}</Text>
-              </View>
+              </TouchableOpacity>
             )}
           />
           <TouchableOpacity
