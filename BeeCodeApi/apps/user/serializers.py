@@ -73,7 +73,7 @@ class SMSLoginSerializer(serializers.Serializer):
     code = serializers.CharField()
 
     def validate_mobile(self, var):
-        if not re.match('^1[34578]\d{9}$', var):
+        if not re.match('^1[34578]\\d{9}$', var):
             raise ValidationError('手机号格式错误')
         return var
 
@@ -119,7 +119,7 @@ class UserRegisterSerializer(serializers.ModelSerializer):
         fields = ['mobile', 'code', 'password', 'password_confirm']
 
     def validate_mobile(self, var):
-        if not re.match('^1[34578]\d{9}$', var):
+        if not re.match('^1[34578]\\d{9}$', var):
             raise ValidationError('手机号格式错误')
         return var
 
@@ -157,7 +157,7 @@ class RegisterSerializer(serializers.ModelSerializer):
         fields = ['username', 'password', 'mobile', 'tow_password']
 
     def validate_mobile(self, var):
-        if not re.match('^1[34578]\d{9}$', var):
+        if not re.match('^1[34578]\\d{9}$', var):
             raise ValidationError('手机号格式错误')
         return var
 
@@ -396,3 +396,55 @@ class PostLikeSerializer(serializers.ModelSerializer):
     class Meta:
         model = models.PostLike
         fields = '__all__'
+
+
+class CollectSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = models.Favorite
+        fields = '__all__'
+
+class Personal_CenterSerializer(serializers.ModelSerializer):
+    username = serializers.SerializerMethodField()
+    bg_img = serializers.SerializerMethodField()
+    following = serializers.SerializerMethodField()
+    followers = serializers.SerializerMethodField()
+    project = serializers.SerializerMethodField()
+    star = serializers.SerializerMethodField()
+    qr_code = serializers.SerializerMethodField()
+    class Meta:
+        model = models.Personal_Center
+        fields = ['username','bg_img','introduction','following','followers','project','star','qr_code','wallet','addr']
+
+    def get_username(self,obj):
+        return obj.user.username
+
+    def get_bg_img(self,obj):
+        bg_img = obj.bg_img
+        user_icon = settings.BACKEND_URL + '/media/' + str(bg_img)
+        return user_icon
+
+    def get_following(self,obj):
+        if obj.following:
+            return models.Personal_Center.objects.filter(following=obj.following).count()
+        return 0
+
+
+
+    def get_followers(self,obj):
+        if obj.followers:
+            return models.Personal_Center.objects.filter(followers=obj.following).count()
+        return 0
+
+    def get_project(self,obj):
+        return 111
+
+    def get_star(self,obj):
+        if obj.star:
+            return models.Personal_Center.objects.filter(star=obj.star).count()
+        return 0
+
+    def get_qr_code(self,obj):
+        qr_code = obj.qr_code
+        user_icon = settings.BACKEND_URL + '/media/' + str(qr_code)
+        return user_icon
+

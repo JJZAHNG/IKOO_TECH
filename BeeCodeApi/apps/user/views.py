@@ -18,6 +18,8 @@ from rest_framework.permissions import IsAuthenticated
 from .models import Post, Comment
 from django.db import transaction
 from django.db.models import F
+from utils.common_modelmixin import CreateModelMixins
+from rest_framework.mixins import RetrieveModelMixin
 
 
 # Create your views here.
@@ -266,4 +268,14 @@ class LikeViewSet(viewsets.ModelViewSet):
 
         return APIResponse('评论点赞成功')
 
+# 收藏
+class CollectView(GenericViewSet,CreateModelMixins):
+    queryset = models.Favorite.objects.all()
+    serializer_class = serializers.CollectSerializer
+
+
+# 个人中心
+class Personal_CenterView(GenericViewSet,RetrieveModelMixin):
+    queryset = models.Personal_Center.objects.all()
+    serializer_class = serializers.Personal_CenterSerializer
 

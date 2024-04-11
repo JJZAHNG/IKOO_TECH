@@ -14,7 +14,7 @@ application = ProtocolTypeRouter({
     # WebSocket聊天处理程序
     "websocket": AuthMiddlewareStack(
         URLRouter(
-            BeeCodeApi.Streaming.routing.websocket_urlpatterns  # 确保这是正确的路径
+            BeeCodeApi.apps.Streaming.routing.websocket_urlpatterns  # 确保这是正确的路径
         )
     ),
 })
