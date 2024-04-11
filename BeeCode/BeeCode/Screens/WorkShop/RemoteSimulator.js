@@ -9,6 +9,10 @@ const RemoteSimulator = () => {
   const [modalVisible, setModalVisible] = useState(false);
   const [devices, setDevices] = useState([]);
 
+  const [connectedDeviceId, setConnectedDeviceId] = useState(null);
+  const [serviceUUID, setServiceUUID] = useState(null);
+  const [characteristicUUID, setCharacteristicUUID] = useState(null);
+
   const scanDevices = () => {
     console.log('Starting scan...');
     setModalVisible(true); // open the modal when starting scan
@@ -37,17 +41,53 @@ const RemoteSimulator = () => {
         // BleManager.retrieveServices(device.id).then((peripheralInfo) => {
         //   console.log('Peripheral info:', peripheralInfo);
         // });
-        return BleManager.retrieveServices(device, id);
+        return BleManager.retrieveServices(device.id);
       })
       .then((peripheralInfo) => {
         console.log('Peripheral info', peripheralInfo);
         // 在这里，你可以根据需要处理服务和特征
         // 例如，你可以根据特定的服务UUID和特征UUID来读取或写入数据
+        const firstService = peripheralInfo.services[0];
+        const firstCharacteristic = firstService.characteristics[0];
+        setServiceUUID(firstService.uuid);
+        setCharacteristicUUID(firstCharacteristic.uuid);
       })
       .catch((error) => {
         console.error('Connection error', error);
       });
   };
+
+  // 添加读取数据的函数
+  const readData = () => {
+    if (connectedDeviceId && serviceUUID && characteristicUUID) {
+      BleManager.read(connectedDeviceId, serviceUUID, characteristicUUID)
+        .then((readData) => {
+          console.log('Read data:', readData);
+          // 处理读取到的数据
+        })
+        .catch((error) => {
+          console.error('Read error', error);
+        });
+    } else {
+      console.log('Device is not connected or UUIDs are not set');
+    }
+  };
+
+  // 添加写入数据的函数
+  const writeData = (data) => {
+    if (connectedDeviceId && serviceUUID && characteristicUUID) {
+      BleManager.write(connectedDeviceId, serviceUUID, characteristicUUID, data)
+        .then(() => {
+          console.log('Write success');
+        })
+        .catch((error) => {
+          console.error('Write error', error);
+        });
+    } else {
+      console.log('Device is not connected or UUIDs are not set');
+    }
+  };
+
 
 
   // 请求定位权限，用于蓝牙扫描
