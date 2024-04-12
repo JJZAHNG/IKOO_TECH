@@ -6,6 +6,6 @@ admin.site.register(Post)
 admin.site.register(Comment)
 admin.site.register(PostImage)
 admin.site.register(Personal_Center)
-admin.site.register(Self_Project)
+xadmin.site.register(Self_Project)
 
 
