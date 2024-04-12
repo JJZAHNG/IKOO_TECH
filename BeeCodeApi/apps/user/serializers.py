@@ -1,6 +1,6 @@
 from rest_framework import serializers
 from user import models
-from django.db.models import Q,F
+from django.db.models import Q, F
 from rest_framework.exceptions import ValidationError
 from rest_framework_jwt.serializers import jwt_payload_handler, jwt_encode_handler
 from django.conf import settings
@@ -143,7 +143,6 @@ class UserRegisterSerializer(serializers.ModelSerializer):
         raise ValidationError('该手机号已经被注册')
 
     def create(self, validated_data):
-
         user = models.User.objects.create_user(**validated_data)
         return user
 
@@ -265,7 +264,7 @@ class PostSerializer(serializers.ModelSerializer):
 
     # 评论的用户名
     def get_comment_user(self, obj):
-        return obj.comment_set.first().user.username
+        return obj.comment_set.first().user.nickname
 
     # 评论的用户图像
     def get_comment_user_img(self, obj):
@@ -290,7 +289,7 @@ class PostSerializer(serializers.ModelSerializer):
         return obj.likes.first().post_like_num
 
     def get_username(self, obj):
-        return obj.user.username
+        return obj.user.nickname
 
     # 发表文章用户的头像
     def get_user_profile_image(self, obj):
@@ -313,30 +312,32 @@ class PostSerializer(serializers.ModelSerializer):
 
     #
 
+
 class CirCleHomeSerializer(PostSerializer):
     post_comment_num = serializers.SerializerMethodField()
     post_love_num = serializers.IntegerField(source='comment_like_num')
+
     class Meta:
         model = Post
-        fields = ['id', 'title', 'username', 'user_profile_image','content_cover', 'post_love_num','created_at','post_comment_num']
-
+        fields = ['id', 'title', 'username', 'user_profile_image', 'content_cover', 'post_love_num', 'created_at',
+                  'post_comment_num']
 
     def get_post_comment_num(self, obj):
         return Comment.objects.filter(post=obj).count()
 
 
 class ContentSerializer(PostSerializer):
-
     class Meta:
         model = Post
-        fields = ['id', 'title', 'username','text', 'user_profile_image', 'content_cover', 'created_at']
+        fields = ['id', 'title', 'username', 'text', 'user_profile_image', 'content_cover', 'created_at']
 
 
 class CommentSerializer(serializers.ModelSerializer):
-    comment_id = serializers.CharField(write_only=True,allow_null=True,required=False)
+    comment_id = serializers.CharField(write_only=True, allow_null=True, required=False)
+
     class Meta:
         model = Comment
-        fields = ['user', 'post', 'text','comment_id']
+        fields = ['user', 'post', 'text', 'comment_id']
         extra_kwargs = {
             'post': {'write_only': True},
             'user': {'write_only': True},
@@ -349,7 +350,9 @@ class CommentSerializer(serializers.ModelSerializer):
         return obj
 
     def create(self, validated_data):
-        user_like = models.Comment.objects.create(user=validated_data.get('user'),post=validated_data.get('post'),text=validated_data.get('text'),parent_id=validated_data.get('comment_id'))
+        user_like = models.Comment.objects.create(user=validated_data.get('user'), post=validated_data.get('post'),
+                                                  text=validated_data.get('text'),
+                                                  parent_id=validated_data.get('comment_id'))
         user_like.comment_num = F('comment_num') + 1
         user_like.save()
         return validated_data
@@ -359,30 +362,33 @@ class CommtSerializer(serializers.ModelSerializer):
     username = serializers.SerializerMethodField()
     children = serializers.SerializerMethodField()
     comment_like_num = serializers.IntegerField(source='post_like_num')
+
     class Meta:
         model = Comment
-        fields = ['id','post','username','text','created_at','comment_like_num','children','comment_num']
+        fields = ['id', 'post', 'username', 'text', 'created_at', 'comment_like_num', 'children', 'comment_num']
         extra_kwargs = {
-            'text':{"read_only":True},
-            'post':{"write_only":True},
-            'user':{"write_only":True}
+            'text': {"read_only": True},
+            'post': {"write_only": True},
+            'user': {"write_only": True}
         }
 
-    def get_username(self,obj):
-        return obj.user.username
+    def get_username(self, obj):
+        return obj.user.nickname
 
-    def get_like(self,obj):
+    def get_like(self, obj):
         return obj.comment_num
 
-    def get_children(self,args):
+    def get_children(self, args):
         parent_id = args
         res = []
 
         def child_data(obj_id):
             objs = Comment.objects.filter(parent_id=obj_id)
             for obj in objs:
-                res.append({'id':obj.id,'username':obj.user.username,'text':obj.text,'created_at':obj.created_at,'comment_reply_num,':obj.post_like_num,'comment_id':obj.parent_id})
+                res.append({'id': obj.id, 'username': obj.user.nickname, 'text': obj.text, 'created_at': obj.created_at,
+                            'comment_reply_num,': obj.post_like_num, 'comment_id': obj.parent_id})
                 child_data(obj.id)
+
         child_data(parent_id)
         return res
 
@@ -392,16 +398,21 @@ class CommentLikeSerializer(serializers.ModelSerializer):
         model = models.CommentLike
         fields = '__all__'
 
+
 class PostLikeSerializer(serializers.ModelSerializer):
     class Meta:
         model = models.PostLike
         fields = '__all__'
 
 
+
+
+
 class CollectSerializer(serializers.ModelSerializer):
     class Meta:
         model = models.Favorite
         fields = '__all__'
+
 
 class Personal_CenterSerializer(serializers.ModelSerializer):
     username = serializers.SerializerMethodField()
@@ -411,40 +422,69 @@ class Personal_CenterSerializer(serializers.ModelSerializer):
     project = serializers.SerializerMethodField()
     star = serializers.SerializerMethodField()
     qr_code = serializers.SerializerMethodField()
+    project_num = serializers.SerializerMethodField()
     class Meta:
         model = models.Personal_Center
-        fields = ['username','bg_img','introduction','following','followers','project','star','qr_code','wallet','addr']
+        fields = ['username', 'bg_img', 'introduction', 'following', 'followers', 'project_num','project', 'star', 'qr_code',
+                  'wallet', 'addr']
 
-    def get_username(self,obj):
-        return obj.user.username
+    def get_username(self, obj):
+        return obj.user.nickname
 
-    def get_bg_img(self,obj):
+    def get_bg_img(self, obj):
         bg_img = obj.bg_img
         user_icon = settings.BACKEND_URL + '/media/' + str(bg_img)
         return user_icon
 
-    def get_following(self,obj):
+    def get_following(self, obj):
         if obj.following:
             return models.Personal_Center.objects.filter(following=obj.following).count()
         return 0
 
-
-
-    def get_followers(self,obj):
+    def get_followers(self, obj):
         if obj.followers:
             return models.Personal_Center.objects.filter(followers=obj.following).count()
         return 0
 
-    def get_project(self,obj):
-        return 111
+    def get_project_num(self,obj):
+        return obj.project.all().count()
 
-    def get_star(self,obj):
+    def get_project(self, obj):
+        if obj.project.exists():
+            project_data = {}
+            for project_instance in obj.project.all():
+                project_data[project_instance.project_name] = {
+                    'user_project': project_instance.user_project.url if project_instance.user_project else None,
+                }
+            return project_data
+        return None
+
+    def get_star(self, obj):
         if obj.star:
             return models.Personal_Center.objects.filter(star=obj.star).count()
         return 0
 
-    def get_qr_code(self,obj):
+    def get_qr_code(self, obj):
         qr_code = obj.qr_code
         user_icon = settings.BACKEND_URL + '/media/' + str(qr_code)
         return user_icon
 
+
+class AcctCenterSerializer(Personal_CenterSerializer):
+    bg_img = serializers.ImageField(allow_null=True, required=False)
+    introduction = serializers.CharField(allow_null=True, allow_blank=True, required=False)
+
+    class Meta:
+        model = models.Personal_Center
+        fields = ['bg_img', 'introduction']
+
+    def validate_introduction(self, obj):
+        if sensitivity_.contains_sensitive_word(obj):
+            raise ValidationError('你输入的是敏感词汇请重新输入')
+        return obj
+
+    def update(self, instance, validated_data):
+        for attr, value in validated_data.items():
+            setattr(instance, attr, value)
+        instance.save()
+        return instance

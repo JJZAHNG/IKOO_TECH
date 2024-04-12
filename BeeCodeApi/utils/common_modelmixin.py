@@ -9,3 +9,8 @@ class CreateModelMixins(CreateModelMixin):
         return APIResponse(code=100,msg='收藏成功')
 
 
+class UpdateModelMixins(UpdateModelMixin):
+    def update(self, request, *args, **kwargs):
+        super().update(request, *args, **kwargs)
+        return APIResponse(code=100,msg='修改成功')
+

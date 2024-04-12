@@ -46,6 +46,7 @@ INSTALLED_APPS = [
     'Streaming',
     'channels',
     'channels_redis',
+    "django_apscheduler",
 ]
 
 

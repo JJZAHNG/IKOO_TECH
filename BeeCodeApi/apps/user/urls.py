@@ -1,5 +1,14 @@
 from rest_framework.routers import SimpleRouter
 from user import views
+import datetime
+# 定时任务
+from apscheduler.schedulers.background import BackgroundScheduler
+from django_apscheduler.jobstores import DjangoJobStore, register_events, register_job
+from .models import Post
+from django.core.cache import cache
+scheduler = BackgroundScheduler(timezone='Asia/Shanghai')
+scheduler.add_jobstore(DjangoJobStore(), "default")
+
 
 router = SimpleRouter()
 # 手机号与发送短信接口
@@ -25,7 +34,37 @@ router.register('post_like', views.LikeViewSet, 'post_like')
 router.register('collect',views.CollectView,'collect')
 # 个人中心
 router.register('acctCenter',views.Personal_CenterView,'acctCenter')
+#
 urlpatterns = [
-
 ]
 urlpatterns += router.urls
+
+
+def send_message():
+    date_time = datetime.datetime.now().date()
+    res = cache.get('11')
+    ls = []
+    if res is not None:
+        for k,v in res.items():
+            if k <= '{}'.format(date_time):
+                ls.extend(v)
+    queryset = Post.objects.exclude(id__in=ls)
+
+    # 在拿到点赞数大于300的数据
+    first_queryset = queryset.filter(comment_like_num__gte=300).order_by('-comment_like_num')[:3]
+    # 移除后在展示没有123 大于300的数据
+    id_list = [i.id for i in first_queryset]
+    # 添加到缓存
+    if res is not None:
+        if id_list:
+            res.update({'{}'.format(date_time):id_list})
+        cache.set('11',res)
+    else:
+        cache.set('11', {})
+
+
+@register_job(scheduler, "interval", seconds=10, id='test_job', replace_existing=True,timezone='Asia/Shanghai')
+def test_job():
+
+    send_message()
+scheduler.start()

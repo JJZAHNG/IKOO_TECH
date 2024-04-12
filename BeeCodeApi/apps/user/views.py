@@ -18,9 +18,9 @@ from rest_framework.permissions import IsAuthenticated
 from .models import Post, Comment
 from django.db import transaction
 from django.db.models import F
-from utils.common_modelmixin import CreateModelMixins
+from utils.common_modelmixin import CreateModelMixins, UpdateModelMixins
 from rest_framework.mixins import RetrieveModelMixin
-
+from datetime import datetime, timedelta
 
 # Create your views here.
 # 1.手机号短信登录
@@ -77,7 +77,7 @@ class UserLoginView(GenericViewSet):
         token = ser.context.get('token')
         icon = ser.context.get('icon')
         user_id = ser.context.get('user_id')
-        return APIResponse(user_id=user_id,username=username, token=token, icon=icon)
+        return APIResponse(user_id=user_id, username=username, token=token, icon=icon)
 
     # 多方式登陆
     @action(methods=['POST'], detail=False)
@@ -89,6 +89,7 @@ class UserLoginView(GenericViewSet):
     def sms_login(self, request, *args, **kwargs):
         return self._login(request, *args, **kwargs)
 
+
 # 手机号注册接口
 class UserRegisterView(GenericViewSet, CreateModelMixin):
     serializer_class = serializers.UserRegisterSerializer
@@ -97,6 +98,7 @@ class UserRegisterView(GenericViewSet, CreateModelMixin):
     def mobile_registration(self, request, *args, **kwargs):
         super().create(request, *args, **kwargs)
         return APIResponse(msg='注册成功')
+
 
 # 用户账号注册
 class RegisterView(GenericViewSet):
@@ -121,45 +123,46 @@ class ForgetpwdView(GenericViewSet):
         username = request.data.get('username')
         user = models.User.objects.filter(username=username).first()
         if user:
-            serializer = self.serializer_class(instance=user,data=request.data)
+            serializer = self.serializer_class(instance=user, data=request.data)
             serializer.is_valid(raise_exception=True)
             serializer.save()
             return APIResponse(msg='密码设置成功')
         return APIResponse(msg='账号输入错误')
 
 
+from rest_framework.viewsets import ModelViewSet, ReadOnlyModelViewSet
 
-from rest_framework.viewsets import ModelViewSet,ReadOnlyModelViewSet
+
 # Achievements / Accomplishments
 class AchievementViewSet(GenericViewSet):
     queryset = Achievement.objects.all()
     serializer_class = AchievementSerializer
-    authentication_classes = [JSONWebTokenAuthentication,]
-    permission_classes = [IsAuthenticated,]
+    authentication_classes = [JSONWebTokenAuthentication, ]
+    permission_classes = [IsAuthenticated, ]
+
     # 签到表
     @action(detail=False, methods=['post'])
-    def earn_achievement(self, request,*args,**kwargs):
+    def earn_achievement(self, request, *args, **kwargs):
         user = request.META.get('HTTP_USERNAME')
-        serializer = self.serializer_class(instance=request.user,data=request.data)
+        serializer = self.serializer_class(instance=request.user, data=request.data)
         serializer.context['user'] = user
         serializer.is_valid(raise_exception=True)
         serializer.save()
         return APIResponse(msg='签到成功')
 
-
     # 时时返回的签到标签
     @action(detail=False, methods=['post'])
-    def earn_achieve(self,request):
+    def earn_achieve(self, request):
         # 判断成就是否完成条件 添加达成返回200
         # signin_count = Achievement.objects.aggregate(total_signin=Sum('signin'))['total_signin']
         username = request.META.get('HTTP_USERNAME')
         user = models.User.objects.filter(username=username).first()
         signin_count = Achievement.objects.filter(user=user).aggregate(total_signin=Sum('signin'))['total_signin']
         if signin_count == 7:
-            return APIResponse(code=705,msg='签到新星')
+            return APIResponse(code=705, msg='签到新星')
         elif signin_count == 15:
             return APIResponse(code=706, msg='签到达人')
-        return APIResponse(code=201,msg='没有成就')
+        return APIResponse(code=201, msg='没有成就')
         # 后续补充 查表操作
 
 
@@ -171,6 +174,18 @@ class PostViewSet(viewsets.ModelViewSet):
     serializer_class = serializers.CirCleHomeSerializer
     pagination_class = PostPageNumberPagination
 
+    def get_queryset(self):
+        date_time = datetime.now().date()
+        res = cache.get('11')
+        ls = []
+        if res is not None:
+            for k, v in res.items():
+                if k <= '{}'.format(date_time):
+                    ls.extend(v)
+        first_queryset = self.queryset.exclude(id__in=ls).filter(comment_like_num__gte=300).order_by('-comment_like_num')[:3]
+        end_queryset = self.queryset.exclude(id__in=[i.id for i in first_queryset])
+        queryset = first_queryset.union(end_queryset)
+        return queryset
 
     def get_serializer_class(self):
         if self.action == 'content_home':
@@ -180,44 +195,41 @@ class PostViewSet(viewsets.ModelViewSet):
         else:
             return super().get_serializer_class()
 
-
     # 朋友圈内容  携带帖子的id
-    @action(methods=['post'],detail=False)
-    def content_home(self,request):
-        res = self.get_queryset().filter(pk=request.data.get('post')).first()
+    @action(methods=['post'], detail=False)
+    def content_home(self, request):
+        res = self.get_queryset().filter(pk=request.data.get('post'))
         serializer = self.get_serializer(instance=res)
         return APIResponse(serializer.data)
 
     # 添加评论
-    @action(methods=['post'],detail=False)
-    def add_comment_content(self,request):
+    @action(methods=['post'], detail=False)
+    def add_comment_content(self, request):
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         serializer.save()
         return APIResponse('评论成功')
-
-
 
 # 展示评论内容
 class Comment_View(GenericViewSet):
     queryset = Comment.objects.all()
     serializer_class = serializers.CommtSerializer
 
-    @action(methods=['post'],detail=False)
-    def article_detail(self,request):
+    @action(methods=['post'], detail=False)
+    def article_detail(self, request):
         queryset = self.get_queryset()
-        serializers = self.get_serializer(instance=queryset,many=True)
+        serializers = self.get_serializer(instance=queryset, many=True)
         return APIResponse(serializers.data)
 
     def get_queryset(self):
         data = self.request.data
         return super().get_queryset().filter(post_id=data.get('post')).filter(parent_id__isnull=True)
 
+
 # 点赞功能
 class LikeViewSet(viewsets.ModelViewSet):
     queryset = Post.objects.all()
     serializer_class = serializers.CommentLikeSerializer
-
 
     def get_object(self, queryset=None):
         if self.action == 'like_post':
@@ -247,12 +259,10 @@ class LikeViewSet(viewsets.ModelViewSet):
     def like_post(self, request):
         post = self.get_object()
         if post.post_likes.filter(user_id=request.data.get('user')).exists():
-            return APIResponse(code=701,msg='文章已经点过赞')
+            return APIResponse(code=701, msg='文章已经点过赞')
 
-        with transaction.atomic():
-            post.post_likes.create(user_id=request.data.get('user'))
-            Post.objects.filter(pk=post.pk).update(comment_like_num=F('comment_like_num') + 1)
-
+        post.post_likes.create(user_id=request.data.get('user'))
+        Post.objects.filter(pk=post.pk).update(comment_like_num=F('comment_like_num') + 1)
         return APIResponse('文章点赞成功')
 
     @action(methods=['post'], detail=False)
@@ -260,7 +270,7 @@ class LikeViewSet(viewsets.ModelViewSet):
         comment = self.get_object()
 
         if comment.comment_likes.filter(user_id=request.data.get('user')).exists():
-            return APIResponse(code=702,msg='评论已点赞')
+            return APIResponse(code=702, msg='评论已点赞')
 
         with transaction.atomic():
             comment.comment_likes.create(user_id=request.data.get('user'))
@@ -268,14 +278,40 @@ class LikeViewSet(viewsets.ModelViewSet):
 
         return APIResponse('评论点赞成功')
 
+
 # 收藏
-class CollectView(GenericViewSet,CreateModelMixins):
+class CollectView(GenericViewSet, CreateModelMixins):
     queryset = models.Favorite.objects.all()
     serializer_class = serializers.CollectSerializer
 
 
-# 个人中心
-class Personal_CenterView(GenericViewSet,RetrieveModelMixin):
+# 个人中心--
+class Personal_CenterView(GenericViewSet, RetrieveModelMixin):
     queryset = models.Personal_Center.objects.all()
     serializer_class = serializers.Personal_CenterSerializer
 
+    def get_serializer_class(self):
+        if self.action == 'acctCenterupdate':
+            return serializers.AcctCenterSerializer
+        else:
+            return super().get_serializer_class()
+
+    def get_object(self,pk=None):
+        if self.action=='acctCenterupdate':
+            return self.get_queryset().filter(user_id=pk).first()
+        else:
+            return super(Personal_CenterView, self).get_object()
+
+    # 修改个人信息
+    @action(methods=['post'], detail=True)
+    def acctCenterupdate(self, request,pk):
+        instance = self.get_object(pk)
+        serializer = self.get_serializer(instance=instance, data=request.data)
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+        return APIResponse(code=100,msg='修改成功')
+
+
+# 查询关注用户
+# 查询点赞用户
+# 查询收藏作品

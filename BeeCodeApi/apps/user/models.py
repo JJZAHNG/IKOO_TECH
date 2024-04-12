@@ -9,7 +9,8 @@ class User(AbstractUser):
     mobile = models.CharField(verbose_name='手机号', max_length=11, null=True)
     # 需要pillow包的支持
     icon = models.ImageField(verbose_name='头像', upload_to='icon', default='icon/default.png')
-
+    # 用户的昵称
+    nickname = models.CharField(verbose_name='昵称',max_length=32,null=True,blank=True)
     class Meta:
         db_table = 'BeeCode_user'
         verbose_name = '用户表'
@@ -96,19 +97,29 @@ class PostImage(models.Model):
         verbose_name = '帖子图片'
         verbose_name_plural = verbose_name
 
+# 帖子分类表
+class Classify_Post(models.Model):
+    name = models.CharField(max_length=32,verbose_name='分类名称')
 
+
+
+# 帖子表
 class Post(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='posts')
     title = models.CharField(max_length=255, verbose_name='标题', null=True, blank=True)  # 新增标题字段
     text = models.TextField(verbose_name='帖子内容')
     comment_like_num = models.IntegerField(verbose_name='文章点赞数', default=0)
     created_at = models.DateTimeField(auto_now_add=True, verbose_name='发布时间')
+    update_time = models.DateTimeField(auto_now=True, verbose_name='更新时间')
+    classify_name = models.ForeignKey(Classify_Post, on_delete=models.PROTECT,null=True)
     post_s = models.ManyToManyField(PostImage)
+    is_featured = models.BooleanField(default=False, verbose_name='是否为精选文章')
 
     class Meta:
         db_table = 'BeeCode_post'
         verbose_name = '帖子表'
         verbose_name_plural = verbose_name
+        ordering = ['-update_time']
 
     def __str__(self):
         return f"{self.user.username} - {self.text[:20]}"
