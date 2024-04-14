@@ -47,12 +47,7 @@ const SettingPage = ({navigation}) => {
   );
 
   return (
-    // <View style={styles.container}>
-    //   <Button
-    //     title="Press Me"
-    //     onPress={handleButton}
-    //   />
-    // </View>
+
     <ImageBackground source={backgroundImg} style={{flex: 1}}>
 
       <View style={styles.header}>

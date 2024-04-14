@@ -107,7 +107,7 @@ const App = () => {
         <Stack.Screen name="ChatService" component={ChatService} options={{ title: "在线咨询" }} />
         <Stack.Screen name="Setting" component={SettingScreen} options={{ headerShown: false }} />
         {/* ... 其他 Stack.Screen 配置 */}
-        <Stack.Screen name="WorkShop" component={WorkShopScreen} options={{ title: "工作坊" }} />
+        <Stack.Screen name="WorkShop" component={WorkShopScreen} options={{ headerShown: false }} />
         {/* Scratch编程界面 */}
         <Stack.Screen name="ScratchScreen" component={ScratchScreen} options={{ title: "Scratch编程" }} />
         {/* 添加遥控器界面 */}
