@@ -22,32 +22,38 @@ export default StyleSheet.create({
   },
   AccountButtonContainer: {
     position: 'absolute', 
-    top: 3, 
-    left: 13,
-    width: 0.15 * screenWidth,
-    height: 0.05 * screenWidth,
+    top: 20, 
+    left: 30,
+    height: 50,
   },
   AccountButton: {
-    width: 0.15 * screenWidth,
-    height: 0.05 * screenWidth,
+    height: 50,
+    borderWidth: 3,
+    borderColor: 'white',
     borderRadius: 25,
     backgroundColor: '#fcbf49', // 按钮颜色
     flexDirection: 'row',
     justifyContent: 'flex-start',
     alignItems: 'center',
     paddingStart: 2,
+
+    elevation: 4, // Shadow for Android
+    shadowColor: '#000', // Shadow properties are for iOS
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 2,
   },
   profileImage: {
-    width: 0.045 * screenWidth,
-    height: 0.045 * screenWidth,
+    width: 40,
+    height: 40,
     borderRadius: 25,
   },
   AccountButtonText: {
     color: '#fff', 
     // fontSize: 16
     fontSize: textSize - 4, 
-    paddingStart: 10,
-
+    paddingHorizontal: 10,
+    fontWeight: '800'
   },
 
   columnA: {

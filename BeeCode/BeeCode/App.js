@@ -1,6 +1,7 @@
 console.log('App.js is loaded');
 
 import React, { useState, useEffect} from 'react';
+import {TouchableOpacity, Image} from 'react-native';
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import LoginScreen from './Screens/Login/LoginScreen';
@@ -65,17 +66,28 @@ const App = () => {
   return (
     <NavigationContainer>
       <Stack.Navigator
-        screenOptions={{
+        screenOptions={({navigation}) => ({
           headerStyle: {
             backgroundColor: '#fcbf49',
           },
           headerTintColor: '#fff',
           headerTitleStyle: {
             fontWeight: '900', 
-            fontSize: 16
+            fontSize: 20
           },
-        }}
-        initialRouteName={initialRouteName}>
+          headerTitleAlign: 'center',
+          headerBackVisible: false,
+          headerLeft: () => (
+            <TouchableOpacity onPress={() => navigation.goBack()}>
+                <Image
+                  source={require('./assets/arrow_back.jpg')}
+                  style={{ height: 30, width: 30, marginHorizontal: 10 }}
+                />
+              </TouchableOpacity>
+          ),
+        })}
+        initialRouteName={initialRouteName}  
+      >
         <Stack.Screen name="Login" component={LoginScreen} options={{headerShown: false}}/>
         <Stack.Screen name="SMSLogin" component={SMSLoginScreen} options={{headerShown: false}}/>
         <Stack.Screen name="Signup" component={SignupScreen} options={{headerShown: false}}/>

@@ -12,6 +12,13 @@ const ProfileScreen = () => {
   const tempUSerImage = require('./res/user.jpg');
   const tempBackgroundImg = require('./res/background.jpg');
   const tempButtonImg = require('./res/qrButton.jpg');
+  const tempThumbnails = [
+    { id: 1, src: require('./res/test1.jpg'), title: 'Image 1' },
+    { id: 2, src: require('./res/test2.jpg'), title: 'Image 2' },
+    { id: 3, src: require('./res/test3.jpg'), title: 'Image 3' },
+    { id: 4, src: require('./res/test4.jpg'), title: 'Image 4' },
+    { id: 5, src: require('./res/test5.jpg'), title: 'Image 5' },
+  ];
 
 
   useEffect(() => {
@@ -47,6 +54,18 @@ const ProfileScreen = () => {
     alert('展示二维码');
   }
 
+  const handleIntroPress = () => {
+    alert('更改用户签名');
+  }
+
+  const showSubscriber = () => {
+    alert('展示订阅账号');
+  }
+
+  const showFollower = () => {
+    alert('展示粉丝列表');
+  }
+
   return (
 
     <View style={styles.container}>
@@ -62,7 +81,9 @@ const ProfileScreen = () => {
               style={styles.avatar}
             />
           </TouchableOpacity>
-          <Text style={styles.name}>狼狼</Text>
+          <TouchableOpacity onPress={handleUsernameChange}>
+            <Text style={styles.name}>狼狼</Text>
+          </TouchableOpacity>
           <View style={styles.qrColumn}>
             <Text style={styles.userId}>66666666</Text>
             <TouchableOpacity onPress={handleQRImagePress}>
@@ -71,33 +92,43 @@ const ProfileScreen = () => {
                 style={styles.clickableImage}
               />
             </TouchableOpacity>
-           
           </View>
-          <Text style={styles.introduction}>用户简介：圆圆的狼狼</Text>
+
+          <TouchableOpacity onPress={handleIntroPress}>
+            <Text style={styles.introduction}>用户简介：圆圆的狼狼</Text>
+          </TouchableOpacity>
           
           <View style={styles.buttonContainer}>
-            <TouchableOpacity style={styles.button}>
+            <TouchableOpacity style={styles.button} onPress={showSubscriber}>
               <Text>关注</Text>
             </TouchableOpacity>
-            <TouchableOpacity style={styles.button}>
+            <TouchableOpacity style={styles.button} onPress={showFollower}>
               <Text>粉丝</Text>
             </TouchableOpacity>
           </View>
         </View>
       </View>
       <View style={styles.rightPanel}>
-        <TouchableOpacity style={styles.column}>
+        <View style={styles.column}>
           <Text style={styles.columnHeader}>收藏作品</Text>
           <ScrollView horizontal>
-            {/* Add thumbnail images */}
+          {tempThumbnails.map((item) => (
+            <TouchableOpacity key={item.id} onPress={() => alert('点击图片')} style={styles.thumbnailContainer}>
+              <Image source={item.src} style={styles.thumbnail} />
+            </TouchableOpacity>
+          ))}
           </ScrollView>
-        </TouchableOpacity>
-        <TouchableOpacity style={styles.column}>
+        </View>
+        <View style={styles.column}>
           <Text style={styles.columnHeader}>我的作品</Text>
           <ScrollView horizontal>
-            {/* Add thumbnail images */}
+          {tempThumbnails.map((item) => (
+            <TouchableOpacity key={item.id} onPress={() => alert('点击图片')} style={styles.thumbnailContainer}>
+              <Image source={item.src} style={styles.thumbnail} />
+            </TouchableOpacity>
+          ))}
           </ScrollView>
-        </TouchableOpacity>
+        </View>
       </View>
     </View>
   );
@@ -184,8 +215,8 @@ const styles = StyleSheet.create({
     justifyContent: 'flex-start',
   },
   columnHeader: {
-    fontSize: 16,
-    fontWeight: 'bold',
+    fontSize: 20,
+    fontWeight: '900',
     marginBottom: 25,
   },
   qrColumn: {
@@ -198,6 +229,13 @@ const styles = StyleSheet.create({
     width: 30,
     height: 30,
     borderRadius: 25, 
+  },
+  thumbnailContainer: {
+    marginRight: 20, 
+  },
+  thumbnail: {
+    width: 100,
+    height: 100,
   },
 });
 

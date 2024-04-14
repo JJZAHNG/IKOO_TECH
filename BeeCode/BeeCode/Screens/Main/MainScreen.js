@@ -108,7 +108,7 @@ const MainScreen = ({ navigation }) => {
               source={tempUSerImage} 
               style={styles.profileImage}
             />
-            <Text style={styles.AccountButtonText}>狼狼</Text>
+            <Text style={styles.AccountButtonText}>圆圆的狼狼</Text>
           </TouchableOpacity>
         </View>
 
@@ -227,7 +227,7 @@ const MainScreen = ({ navigation }) => {
                   style={styles.buttonText_normal_bold}
                   numberOfLines={1} 
                   ellipsizeMode="tail"
-                >马蜂窝</Text>
+                >Bee社区</Text>
                 <Text 
                   style={styles.buttonText_small_light}
                   numberOfLines={1} 
