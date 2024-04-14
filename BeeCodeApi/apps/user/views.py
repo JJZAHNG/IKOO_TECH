@@ -19,7 +19,7 @@ from .models import Post, Comment
 from django.db import transaction
 from django.db.models import F
 from utils.common_modelmixin import CreateModelMixins, UpdateModelMixins
-from rest_framework.mixins import RetrieveModelMixin
+from rest_framework.mixins import RetrieveModelMixin,ListModelMixin
 from datetime import datetime, timedelta
 
 # Create your views here.
@@ -286,8 +286,8 @@ class CollectView(GenericViewSet, CreateModelMixins):
 
 
 # 个人中心--
-class Personal_CenterView(GenericViewSet, RetrieveModelMixin):
-    queryset = models.Personal_Center.objects.all()
+class Personal_CenterView(GenericViewSet,RetrieveModelMixin):
+    queryset = models.User.objects.all()
     serializer_class = serializers.Personal_CenterSerializer
 
     def get_serializer_class(self):
@@ -300,7 +300,7 @@ class Personal_CenterView(GenericViewSet, RetrieveModelMixin):
         if self.action=='acctCenterupdate':
             return self.get_queryset().filter(user_id=pk).first()
         else:
-            return super(Personal_CenterView, self).get_object()
+            return super().get_object()
 
     # 修改个人信息
     @action(methods=['post'], detail=True)
