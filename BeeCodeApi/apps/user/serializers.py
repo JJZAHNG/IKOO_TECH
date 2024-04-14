@@ -41,7 +41,7 @@ class UniversalSerializer(serializers.Serializer):
         self.context['token'] = token
         self.context['icon'] = settings.BACKEND_URL + \
                                '/media/' + str(user.icon)
-
+        self.context['user_id'] = user.id
         return attrs
 
     def _get_user(self, attrs):
@@ -80,7 +80,6 @@ class SMSLoginSerializer(serializers.Serializer):
     def validate(self, attrs):
         # 校验用户名密码是否正确
         user = self._get_user(attrs)
-
         # 签发token
         token = self._get_token(user)
 
@@ -89,7 +88,7 @@ class SMSLoginSerializer(serializers.Serializer):
         self.context['token'] = token
         self.context['icon'] = settings.BACKEND_URL + \
                                '/media/' + str(user.icon)
-        self.context['user_id'] = user.id
+        self.context['user_id'] = user.pk
 
         return attrs
 
@@ -430,6 +429,7 @@ class Personal_CenterSerializer(serializers.ModelSerializer):
         model = models.User
         fields = ['nickname', 'user_img','bg_img', 'user_introduction', 'following', 'followers', 'project_num','project', 'star', 'qr_code',
                   'user_wallet', 'addr']
+
     # 用户头像
     def get_user_img(self, obj):
         bg_img = obj.icon
@@ -489,12 +489,19 @@ class Personal_CenterSerializer(serializers.ModelSerializer):
 
 
 class AcctCenterSerializer(serializers.ModelSerializer):
+    icon = serializers.ImageField(allow_null=True,required=False)
     bg_img = serializers.ImageField(allow_null=True, required=False)
-    introduction = serializers.CharField(allow_null=True, allow_blank=True, required=False)
+    introduction = serializers.SerializerMethodField()
+    username = serializers.CharField(read_only=True)
+
 
     class Meta:
-        model = models.Personal_Center
-        fields = ['bg_img', 'introduction']
+        model = models.User
+        fields = ['icon','username','bg_img', 'introduction']
+
+    def get_introduction(self,obj):
+        return obj.personal_center.introduction
+
 
     def validate_introduction(self, obj):
         if sensitivity_.contains_sensitive_word(obj):
