@@ -36,7 +36,7 @@ class Self_Project(models.Model):
 class Personal_Center(models.Model):
     user = models.OneToOneField(User, verbose_name='用户个人中心', on_delete=models.CASCADE)
     bg_img = models.ImageField(verbose_name='背景', upload_to='bg', null=True, blank=True)
-    introduction = models.CharField(max_length=255, verbose_name='简介')
+    introduction = models.CharField(max_length=255, verbose_name='简介',null=True)
     following = models.ForeignKey(User, related_name='following_set', verbose_name='关注用户', on_delete=models.CASCADE,
                                   null=True, blank=True)
     followers = models.ForeignKey(User, related_name='followers_set', verbose_name='粉丝用户', on_delete=models.CASCADE,
@@ -45,7 +45,7 @@ class Personal_Center(models.Model):
     star = models.ForeignKey(to='Favorite', verbose_name='收藏', on_delete=models.CASCADE, null=True, blank=True)
     qr_code = models.ImageField(verbose_name='二维码', null=True, blank=True)
     wallet = models.DecimalField(verbose_name='钱包', max_digits=5, decimal_places=2, default=0)
-    addr = models.CharField(verbose_name='地址', max_length=32)
+    addr = models.CharField(verbose_name='地址', max_length=32,null=True,)
 
     class Meta:
         db_table = "BeeCode_Personal_Center"
