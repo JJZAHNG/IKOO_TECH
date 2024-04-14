@@ -20,7 +20,11 @@ const ProfileScreen = () => {
     bg_img: null,
     icon: null,
     isVIP: '加载中...',
-    id: '', // 用户ID
+    id: '', // 用户ID,
+    introduction:'加载中...',
+    uuid:'加载中...',
+    following_count:'2',
+    follower_count:'2'
   });
 
   const tempUSerImage = require('./res/user.jpg');
@@ -37,28 +41,36 @@ const ProfileScreen = () => {
   useEffect(() => {
     const getUserProfile = async () => {
       try {
-        const userId = await AsyncStorage.getItem('userId');
-        if (userId !== null) {
-          // const response = await fetch(`http://${config.SERVER_IP}:8000/api/v1/user/acctCenter/${userId}/`);
-          const response = await fetch(`http://${config.SERVER_IP}:8000/api/v1/user/acctCenter/1/`);
+        const storedUserData = await AsyncStorage.getItem('userData');
+        console.log('校验 1 >>>', storedUserData)
+        if (storedUserData) {
+          const userDataJson = JSON.parse(storedUserData);
+          const userId = userDataJson.user_id;
+          console.log('校验 2 Current USER ID >>> ',userId)
+          const response = await fetch(`http://${config.SERVER_IP}:8000/api/v1/user/acctCenter/${userId}/`);
+          if (!response.ok) throw new Error('Network response was not ok');
           const json = await response.json();
-          setUserData({
-            ...userData,
-            username: json.username,
-            bg_img: json.bg_img.startsWith('http') ? json.bg_img : `http://${config.SERVER_IP}:8000${json.bg_img}`, // 确保URL格式正确
-            introduction: json.introduction,
-          });
-        } else {
-          // 处理未找到userId的情况
-          console.log('UserId not found');
+          console.log('校验 3 >>>', json)
+
+          // 更新状态以使用从API获得的数据
+          setUserData(prevData => ({
+            ...prevData,
+            username: json.username || prevData.username,
+            bg_img: json.bg_img || prevData.bg_img,
+            introduction: json.introduction || prevData.introduction,
+            // ...其他需要更新的字段
+          }));
+
+          console.log("校验 4 >>> 个人中心当前信息：", userData.username, userData.bg_img, userData.introduction)
         }
       } catch (error) {
-        console.error(error);
+        Alert.alert('错误', '无法加载用户数据。');
+        console.error('Profile fetch error:', error);
       }
     };
+
     getUserProfile();
   }, []);
-  
 
   const handleAvatarClick = () => {
     alert('更改头像');
@@ -104,10 +116,10 @@ const ProfileScreen = () => {
             />
           </TouchableOpacity>
           <TouchableOpacity onPress={handleUsernameChange}>
-            <Text style={styles.name}>狼狼</Text>
+            <Text style={styles.name}>{userData.username}</Text>
           </TouchableOpacity>
           <View style={styles.qrColumn}>
-            <Text style={styles.userId}>66666666</Text>
+            <Text style={styles.userId}>用户账号：{userData.uuid}</Text>
             <TouchableOpacity onPress={handleQRImagePress}>
               <Image
                 source={tempButtonImg}  // This should be your clickable image
@@ -117,15 +129,15 @@ const ProfileScreen = () => {
           </View>
 
           <TouchableOpacity onPress={handleIntroPress}>
-            <Text style={styles.introduction}>用户简介：圆圆的狼狼</Text>
+            <Text style={styles.introduction}>用户简介：{userData.introduction}</Text>
           </TouchableOpacity>
           
           <View style={styles.buttonContainer}>
             <TouchableOpacity style={styles.button} onPress={showSubscriber}>
-              <Text>关注</Text>
+              <Text>关注{userData.following_count}</Text>
             </TouchableOpacity>
             <TouchableOpacity style={styles.button} onPress={showFollower}>
-              <Text>粉丝</Text>
+              <Text>粉丝{userData.follower_count}</Text>
             </TouchableOpacity>
           </View>
         </View>
