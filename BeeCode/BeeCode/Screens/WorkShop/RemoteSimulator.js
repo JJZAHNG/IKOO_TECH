@@ -1,11 +1,81 @@
 import React, { useState, useEffect } from 'react';
 import { Platform, PermissionsAndroid } from 'react-native';
-import { View, Modal, Text, FlatList, TouchableOpacity, StyleSheet, ImageBackground } from 'react-native';
+import { View, Modal, Text, FlatList, TouchableOpacity, StyleSheet, ImageBackground, Image, Animated, PanResponder, Dimensions } from 'react-native';
 import BleManager from 'react-native-ble-manager';
 import { Alert } from 'react-native';
 
 
-const RemoteSimulator = () => {
+
+const Joystick = ({ size }) => {
+  const [stickPosition, setStickPosition] = useState(new Animated.ValueXY());
+
+  const panResponder = PanResponder.create({
+    onStartShouldSetPanResponder: () => true,
+    onPanResponderGrant: () => {
+      stickPosition.setOffset({
+        x: stickPosition.x._value,
+        y: stickPosition.y._value,
+      });
+    },
+    onPanResponderMove: Animated.event([
+      null,
+      {
+        dx: stickPosition.x,
+        dy: stickPosition.y,
+      },
+    ], { useNativeDriver: false }),
+    onPanResponderRelease: () => {
+      stickPosition.flattenOffset();
+      Animated.spring(stickPosition, {
+        toValue: { x: 0, y: 0 },
+        friction: 5,
+        useNativeDriver: false,
+      }).start();
+    },
+  });
+
+  const joystickSize = size / 2;
+  const stickStyle = {
+    ...styles.joystickStick,
+    transform: stickPosition.getTranslateTransform(),
+    width: joystickSize,
+    height: joystickSize,
+    borderRadius: joystickSize / 2,
+  };
+
+  return (
+    <View
+      style={[
+        styles.joystickContainer,
+        { width: size, height: size, borderRadius: size / 2 },
+      ]}
+    >
+      <Animated.View
+        {...panResponder.panHandlers}
+        style={stickStyle}
+      />
+    </View>
+  );
+};
+
+
+const RemoteSimulator = ({ navigation }) => {
+  const arrowBackImg = require('./res/arrow_back.jpg');
+
+  const leftButtons = {
+    top: require('./res/leftButtons/top.jpg'),
+    right: require('./res/leftButtons/right.jpg'),
+    bottom: require('./res/leftButtons/bottom.jpg'),
+    left: require('./res/leftButtons/left.jpg'),
+  };
+
+  const rightButtons = {
+    top: require('./res/rightButtons/top.jpg'),
+    right: require('./res/rightButtons/right.jpg'),
+    bottom: require('./res/rightButtons/bottom.jpg'),
+    left: require('./res/rightButtons/left.jpg'),
+  };
+
   const [modalVisible, setModalVisible] = useState(false);
   const [devices, setDevices] = useState([]);
 
@@ -171,12 +241,63 @@ const RemoteSimulator = () => {
     };
   }, []);
 
+  const LeftButtons = ({ onButtonPress }) => {
+    return (
+      <View style={styles.container_leftButton}>
+        <TouchableOpacity style={[styles.button_leftButton, styles.topButton_leftButton]} onPress={() => onButtonPress('top')}>
+          <Image source={leftButtons.top} style={styles.buttonImage_leftButton} />
+        </TouchableOpacity>
+        <TouchableOpacity style={[styles.button_leftButton, styles.rightButton_leftButton]} onPress={() => onButtonPress('right')}>
+          <Image source={leftButtons.right} style={styles.buttonImage_leftButton} />
+        </TouchableOpacity>
+        <TouchableOpacity style={[styles.button_leftButton, styles.bottomButton_leftButton]} onPress={() => onButtonPress('bottom')}>
+          <Image source={leftButtons.bottom} style={styles.buttonImage_leftButton} />
+        </TouchableOpacity>
+        <TouchableOpacity style={[styles.button_leftButton, styles.leftButton_leftButton]} onPress={() => onButtonPress('left')}>
+          <Image source={leftButtons.left} style={styles.buttonImage_leftButton} />
+        </TouchableOpacity>
+      </View>
+    );
+  };
+
+  const RightButtons = ({ onButtonPress }) => {
+    return (
+      <View style={styles.container_leftButton}>
+        <TouchableOpacity style={[styles.button_leftButton, styles.topButton_leftButton]} onPress={() => onButtonPress('top')}>
+          <Image source={rightButtons.top} style={styles.buttonImage_leftButton} />
+        </TouchableOpacity>
+        <TouchableOpacity style={[styles.button_leftButton, styles.rightButton_leftButton]} onPress={() => onButtonPress('right')}>
+          <Image source={rightButtons.right} style={styles.buttonImage_leftButton} />
+        </TouchableOpacity>
+        <TouchableOpacity style={[styles.button_leftButton, styles.bottomButton_leftButton]} onPress={() => onButtonPress('bottom')}>
+          <Image source={rightButtons.bottom} style={styles.buttonImage_leftButton} />
+        </TouchableOpacity>
+        <TouchableOpacity style={[styles.button_leftButton, styles.leftButton_leftButton]} onPress={() => onButtonPress('left')}>
+          <Image source={rightButtons.left} style={styles.buttonImage_leftButton} />
+        </TouchableOpacity>
+      </View>
+    );
+  };
+
   return (
     <ImageBackground source={require('./res/remote_background.jpg')} style={styles.background}>
+      <View style={styles.header}>
+          <TouchableOpacity onPress={() => navigation.goBack()}>
+            <Image
+              source={arrowBackImg}
+              style={{ height: 30, width: 30, marginHorizontal: 10 }}
+            />
+          </TouchableOpacity>
+          <Text style={styles.headerTitle}>机械工坊</Text>
+        </View>
       <View style={styles.container}>
         {/* First container with a circle */}
         <View style={styles.sideContainer}>
-          <View style={styles.circleButton}></View>
+          {/* <View style={styles.circleButton}></View> */}
+          <LeftButtons onButtonPress={(direction) => {
+            console.log(`Left Button pressed: ${direction}`);
+            // Handle the button press here
+          }} />
         </View>
 
         {/* Middle container with the Bluetooth connection button */}
@@ -188,9 +309,18 @@ const RemoteSimulator = () => {
 
         {/* Third container, similar to the first */}
         <View style={styles.sideContainer}>
-          <View style={styles.circleButton}></View>
+          {/* <View style={styles.circleButton}></View> */}
+          <RightButtons onButtonPress={(direction) => {
+            console.log(`Right Button pressed: ${direction}`);
+            // Handle the button press here
+          }} />
         </View>
+        
       </View>
+      <View style={styles.joysticksColumn}>
+          <Joystick size={120} />
+          <Joystick size={120} />
+        </View>
 
       {/* Modal to display the list of devices */}
       <Modal
@@ -226,9 +356,28 @@ const RemoteSimulator = () => {
   );
 };
 
+const buttonSize = 60; // Size of the touchable area for each button
+const screenWidth = Dimensions.get('window').width;
+const joystickSize = 120;
+
+
 
   
 const styles = StyleSheet.create({
+  header: {
+    flexDirection: 'row',  // Aligns the back button and title horizontally
+    alignItems: 'center',
+    justifyContent: 'space-between',  // Positions the back button on the left and centers the title
+    paddingHorizontal: 10,
+    height: 60,  // Fixed height for the header
+  },
+  headerTitle: {
+    flex: 1,
+    textAlign: 'center',  // Ensures the title is centered within the available space
+    fontSize: 20,
+    fontWeight: '900',
+    color: 'white'
+  },
   background: {
     flex: 1,
   },
@@ -279,6 +428,61 @@ const styles = StyleSheet.create({
   },
   deviceText: {
     fontSize: 18,
+  },
+
+  container_leftButton: {
+    width: buttonSize * 3,
+    height: buttonSize * 3,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  button_leftButton: {
+    position: 'absolute',
+    width: buttonSize,
+    height: buttonSize,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  buttonImage_leftButton: {
+    width: buttonSize,
+    height: buttonSize,
+  },
+  topButton_leftButton: {
+    top: 0,
+    left: buttonSize,
+  },
+  rightButton_leftButton: {
+    top: buttonSize,
+    left: buttonSize * 2,
+  },
+  bottomButton_leftButton: {
+    top: buttonSize * 2,
+    left: buttonSize,
+  },
+  leftButton_leftButton: {
+    top: buttonSize,
+    left: 0,
+  },
+  joystickContainer: {
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: '#CCC',
+    opacity: 0.5,
+  },
+  joystickStick: {
+    backgroundColor: 'blue',
+    position: 'absolute',
+  },
+  joysticksColumn: {
+    flexDirection: 'row',
+    position: 'absolute',
+    left: screenWidth / 3 - joystickSize / 2,
+    bottom: 50, 
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    height: 60, 
+    width: '50%',
+    alignSelf: 'center',
   },
 });
 

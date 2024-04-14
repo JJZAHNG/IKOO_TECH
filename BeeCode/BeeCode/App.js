@@ -111,7 +111,7 @@ const App = () => {
         {/* Scratch编程界面 */}
         <Stack.Screen name="ScratchScreen" component={ScratchScreen} options={{ title: "Scratch编程" }} />
         {/* 添加遥控器界面 */}
-        <Stack.Screen name="RemoteSimulator" component={RemoteSimulator} options={{ title: "遥控器" }} />
+        <Stack.Screen name="RemoteSimulator" component={RemoteSimulator} options={{ headerShown: false }} />
         <Stack.Screen name="SocialScreen" component={SocialScreen} options={{ title: "BEE社区" }} />
 
         <Stack.Screen name="ProfileScreen" component={ProfileScreen} options={{ title: "个人中心" }} />
