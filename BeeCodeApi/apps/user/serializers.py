@@ -415,7 +415,7 @@ class CollectSerializer(serializers.ModelSerializer):
 
 
 class Personal_CenterSerializer(serializers.ModelSerializer):
-    username = serializers.SerializerMethodField()
+    user_img = serializers.SerializerMethodField()
     bg_img = serializers.SerializerMethodField()
     following = serializers.SerializerMethodField()
     followers = serializers.SerializerMethodField()
@@ -423,54 +423,72 @@ class Personal_CenterSerializer(serializers.ModelSerializer):
     star = serializers.SerializerMethodField()
     qr_code = serializers.SerializerMethodField()
     project_num = serializers.SerializerMethodField()
+    user_introduction = serializers.SerializerMethodField()
+    user_wallet = serializers.SerializerMethodField()
+    addr = serializers.SerializerMethodField()
     class Meta:
-        model = models.Personal_Center
-        fields = ['username', 'bg_img', 'introduction', 'following', 'followers', 'project_num','project', 'star', 'qr_code',
-                  'wallet', 'addr']
-
-    def get_username(self, obj):
-        return obj.user.nickname
-
-    def get_bg_img(self, obj):
-        bg_img = obj.bg_img
+        model = models.User
+        fields = ['nickname', 'user_img','bg_img', 'user_introduction', 'following', 'followers', 'project_num','project', 'star', 'qr_code',
+                  'user_wallet', 'addr']
+    # 用户头像
+    def get_user_img(self, obj):
+        bg_img = obj.icon
         user_icon = settings.BACKEND_URL + '/media/' + str(bg_img)
         return user_icon
+    # 用户背景
+    def get_bg_img(self, obj):
+        bg_img = obj.personal_center.bg_img
+        user_bg_img = settings.BACKEND_URL + '/media/' + str(bg_img)
+        return user_bg_img
+    # 用户简介
+    def get_user_introduction(self,obj):
+        return obj.personal_center.introduction
+    # 钱包
+    def get_user_wallet(self,obj):
+        return obj.personal_center.wallet
+    # 地址
+    def get_addr(self,obj):
+        return obj.personal_center.addr
 
     def get_following(self, obj):
-        if obj.following:
-            return models.Personal_Center.objects.filter(following=obj.following).count()
-        return 0
+        if hasattr(obj, 'followers_set') and obj.followers_set.exists():
+            return obj.followers_set.count()
+        else:
+            return 0
 
     def get_followers(self, obj):
-        if obj.followers:
-            return models.Personal_Center.objects.filter(followers=obj.following).count()
-        return 0
+        if hasattr(obj, 'project_set') and obj.followers_set.exists():
+            return obj.followers_set.count()
+        else:
+            return 0
 
-    def get_project_num(self,obj):
-        return obj.project.all().count()
+    def get_project_num(self, obj):
+        if hasattr(obj, 'personal_center') and obj.personal_center.project.exists():
+            return obj.personal_center.project.count()
+        else:
+            return 0
 
     def get_project(self, obj):
-        if obj.project.exists():
-            project_data = {}
-            for project_instance in obj.project.all():
+        project_data = {}
+        if hasattr(obj, 'personal_center') and obj.personal_center.project.exists():
+            for project_instance in obj.personal_center.project.all():
                 project_data[project_instance.project_name] = {
                     'user_project': project_instance.user_project.url if project_instance.user_project else None,
                 }
-            return project_data
-        return None
+        return project_data or None
 
     def get_star(self, obj):
-        if obj.star:
+        if obj.personal_center.star:
             return models.Personal_Center.objects.filter(star=obj.star).count()
         return 0
 
     def get_qr_code(self, obj):
-        qr_code = obj.qr_code
+        qr_code = obj.personal_center.qr_code
         user_icon = settings.BACKEND_URL + '/media/' + str(qr_code)
         return user_icon
 
 
-class AcctCenterSerializer(Personal_CenterSerializer):
+class AcctCenterSerializer(serializers.ModelSerializer):
     bg_img = serializers.ImageField(allow_null=True, required=False)
     introduction = serializers.CharField(allow_null=True, allow_blank=True, required=False)
 
