@@ -39,7 +39,8 @@ const ProfileScreen = () => {
       try {
         const userId = await AsyncStorage.getItem('userId');
         if (userId !== null) {
-          const response = await fetch(`http://${config.SERVER_IP}:8000/api/v1/user/acctCenter/${userId}/`);
+          // const response = await fetch(`http://${config.SERVER_IP}:8000/api/v1/user/acctCenter/${userId}/`);
+          const response = await fetch(`http://${config.SERVER_IP}:8000/api/v1/user/acctCenter/1/`);
           const json = await response.json();
           setUserData({
             ...userData,
