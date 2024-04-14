@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, TouchableOpacity, Image, StyleSheet } from 'react-native';
+import { StyleSheet, View, Text, Image, TouchableOpacity, ScrollView } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const ProfileScreen = () => {
@@ -8,6 +8,11 @@ const ProfileScreen = () => {
     icon: null,
     isVIP: '加载中...',
   });
+
+  const tempUSerImage = require('./res/user.jpg');
+  const tempBackgroundImg = require('./res/background.jpg');
+  const tempButtonImg = require('./res/qrButton.jpg');
+
 
   useEffect(() => {
     const getUserData = async () => {
@@ -26,7 +31,7 @@ const ProfileScreen = () => {
     getUserData();
   }, []);
 
-  const handleAvatarChange = () => {
+  const handleAvatarClick = () => {
     alert('更改头像');
   };
 
@@ -38,68 +43,158 @@ const ProfileScreen = () => {
     alert('升级会员');
   }
 
+  const handleQRImagePress = () => {
+    alert('展示二维码');
+  }
+
   return (
+
     <View style={styles.container}>
-      <TouchableOpacity style={styles.avatarContainer} onPress={handleAvatarChange}>
-        {userData.icon ? (
-          <Image source={{ uri: userData.icon }} style={styles.avatarImage} />
-        ) : (
-          <Text style={styles.avatarText}>头像</Text>
-        )}
-      </TouchableOpacity>
-      <View style={styles.infoRow}>
-        <Text style={styles.infoText}>{userData.username}</Text>
-        {/* 修改用户名逻辑保持不变 */}
+      <View style={styles.leftPanel}>
+        <View style={styles.profileContainer}>
+          <Image
+            source={tempBackgroundImg} // Change this path to your user selected background image
+            style={styles.backgroundImage}
+          />
+          <TouchableOpacity onPress={handleAvatarClick}>
+            <Image
+              source={ tempUSerImage } // Change this path to your head portrait image
+              style={styles.avatar}
+            />
+          </TouchableOpacity>
+          <Text style={styles.name}>狼狼</Text>
+          <View style={styles.qrColumn}>
+            <Text style={styles.userId}>66666666</Text>
+            <TouchableOpacity onPress={handleQRImagePress}>
+              <Image
+                source={tempButtonImg}  // This should be your clickable image
+                style={styles.clickableImage}
+              />
+            </TouchableOpacity>
+           
+          </View>
+          <Text style={styles.introduction}>用户简介：圆圆的狼狼</Text>
+          
+          <View style={styles.buttonContainer}>
+          <TouchableOpacity style={styles.button}>
+            <Text>关注</Text>
+          </TouchableOpacity>
+          <TouchableOpacity style={styles.button}>
+            <Text>粉丝</Text>
+          </TouchableOpacity>
+          </View>
+        </View>
       </View>
-      <View style={styles.infoRow}>
-        <Text style={styles.infoText}>******</Text>
-        {/* 密码逻辑保持不变 */}
-      </View>
-      <View style={styles.infoRow}>
-        <Text style={styles.infoText}>{userData.isVIP}</Text>
-        {/* 会员状态逻辑保持不变 */}
+      <View style={styles.rightPanel}>
+        <TouchableOpacity style={styles.column}>
+          <Text style={styles.columnHeader}>收藏作品</Text>
+          <ScrollView horizontal>
+            {/* Add thumbnail images */}
+          </ScrollView>
+        </TouchableOpacity>
+        <TouchableOpacity style={styles.column}>
+          <Text style={styles.columnHeader}>我的作品</Text>
+          <ScrollView horizontal>
+            {/* Add thumbnail images */}
+          </ScrollView>
+        </TouchableOpacity>
       </View>
     </View>
   );
 };
 
 
+
 const styles = StyleSheet.create({
   container: {
-    flex: 1,
-    alignItems: 'center',
-    paddingTop: 50,
-  },
-  avatarContainer: {
-    width: 100,
-    height: 100,
-    borderRadius: 50,
-    backgroundColor: '#fcbf49',
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginBottom: 30,
-  },
-  avatarText: {
-    color: '#fff',
-    fontSize: 18,
-  },
-  infoRow: {
     flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: 20,
+    flex: 1,
   },
-  infoText: {
-    fontSize: 18,
+  leftPanel: {
+    flex: 0.5,
+    alignItems: 'center',
+    justifyContent: 'flex-start',
+  },
+  rightPanel: {
+    flex: 0.5,
+    padding: 10,
+    flexDirection: 'column'
+  },
+  profileContainer: {
+    alignItems: 'center',
+    height: '100%'
+  },
+  backgroundImage: {
+    position: 'absolute',
+    width: '100%',
+    height: '100%',
+  },
+  avatar: {
+    width: 120,
+    height: 120,
+    borderRadius: 60,
+    marginTop: 20,
+  },
+  name: {
+    marginTop: 10,
+    fontSize: 20,
+    fontWeight: 'bold',
+    borderRadius: 25,
+    backgroundColor: 'rgba(255, 255, 255, 0.5)',
+    paddingHorizontal: 20,
+    paddingVertical: 4,
+    alignSelf: 'center',
+  },
+  userId: {
+    marginTop: 5,
+    fontSize: 16,
+    borderRadius: 25,
+    backgroundColor: 'rgba(255, 255, 255, 0.5)',
+    paddingHorizontal: 20,
+    paddingVertical: 4,
     marginRight: 10,
   },
-  editText: {
-    fontSize: 16,
-    color: '#007bff',
+  introduction: {
+    marginVertical: 5,
+    paddingHorizontal: 20,
+    textAlign: 'center',
+    borderRadius: 25,
+    backgroundColor: 'rgba(255, 255, 255, 0.5)',
+    paddingHorizontal: 20,
+    paddingVertical: 4,
   },
-  avatarImage: {
-    width: 100,
-    height: 100,
-    borderRadius: 50,
+
+  buttonContainer: {
+    width: '40%',
+    padding: 10,
+    justifyContent: 'space-between',
+    flexDirection: 'row',
+  },
+  button: {
+    padding: 10,
+    backgroundColor: '#DDD',
+    alignItems: 'center',
+    borderRadius: 25,
+  },
+  column: {
+    height: '50%',
+    justifyContent: 'flex-start',
+  },
+  columnHeader: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    marginBottom: 25,
+  },
+  qrColumn: {
+    flexDirection: 'row',
+    alignItems: 'center', 
+    padding: 10,
+  },
+  clickableImage: {
+    marginTop: 5,
+    width: 30,
+    height: 30,
+    borderRadius: 25, 
   },
 });
 

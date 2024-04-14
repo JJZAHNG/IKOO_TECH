@@ -65,15 +65,16 @@ const App = () => {
   return (
     <NavigationContainer>
       <Stack.Navigator
-        // screenOptions={{
-        //   headerStyle: {
-        //     backgroundColor: '#fcbf49', // Set your own color
-        //   },
-        //   headerTintColor: '#fff', // Set the color for the header title and buttons
-        //   headerTitleStyle: {
-        //     fontWeight: '900', // Set the header title style
-        //   },
-        // }}
+        screenOptions={{
+          headerStyle: {
+            backgroundColor: '#fcbf49',
+          },
+          headerTintColor: '#fff',
+          headerTitleStyle: {
+            fontWeight: '900', 
+            fontSize: 16
+          },
+        }}
         initialRouteName={initialRouteName}>
         <Stack.Screen name="Login" component={LoginScreen} options={{headerShown: false}}/>
         <Stack.Screen name="SMSLogin" component={SMSLoginScreen} options={{headerShown: false}}/>

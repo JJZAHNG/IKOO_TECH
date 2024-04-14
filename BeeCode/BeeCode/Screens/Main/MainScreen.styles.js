@@ -23,7 +23,9 @@ export default StyleSheet.create({
   AccountButtonContainer: {
     position: 'absolute', 
     top: 3, 
-    left: 13 
+    left: 13,
+    width: 0.15 * screenWidth,
+    height: 0.05 * screenWidth,
   },
   AccountButton: {
     width: 0.15 * screenWidth,
