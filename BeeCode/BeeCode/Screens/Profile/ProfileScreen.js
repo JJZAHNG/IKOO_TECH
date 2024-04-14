@@ -76,12 +76,12 @@ const ProfileScreen = () => {
           <Text style={styles.introduction}>用户简介：圆圆的狼狼</Text>
           
           <View style={styles.buttonContainer}>
-          <TouchableOpacity style={styles.button}>
-            <Text>关注</Text>
-          </TouchableOpacity>
-          <TouchableOpacity style={styles.button}>
-            <Text>粉丝</Text>
-          </TouchableOpacity>
+            <TouchableOpacity style={styles.button}>
+              <Text>关注</Text>
+            </TouchableOpacity>
+            <TouchableOpacity style={styles.button}>
+              <Text>粉丝</Text>
+            </TouchableOpacity>
           </View>
         </View>
       </View>
@@ -133,7 +133,7 @@ const styles = StyleSheet.create({
     width: 120,
     height: 120,
     borderRadius: 60,
-    marginTop: 20,
+    marginTop: 10,
   },
   name: {
     marginTop: 10,
@@ -165,15 +165,18 @@ const styles = StyleSheet.create({
   },
 
   buttonContainer: {
+    marginTop: 5,
     width: '40%',
-    padding: 10,
+    padding: 5,
     justifyContent: 'space-between',
     flexDirection: 'row',
   },
   button: {
-    padding: 10,
+    paddingVertical: 5,
+    paddingHorizontal: 10,
     backgroundColor: '#DDD',
     alignItems: 'center',
+    justifyContent: 'center',
     borderRadius: 25,
   },
   column: {
