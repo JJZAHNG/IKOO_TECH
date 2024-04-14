@@ -142,12 +142,12 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   leftPanel: {
-    flex: 0.5,
+    flex: 0.3,
     alignItems: 'center',
     justifyContent: 'flex-start',
   },
   rightPanel: {
-    flex: 0.5,
+    flex: 0.7,
     padding: 10,
     flexDirection: 'column'
   },
@@ -197,7 +197,7 @@ const styles = StyleSheet.create({
 
   buttonContainer: {
     marginTop: 5,
-    width: '40%',
+    width: '60%',
     padding: 5,
     justifyContent: 'space-between',
     flexDirection: 'row',
