@@ -1,16 +1,30 @@
 import React, { useState, useEffect } from 'react';
-import { StyleSheet, View, Text, Image, TouchableOpacity, ScrollView } from 'react-native';
+import {
+  StyleSheet,
+  View,
+  Text,
+  Image,
+  TouchableOpacity,
+  ScrollView,
+  Alert
+} from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import axios from 'axios';
+import config from '../../config.js'; 
+
+// `http://${config.SERVER_IP}:8000/api/v1/user/acctCenter/${userId}/`
 
 const ProfileScreen = () => {
   const [userData, setUserData] = useState({
     username: '加载中...',
+    bg_img: null,
     icon: null,
     isVIP: '加载中...',
+    id: '', // 用户ID
   });
 
   const tempUSerImage = require('./res/user.jpg');
-  const tempBackgroundImg = require('./res/background.jpg');
+  // const tempBackgroundImg = require('./res/background.jpg');
   const tempButtonImg = require('./res/qrButton.jpg');
   const tempThumbnails = [
     { id: 1, src: require('./res/test1.jpg'), title: 'Image 1' },
@@ -20,23 +34,30 @@ const ProfileScreen = () => {
     { id: 5, src: require('./res/test5.jpg'), title: 'Image 5' },
   ];
 
-
   useEffect(() => {
-    const getUserData = async () => {
-      const storedUserData = await AsyncStorage.getItem('userData');
-      if (storedUserData) {
-        const userData = JSON.parse(storedUserData);
-        setUserData({
-          username: userData.username || '用户名',
-          icon: userData.icon || 'http://127.0.0.1:8000/media/icon/default.png', // 默认头像
-          isVIP: userData.isVIP || '非会员', // 默认会员状态
-        });
+    const getUserProfile = async () => {
+      try {
+        const userId = await AsyncStorage.getItem('userId');
+        if (userId !== null) {
+          const response = await fetch(`http://${config.SERVER_IP}:8000/api/v1/user/acctCenter/${userId}/`);
+          const json = await response.json();
+          setUserData({
+            ...userData,
+            username: json.username,
+            bg_img: json.bg_img.startsWith('http') ? json.bg_img : `http://${config.SERVER_IP}:8000${json.bg_img}`, // 确保URL格式正确
+            introduction: json.introduction,
+          });
+        } else {
+          // 处理未找到userId的情况
+          console.log('UserId not found');
+        }
+      } catch (error) {
+        console.error(error);
       }
     };
-
-
-    getUserData();
+    getUserProfile();
   }, []);
+  
 
   const handleAvatarClick = () => {
     alert('更改头像');
@@ -72,7 +93,7 @@ const ProfileScreen = () => {
       <View style={styles.leftPanel}>
         <View style={styles.profileContainer}>
           <Image
-            source={tempBackgroundImg} // Change this path to your user selected background image
+            source={{ uri: userData.bg_img }}
             style={styles.backgroundImage}
           />
           <TouchableOpacity onPress={handleAvatarClick}>
