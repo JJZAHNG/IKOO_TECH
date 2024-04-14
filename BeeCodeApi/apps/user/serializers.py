@@ -143,6 +143,7 @@ class UserRegisterSerializer(serializers.ModelSerializer):
 
     def create(self, validated_data):
         user = models.User.objects.create_user(**validated_data)
+        models.Personal_Center.objects.create(user=user)
         return user
 
 
@@ -176,6 +177,7 @@ class RegisterSerializer(serializers.ModelSerializer):
 
     def create(self, validated_data):
         user = models.User.objects.create_user(**validated_data)
+        models.Personal_Center.objects.create(user=user)
         return user
 
 
@@ -414,6 +416,7 @@ class CollectSerializer(serializers.ModelSerializer):
 
 
 class Personal_CenterSerializer(serializers.ModelSerializer):
+    username = serializers.CharField(read_only=True)
     user_img = serializers.SerializerMethodField()
     bg_img = serializers.SerializerMethodField()
     following = serializers.SerializerMethodField()
@@ -427,7 +430,7 @@ class Personal_CenterSerializer(serializers.ModelSerializer):
     addr = serializers.SerializerMethodField()
     class Meta:
         model = models.User
-        fields = ['nickname', 'user_img','bg_img', 'user_introduction', 'following', 'followers', 'project_num','project', 'star', 'qr_code',
+        fields = ['nickname','username', 'user_img','bg_img', 'user_introduction', 'following', 'followers', 'project_num','project', 'star', 'qr_code',
                   'user_wallet', 'addr']
 
     # 用户头像
@@ -440,15 +443,16 @@ class Personal_CenterSerializer(serializers.ModelSerializer):
         bg_img = obj.personal_center.bg_img
         user_bg_img = settings.BACKEND_URL + '/media/' + str(bg_img)
         return user_bg_img
+
     # 用户简介
     def get_user_introduction(self,obj):
-        return obj.personal_center.introduction
+        return obj.personal_center.introduction if obj.personal_center else None
     # 钱包
     def get_user_wallet(self,obj):
         return obj.personal_center.wallet
     # 地址
     def get_addr(self,obj):
-        return obj.personal_center.addr
+        return obj.personal_center.addr if obj.personal_center else None
 
     def get_following(self, obj):
         if hasattr(obj, 'followers_set') and obj.followers_set.exists():
@@ -484,24 +488,24 @@ class Personal_CenterSerializer(serializers.ModelSerializer):
 
     def get_qr_code(self, obj):
         qr_code = obj.personal_center.qr_code
-        user_icon = settings.BACKEND_URL + '/media/' + str(qr_code)
-        return user_icon
+        if qr_code:
+            user_icon = settings.BACKEND_URL + '/media/' + str(qr_code)
+            return user_icon
+        return None
 
 
 class AcctCenterSerializer(serializers.ModelSerializer):
     icon = serializers.ImageField(allow_null=True,required=False)
     bg_img = serializers.ImageField(allow_null=True, required=False)
-    introduction = serializers.SerializerMethodField()
-    username = serializers.CharField(read_only=True)
+    introduction = serializers.SerializerMethodField(allow_null=True,required=False)
 
 
     class Meta:
         model = models.User
-        fields = ['icon','username','bg_img', 'introduction']
+        fields = ['icon','nickname','bg_img','introduction']
 
-    def get_introduction(self,obj):
-        return obj.personal_center.introduction
-
+    def get_introduction(self, obj):
+        return obj.personal_center.introduction if obj.personal_center else None
 
     def validate_introduction(self, obj):
         if sensitivity_.contains_sensitive_word(obj):
@@ -509,7 +513,14 @@ class AcctCenterSerializer(serializers.ModelSerializer):
         return obj
 
     def update(self, instance, validated_data):
-        for attr, value in validated_data.items():
-            setattr(instance, attr, value)
+        instance.nickname = validated_data.get('nickname', instance.nickname)
         instance.save()
+
+        personal_center_data = validated_data.pop('personal_center', {})
+        personal_center = instance.personal_center
+        if personal_center_data:
+            personal_center.bg_img = personal_center_data.get('bg_img', personal_center.bg_img)
+            personal_center.introduction = personal_center_data.get('introduction', personal_center.introduction)
+            personal_center.save()
+
         return instance
