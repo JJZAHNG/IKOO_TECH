@@ -406,9 +406,6 @@ class PostLikeSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 
-
-
-
 class CollectSerializer(serializers.ModelSerializer):
     class Meta:
         model = models.Favorite
@@ -428,9 +425,11 @@ class Personal_CenterSerializer(serializers.ModelSerializer):
     user_introduction = serializers.SerializerMethodField()
     user_wallet = serializers.SerializerMethodField()
     addr = serializers.SerializerMethodField()
+
     class Meta:
         model = models.User
-        fields = ['nickname','username', 'user_img','bg_img', 'user_introduction', 'following', 'followers', 'project_num','project', 'star', 'qr_code',
+        fields = ['nickname', 'username', 'user_img', 'bg_img', 'user_introduction', 'following', 'followers',
+                  'project_num', 'project', 'star', 'qr_code',
                   'user_wallet', 'addr']
 
     # 用户头像
@@ -438,6 +437,7 @@ class Personal_CenterSerializer(serializers.ModelSerializer):
         bg_img = obj.icon
         user_icon = settings.BACKEND_URL + '/media/' + str(bg_img)
         return user_icon
+
     # 用户背景
     def get_bg_img(self, obj):
         bg_img = obj.personal_center.bg_img
@@ -445,13 +445,15 @@ class Personal_CenterSerializer(serializers.ModelSerializer):
         return user_bg_img
 
     # 用户简介
-    def get_user_introduction(self,obj):
+    def get_user_introduction(self, obj):
         return obj.personal_center.introduction if obj.personal_center else None
+
     # 钱包
-    def get_user_wallet(self,obj):
+    def get_user_wallet(self, obj):
         return obj.personal_center.wallet
+
     # 地址
-    def get_addr(self,obj):
+    def get_addr(self, obj):
         return obj.personal_center.addr if obj.personal_center else None
 
     def get_following(self, obj):
@@ -494,37 +496,195 @@ class Personal_CenterSerializer(serializers.ModelSerializer):
         return None
 
 
-
-
-
 class AcctCenterSerializer(serializers.ModelSerializer):
-    icon = serializers.ImageField(required=False,allow_null=True)
-    bg_img = serializers.ImageField(required=False,allow_null=True)
-    introduction = serializers.CharField(required=False,allow_null=True)
-    nickname = serializers.CharField(allow_null=True,required=False)
-    addr = serializers.CharField(allow_null=True,required=False)
+    icon = serializers.ImageField(required=False, allow_null=True)
+    bg_img = serializers.ImageField(required=False, allow_null=True)
+    introduction = serializers.CharField(required=False, allow_null=True)
+    nickname = serializers.CharField(allow_null=True, required=False)
+    addr = serializers.CharField(allow_null=True, required=False)
+
     class Meta:
         model = models.Personal_Center
-        fields = ['icon','bg_img', 'introduction','nickname','addr']
+        fields = ['icon', 'bg_img', 'introduction', 'nickname', 'addr']
 
     def validate_introduction(self, obj):
         if sensitivity_.contains_sensitive_word(obj):
             raise ValidationError('你输入的是敏感词汇请重新输入')
         return obj
 
-    def validate_nickname(self,obj):
+    def validate_nickname(self, obj):
         if sensitivity_.contains_sensitive_word(obj):
             raise ValidationError('你输入的是敏感词汇请重新输入')
         return obj
-
 
     def update(self, instance, validated_data):
         instance.user.icon = validated_data.get('icon', instance.user.icon)
         instance.user.nickname = validated_data.get('nickname', instance.user.nickname)
         instance.user.save()
-        personal_center, created = models.Personal_Center.objects.get_or_create(user=instance.user)
-        personal_center.bg_img = validated_data.get('bg_img', personal_center.bg_img)
-        personal_center.introduction = validated_data.get('introduction', personal_center.introduction)
-        personal_center.addr = validated_data.get('addr', personal_center.addr)
-        personal_center.save()
+        instance.bg_img = validated_data.get('bg_img', instance.bg_img)
+        instance.introduction = validated_data.get('introduction', instance.introduction)
+        instance.addr = validated_data.get('addr', instance.addr)
+        instance.save()
         return instance
+
+
+# 修改账号名或密码密码
+class Change_PwdSerializer(serializers.ModelSerializer):
+    twice_pwd = serializers.CharField(max_length=12)
+
+    class Meta:
+        model = models.User
+        fields = ['password', 'twice_pwd']
+        extra_kwargs = {}
+
+    def validate_password(self, value):
+        if len(value) < 9:
+            raise serializers.ValidationError('密码长度要大于9个字符')
+        return value
+
+    def validate(self, attrs):
+        password = attrs.get('password')
+        twice_pwd = attrs.get('twice_pwd')
+        if password == twice_pwd:
+            attrs.pop('twice_pwd')
+            return attrs
+        raise ValidationError('两次密码不一直')
+
+    def update(self, instance, validated_data):
+        new_password = validated_data.get('password')
+        instance.password = make_password(new_password)
+        instance.save()
+        return instance
+
+
+class Change_mbSerializer(serializers.ModelSerializer):
+    code = serializers.CharField(max_length=6)
+    class Meta:
+        model = models.User
+        fields = ['mobile', 'code']
+
+    def validate_mobile(self, var):
+        if not re.match('^1[34578]\\d{9}$', var):
+            raise ValidationError('手机号格式错误')
+        return var
+
+    def validate(self, attrs):
+        mobile = attrs.get('mobile')
+        code = attrs.get('code')
+        old_code = cache.get('cache_mobile_%s' % mobile)
+        if code == old_code or (settings.DEBUG and code == '1111'):  # 测试阶段 万能验证码
+            attrs.pop('code')
+            return attrs
+        else:
+            raise ValidationError('验证码错误')
+
+
+
+
+
+
+# 查询关注用户
+class Concern_UserSerializer(serializers.ModelSerializer):
+    user_name = serializers.SerializerMethodField(read_only=True)
+    user_img = serializers.SerializerMethodField(read_only=True)
+
+    class Meta:
+        model = models.Personal_Center
+        fields = ['user_name','user_img']
+
+
+    def get_user_name(self,obj):
+        return obj.following.username
+
+    def get_user_img(self,obj):
+        user = obj.following
+        user_icon = settings.BACKEND_URL + '/media/' + str(user.icon)
+        return user_icon
+
+
+# 查看粉丝
+class Like_WorksSerializer(serializers.ModelSerializer):
+    like_name = serializers.SerializerMethodField(read_only=True)
+    like_img = serializers.SerializerMethodField(read_only=True)
+
+    class Meta:
+        model = models.Personal_Center
+        fields = ['user_name', 'user_img']
+
+    def get_like_name(self, obj):
+        return obj.followers.username
+
+    def get_like_img(self, obj):
+        user = obj.followers
+        user_icon = settings.BACKEND_URL + '/media/' + str(user.icon)
+        return user_icon
+
+# 查看收藏
+class Collect_Serializer(serializers.ModelSerializer):
+    post_img = serializers.SerializerMethodField(read_only=True)
+    post_title = serializers.SerializerMethodField(read_only=True)
+    post_user = serializers.SerializerMethodField(read_only=True)
+    post_comment_like_num = serializers.SerializerMethodField(read_only=True)
+    post_user_img = serializers.SerializerMethodField(read_only=True)
+    class Meta:
+        model = models.Personal_Center
+        fields = ['post_img','post_title','post_user','post_comment_like_num','post_user_img']
+
+    def get_post_img(self,obj):
+        user = obj.star.user
+        user_icon = settings.BACKEND_URL + '/media/' + str(user.icon)
+        return user_icon
+
+    def get_post_title(self,obj):
+        return obj.star.post.title
+    def get_post_user(self,obj):
+        return obj.star.user.username
+
+    def get_post_comment_like_num(self,obj):
+        return obj.star.post.comment_like_num
+
+    def get_post_user_img(self,obj):
+        imgs = obj.star.post.post_s.all()
+        comments_text = []
+        for img in imgs:
+            comments_text.append(settings.BACKEND_URL + '/media/' + str(img.img))
+        return comments_text
+
+
+
+# 查看作品
+class BeanSerializer(serializers.ModelSerializer):
+    project_name = serializers.SerializerMethodField(read_only=True)
+    project_file = serializers.SerializerMethodField(read_only=True)
+    class Meta:
+        model = models.Personal_Center
+        fields = ['project_name','project_file']
+    def get_project_name(self,obj):
+        return obj.project.first().project_name
+
+    def get_project_file(self,obj):
+        return obj.project.first().user_project.url
+
+# 添加作品
+class Add_CollectSerializer(serializers.ModelSerializer):
+    project_name = serializers.CharField(source='project.project_name', write_only=True)
+    user_project = serializers.FileField(write_only=True)
+
+    class Meta:
+        model = models.Personal_Center
+        fields = ['user', 'project_name', 'user_project']
+
+    def create(self, validated_data):
+        project_name = validated_data.pop('project_name')
+        user_project = validated_data.pop('user_project')
+        user = validated_data.get('user')
+
+        # 创建新作品
+        new_project = models.Self_Project.objects.create(project_name=project_name, user_project=user_project)
+
+        # 将新作品添加到用户个人中心的作品列表中
+        personal_center = user.personal_center
+        personal_center.project.add(new_project)
+        personal_center.save()
+
+        return personal_center

@@ -19,8 +19,9 @@ from .models import Post, Comment
 from django.db import transaction
 from django.db.models import F
 from utils.common_modelmixin import CreateModelMixins, UpdateModelMixins
-from rest_framework.mixins import RetrieveModelMixin,ListModelMixin
+from rest_framework.mixins import RetrieveModelMixin, ListModelMixin
 from datetime import datetime, timedelta
+
 
 # Create your views here.
 # 1.手机号短信登录
@@ -182,7 +183,8 @@ class PostViewSet(viewsets.ModelViewSet):
             for k, v in res.items():
                 if k <= '{}'.format(date_time):
                     ls.extend(v)
-        first_queryset = self.queryset.exclude(id__in=ls).filter(comment_like_num__gte=300).order_by('-comment_like_num')[:3]
+        first_queryset = self.queryset.exclude(id__in=ls).filter(comment_like_num__gte=300).order_by(
+            '-comment_like_num')[:3]
         end_queryset = self.queryset.exclude(id__in=[i.id for i in first_queryset])
         queryset = first_queryset.union(end_queryset)
         return queryset
@@ -209,6 +211,7 @@ class PostViewSet(viewsets.ModelViewSet):
         serializer.is_valid(raise_exception=True)
         serializer.save()
         return APIResponse('评论成功')
+
 
 # 展示评论内容
 class Comment_View(GenericViewSet):
@@ -286,13 +289,13 @@ class CollectView(GenericViewSet, CreateModelMixins):
 
 
 # 个人中心--
-class Personal_CenterView(GenericViewSet,RetrieveModelMixin):
+class Personal_CenterView(GenericViewSet, RetrieveModelMixin):
     queryset = models.User.objects.all()
     serializer_class = serializers.Personal_CenterSerializer
 
     def get_queryset(self):
         if self.action == 'acctCenterupdate':
-            return  models.Personal_Center.objects.all()
+            return models.Personal_Center.objects.all()
         else:
             return super().get_queryset()
 
@@ -302,8 +305,8 @@ class Personal_CenterView(GenericViewSet,RetrieveModelMixin):
         else:
             return super().get_serializer_class()
 
-    def get_object(self,id=None):
-        if self.action=='acctCenterupdate':
+    def get_object(self, id=None):
+        if self.action == 'acctCenterupdate':
             return self.get_queryset().filter(user_id=id).first()
         else:
             return super().get_object()
@@ -315,12 +318,96 @@ class Personal_CenterView(GenericViewSet,RetrieveModelMixin):
         serializer = self.get_serializer(instance=instance, data=request.data)
         serializer.is_valid(raise_exception=True)
         serializer.save()
-        return APIResponse(code=100,msg='修改成功')
+        return APIResponse(code=100, msg='修改成功')
 
-# 查询关注用户
-# 查询点赞用户
-# 查询收藏作品
-# 查看二维码
-# 查看粉丝
-# 我的作品
-# 修改密码 账号
+
+class SettingView(GenericViewSet, UpdateModelMixins):
+    queryset = User.objects.all()
+    serializer_class = serializers.Change_PwdSerializer
+
+    def get_serializer_class(self):
+        if self.action == 'change_mb':
+            return serializers.Change_mbSerializer
+        else:
+            return super(SettingView, self).get_serializer_class()
+
+    # 修改密码
+    @action(methods=['post'], detail=True)
+    def change_user(self, request,*args,**kwargs):
+        instance = self.get_object()
+        serializers = self.get_serializer(instance=instance, data=request.data)
+        serializers.is_valid(raise_exception=True)
+        serializers.save()
+        return APIResponse(code=100, msg='密码修改成功')
+
+    # 修改手机号
+    @action(methods=['post'], detail=True)
+    def change_mb(self, request,*args,**kwargs):
+        instance = self.get_object()
+        serializers = self.get_serializer(instance=instance, data=request.data)
+        serializers.is_valid(raise_exception=True)
+        serializers.save()
+        return APIResponse(code=100, msg='修改成功')
+
+    # 注销用户
+    @action(methods=['post'], detail=True)
+    def change_pwd(self, request):
+        User.objects.filter(id=request.data.get('user')).delete()
+        return APIResponse(code=100, msg='注销成功')
+
+
+class PrivacyView(GenericViewSet,RetrieveModelMixin):
+    queryset = models.Personal_Center.objects.all()
+    serializer_class = serializers.BeanSerializer
+
+    def get_serializer_class(self):
+        if self.action=='concern_user':
+            return serializers.Concern_UserSerializer
+        elif self.action =='like_works':
+            return serializers.Like_WorksSerializer
+        elif self.action == 'collect_post':
+            return serializers.Collect_Serializer
+        else:
+            return super().get_serializer_class()
+
+    # 查询关注用户
+    @action(methods=['post'], detail=True)
+    def concern_user(self, request,*args,**kwargs):
+        instance = self.get_object()
+        serializers = self.get_serializer(instance=instance)
+        return APIResponse(serializers.data)
+
+    # 查询粉丝
+    @action(methods=['post'], detail=True)
+    def like_works(self, request,*args,**kwargs):
+        instance = self.get_object()
+        serializers = self.get_serializer(instance=instance)
+        return APIResponse(serializers.data)
+
+    # 查收藏
+    @action(methods=['post'], detail=True)
+    def collect_post(self, request,*args,**kwargs):
+        instances = self.get_object()
+        serializers = self.get_serializer(instance=instances)
+        return APIResponse(serializers.data)
+
+    # 查看我的作品
+    @action(methods=['post'], detail=True)
+    def collect(self, request,*args,**kwargs):
+        instance = self.get_object()
+        serializers = self.get_serializer(instance=instance)
+        return APIResponse(serializers.data)
+
+class AddCollectView(GenericViewSet,CreateModelMixin):
+    queryset = models.Personal_Center.objects.all()
+    serializer_class = serializers.Add_CollectSerializer
+
+    def create(self, request, *args, **kwargs):
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        user = request.data.get('user')
+        personal_center = models.Personal_Center.objects.get(user=user)
+        serializer.save(instance=personal_center)
+        return APIResponse(serializer.data)
+
+    

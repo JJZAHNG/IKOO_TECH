@@ -3,7 +3,7 @@ from user import views
 import datetime
 # 定时任务
 from apscheduler.schedulers.background import BackgroundScheduler
-from django_apscheduler.jobstores import DjangoJobStore, register_events, register_job
+from django_apscheduler.jobstores import DjangoJobStore, register_job
 from .models import Post
 from django.core.cache import cache
 scheduler = BackgroundScheduler(timezone='Asia/Shanghai')
@@ -34,7 +34,15 @@ router.register('post_like', views.LikeViewSet, 'post_like')
 router.register('collect',views.CollectView,'collect')
 # 个人中心
 router.register('acctCenter',views.Personal_CenterView,'acctCenter')
-#
+# 修改密码修改手机号
+router.register('settings',views.SettingView,'settings')
+# 查询个人中心粉丝 收藏
+router.register('privacy',views.PrivacyView,'privacy')
+# 添加作品
+router.register('addcollect',views.AddCollectView,'addcollect')
+
+
+
 urlpatterns = [
 ]
 urlpatterns += router.urls
@@ -63,7 +71,7 @@ def send_message():
         cache.set('11', {})
 
 
-@register_job(scheduler, "interval", seconds=10, id='test_job', replace_existing=True,timezone='Asia/Shanghai')
+@register_job(scheduler, "interval", days=2, id='test_job', replace_existing=True,timezone='Asia/Shanghai')
 def test_job():
 
     send_message()
