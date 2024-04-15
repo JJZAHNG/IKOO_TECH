@@ -290,28 +290,37 @@ class Personal_CenterView(GenericViewSet,RetrieveModelMixin):
     queryset = models.User.objects.all()
     serializer_class = serializers.Personal_CenterSerializer
 
+    def get_queryset(self):
+        if self.action == 'acctCenterupdate':
+            return  models.Personal_Center.objects.all()
+        else:
+            return super().get_queryset()
+
     def get_serializer_class(self):
         if self.action == 'acctCenterupdate':
             return serializers.AcctCenterSerializer
         else:
             return super().get_serializer_class()
 
-    def get_object(self,pk=None):
+    def get_object(self,id=None):
         if self.action=='acctCenterupdate':
-            return self.get_queryset().filter(user_id=pk).first()
+            return self.get_queryset().filter(user_id=id).first()
         else:
             return super().get_object()
 
     # 修改个人信息
-    @action(methods=['post'], detail=True)
-    def acctCenterupdate(self, request,pk):
-        instance = self.get_object(pk)
+    @action(methods=['post'], detail=False)
+    def acctCenterupdate(self, request):
+        instance = self.get_object(request.data.get('user'))
         serializer = self.get_serializer(instance=instance, data=request.data)
         serializer.is_valid(raise_exception=True)
         serializer.save()
         return APIResponse(code=100,msg='修改成功')
 
-
 # 查询关注用户
 # 查询点赞用户
 # 查询收藏作品
+# 查看二维码
+# 查看粉丝
+# 我的作品
+# 修改密码 账号

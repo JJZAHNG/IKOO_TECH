@@ -494,33 +494,37 @@ class Personal_CenterSerializer(serializers.ModelSerializer):
         return None
 
 
+
+
+
 class AcctCenterSerializer(serializers.ModelSerializer):
-    icon = serializers.ImageField(allow_null=True,required=False)
-    bg_img = serializers.ImageField(allow_null=True, required=False)
-    introduction = serializers.SerializerMethodField(allow_null=True,required=False)
-
-
+    icon = serializers.ImageField(required=False,allow_null=True)
+    bg_img = serializers.ImageField(required=False,allow_null=True)
+    introduction = serializers.CharField(required=False,allow_null=True)
+    nickname = serializers.CharField(allow_null=True,required=False)
+    addr = serializers.CharField(allow_null=True,required=False)
     class Meta:
-        model = models.User
-        fields = ['icon','nickname','bg_img','introduction']
-
-    def get_introduction(self, obj):
-        return obj.personal_center.introduction if obj.personal_center else None
+        model = models.Personal_Center
+        fields = ['icon','bg_img', 'introduction','nickname','addr']
 
     def validate_introduction(self, obj):
         if sensitivity_.contains_sensitive_word(obj):
             raise ValidationError('你输入的是敏感词汇请重新输入')
         return obj
 
+    def validate_nickname(self,obj):
+        if sensitivity_.contains_sensitive_word(obj):
+            raise ValidationError('你输入的是敏感词汇请重新输入')
+        return obj
+
+
     def update(self, instance, validated_data):
-        instance.nickname = validated_data.get('nickname', instance.nickname)
-        instance.save()
-
-        personal_center_data = validated_data.pop('personal_center', {})
-        personal_center = instance.personal_center
-        if personal_center_data:
-            personal_center.bg_img = personal_center_data.get('bg_img', personal_center.bg_img)
-            personal_center.introduction = personal_center_data.get('introduction', personal_center.introduction)
-            personal_center.save()
-
+        instance.user.icon = validated_data.get('icon', instance.user.icon)
+        instance.user.nickname = validated_data.get('nickname', instance.user.nickname)
+        instance.user.save()
+        personal_center, created = models.Personal_Center.objects.get_or_create(user=instance.user)
+        personal_center.bg_img = validated_data.get('bg_img', personal_center.bg_img)
+        personal_center.introduction = validated_data.get('introduction', personal_center.introduction)
+        personal_center.addr = validated_data.get('addr', personal_center.addr)
+        personal_center.save()
         return instance
