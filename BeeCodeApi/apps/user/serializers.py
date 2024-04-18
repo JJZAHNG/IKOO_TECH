@@ -301,7 +301,7 @@ class PostSerializer(serializers.ModelSerializer):
 
     # 发表的图片
     def get_content_cover(self, obj):
-        imgs = obj.post_s.all()
+        imgs = obj.postimage_set.all()
         comments_text = []
         for img in imgs:
             comments_text.append(settings.BACKEND_URL + '/media/' + str(img.img))
@@ -311,7 +311,7 @@ class PostSerializer(serializers.ModelSerializer):
     def get_user_like_num(self, obj):
         return obj.likes.first().comment_like_num
 
-    #
+
 
 
 class CirCleHomeSerializer(PostSerializer):
@@ -328,6 +328,7 @@ class CirCleHomeSerializer(PostSerializer):
 
 
 class ContentSerializer(PostSerializer):
+
     class Meta:
         model = Post
         fields = ['id', 'title', 'username', 'text', 'user_profile_image', 'content_cover', 'created_at']
@@ -418,7 +419,6 @@ class Personal_CenterSerializer(serializers.ModelSerializer):
     bg_img = serializers.SerializerMethodField()
     following = serializers.SerializerMethodField()
     followers = serializers.SerializerMethodField()
-    project = serializers.SerializerMethodField()
     star = serializers.SerializerMethodField()
     qr_code = serializers.SerializerMethodField()
     project_num = serializers.SerializerMethodField()
@@ -429,7 +429,7 @@ class Personal_CenterSerializer(serializers.ModelSerializer):
     class Meta:
         model = models.User
         fields = ['nickname', 'username', 'user_img', 'bg_img', 'user_introduction', 'following', 'followers',
-                  'project_num', 'project', 'star', 'qr_code',
+                  'project_num', 'star', 'qr_code',
                   'user_wallet', 'addr']
 
     # 用户头像
@@ -457,31 +457,14 @@ class Personal_CenterSerializer(serializers.ModelSerializer):
         return obj.personal_center.addr if obj.personal_center else None
 
     def get_following(self, obj):
-        if hasattr(obj, 'followers_set') and obj.followers_set.exists():
-            return obj.followers_set.count()
-        else:
-            return 0
+        return obj.following.count()
 
     def get_followers(self, obj):
-        if hasattr(obj, 'project_set') and obj.followers_set.exists():
-            return obj.followers_set.count()
-        else:
-            return 0
+        return obj.followers.count()
 
     def get_project_num(self, obj):
-        if hasattr(obj, 'personal_center') and obj.personal_center.project.exists():
-            return obj.personal_center.project.count()
-        else:
-            return 0
+        return obj.personal_center.self_project_set.count()
 
-    def get_project(self, obj):
-        project_data = {}
-        if hasattr(obj, 'personal_center') and obj.personal_center.project.exists():
-            for project_instance in obj.personal_center.project.all():
-                project_data[project_instance.project_name] = {
-                    'user_project': project_instance.user_project.url if project_instance.user_project else None,
-                }
-        return project_data or None
 
     def get_star(self, obj):
         if obj.personal_center.star:
@@ -535,7 +518,7 @@ class Change_PwdSerializer(serializers.ModelSerializer):
     class Meta:
         model = models.User
         fields = ['password', 'twice_pwd']
-        extra_kwargs = {}
+
 
     def validate_password(self, value):
         if len(value) < 9:
@@ -559,17 +542,20 @@ class Change_PwdSerializer(serializers.ModelSerializer):
 
 class Change_mbSerializer(serializers.ModelSerializer):
     code = serializers.CharField(max_length=6)
+
     class Meta:
         model = models.User
         fields = ['mobile', 'code']
 
     def validate_mobile(self, var):
-        if not re.match('^1[34578]\\d{9}$', var):
-            raise ValidationError('手机号格式错误')
+        if models.User.objects.filter(mobile=var):
+            raise ValidationError('手机号已被注册')
         return var
 
     def validate(self, attrs):
         mobile = attrs.get('mobile')
+        if not re.match('^1[34578]\\d{9}$', mobile):
+            raise ValidationError('手机号格式错误')
         code = attrs.get('code')
         old_code = cache.get('cache_mobile_%s' % mobile)
         if code == old_code or (settings.DEBUG and code == '1111'):  # 测试阶段 万能验证码
@@ -579,91 +565,83 @@ class Change_mbSerializer(serializers.ModelSerializer):
             raise ValidationError('验证码错误')
 
 
-
-
-
-
 # 查询关注用户
 class Concern_UserSerializer(serializers.ModelSerializer):
-    user_name = serializers.SerializerMethodField(read_only=True)
-    user_img = serializers.SerializerMethodField(read_only=True)
+    following_ = serializers.SerializerMethodField(read_only=True)
 
     class Meta:
-        model = models.Personal_Center
-        fields = ['user_name','user_img']
+        model = models.User
+        fields = ['following']
 
-
-    def get_user_name(self,obj):
-        return obj.following.username
-
-    def get_user_img(self,obj):
-        user = obj.following
-        user_icon = settings.BACKEND_URL + '/media/' + str(user.icon)
-        return user_icon
-
+    def get_following_(self, obj):
+        followers_data = []
+        followers = obj.following.all()
+        for follower in followers:
+            followers_data.append({
+                'user_name': follower.nickname,
+                'user_img': follower.icon.url
+            })
+        return followers_data
 
 # 查看粉丝
 class Like_WorksSerializer(serializers.ModelSerializer):
-    like_name = serializers.SerializerMethodField(read_only=True)
-    like_img = serializers.SerializerMethodField(read_only=True)
+    followers = serializers.SerializerMethodField(read_only=True)
 
     class Meta:
-        model = models.Personal_Center
-        fields = ['user_name', 'user_img']
+        model = models.User
+        fields = ['followers']
 
-    def get_like_name(self, obj):
-        return obj.followers.username
+    def get_followers(self, obj):
+        followers_data = []
+        following_all = obj.followers.all()
+        for following_ in following_all:
+            followers_data.append({
+                'user_name': following_.nickname,
+                'user_img': following_.icon.url
+            })
+        return followers_data
 
-    def get_like_img(self, obj):
-        user = obj.followers
-        user_icon = settings.BACKEND_URL + '/media/' + str(user.icon)
-        return user_icon
 
 # 查看收藏
 class Collect_Serializer(serializers.ModelSerializer):
-    post_img = serializers.SerializerMethodField(read_only=True)
-    post_title = serializers.SerializerMethodField(read_only=True)
-    post_user = serializers.SerializerMethodField(read_only=True)
-    post_comment_like_num = serializers.SerializerMethodField(read_only=True)
-    post_user_img = serializers.SerializerMethodField(read_only=True)
+    collect_ = serializers.SerializerMethodField(read_only=True)
+
     class Meta:
-        model = models.Personal_Center
-        fields = ['post_img','post_title','post_user','post_comment_like_num','post_user_img']
+        model = models.Favorite
+        fields = ['collect_']
 
-    def get_post_img(self,obj):
-        user = obj.star.user
-        user_icon = settings.BACKEND_URL + '/media/' + str(user.icon)
-        return user_icon
-
-    def get_post_title(self,obj):
-        return obj.star.post.title
-    def get_post_user(self,obj):
-        return obj.star.user.username
-
-    def get_post_comment_like_num(self,obj):
-        return obj.star.post.comment_like_num
-
-    def get_post_user_img(self,obj):
-        imgs = obj.star.post.post_s.all()
-        comments_text = []
-        for img in imgs:
-            comments_text.append(settings.BACKEND_URL + '/media/' + str(img.img))
-        return comments_text
+    def get_collect_(self,obj):
+        followers_data = []
+        for i in obj:
+            print()
+            followers_data.append({
+                'username':i.post.user.nickname,
+                'userPost':i.post.title,
+                'post_id':i.post.id
+            })
+        return followers_data
 
 
 
 # 查看作品
 class BeanSerializer(serializers.ModelSerializer):
-    project_name = serializers.SerializerMethodField(read_only=True)
-    project_file = serializers.SerializerMethodField(read_only=True)
+    projects = serializers.SerializerMethodField(read_only=True)
+
     class Meta:
         model = models.Personal_Center
-        fields = ['project_name','project_file']
-    def get_project_name(self,obj):
-        return obj.project.first().project_name
+        fields = ['projects']
 
-    def get_project_file(self,obj):
-        return obj.project.first().user_project.url
+    def get_projects(self, obj):
+        project_data = []
+        projects = obj.self_project_set.all()
+        for project in projects:
+            project_data.append({
+                'project_name': project.project_name,
+                'project_file': project.user_project.url
+            })
+
+        return project_data
+
 
 # 添加作品
 class Add_CollectSerializer(serializers.ModelSerializer):
@@ -688,3 +666,4 @@ class Add_CollectSerializer(serializers.ModelSerializer):
         personal_center.save()
 
         return personal_center
+

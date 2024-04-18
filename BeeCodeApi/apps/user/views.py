@@ -200,7 +200,7 @@ class PostViewSet(viewsets.ModelViewSet):
     # 朋友圈内容  携带帖子的id
     @action(methods=['post'], detail=False)
     def content_home(self, request):
-        res = self.get_queryset().filter(pk=request.data.get('post'))
+        res = models.Post.objects.filter(pk=request.data.get('post')).first()
         serializer = self.get_serializer(instance=res)
         return APIResponse(serializer.data)
 
@@ -350,11 +350,13 @@ class SettingView(GenericViewSet, UpdateModelMixins):
         return APIResponse(code=100, msg='修改成功')
 
     # 注销用户
-    @action(methods=['post'], detail=True)
+    @action(methods=['post'], detail=False)
     def change_pwd(self, request):
-        User.objects.filter(id=request.data.get('user')).delete()
-        return APIResponse(code=100, msg='注销成功')
-
+        res = User.objects.filter(id=request.data.get('user'))
+        if res:
+            res.delete()
+            return APIResponse(code=100, msg='注销成功')
+        return APIResponse(code=879,msg='没有该用户')
 
 class PrivacyView(GenericViewSet,RetrieveModelMixin):
     queryset = models.Personal_Center.objects.all()
@@ -369,45 +371,54 @@ class PrivacyView(GenericViewSet,RetrieveModelMixin):
             return serializers.Collect_Serializer
         else:
             return super().get_serializer_class()
+    
+    def get_queryset(self):
+        if self.action == 'concern_user' or self.action == 'like_works':
+            return models.User.objects.all()
+        elif self.action == 'collect_post':
+            return models.Favorite.objects.all()
+        else:
+            return super().get_queryset()
 
     # 查询关注用户
     @action(methods=['post'], detail=True)
     def concern_user(self, request,*args,**kwargs):
-        instance = self.get_object()
+        instance = self.get_queryset().filter(pk=kwargs['pk']).first()
         serializers = self.get_serializer(instance=instance)
         return APIResponse(serializers.data)
 
     # 查询粉丝
     @action(methods=['post'], detail=True)
     def like_works(self, request,*args,**kwargs):
-        instance = self.get_object()
+        instance = self.get_queryset().filter(pk=kwargs['pk']).first()
         serializers = self.get_serializer(instance=instance)
         return APIResponse(serializers.data)
 
     # 查收藏
     @action(methods=['post'], detail=True)
     def collect_post(self, request,*args,**kwargs):
-        instances = self.get_object()
+        instances = self.get_queryset().filter(user_id=kwargs['pk'])
         serializers = self.get_serializer(instance=instances)
         return APIResponse(serializers.data)
 
     # 查看我的作品
     @action(methods=['post'], detail=True)
     def collect(self, request,*args,**kwargs):
-        instance = self.get_object()
+        instance = self.get_queryset().filter(user_id=kwargs['pk']).first()
         serializers = self.get_serializer(instance=instance)
         return APIResponse(serializers.data)
 
-class AddCollectView(GenericViewSet,CreateModelMixin):
-    queryset = models.Personal_Center.objects.all()
-    serializer_class = serializers.Add_CollectSerializer
-
-    def create(self, request, *args, **kwargs):
-        serializer = self.get_serializer(data=request.data)
-        serializer.is_valid(raise_exception=True)
-        user = request.data.get('user')
-        personal_center = models.Personal_Center.objects.get(user=user)
-        serializer.save(instance=personal_center)
-        return APIResponse(serializer.data)
+# 添加作品
+class AddCollectView(ViewSet):
+    @action(methods=['post'],detail=False)
+    def add_project(self,request,*args,**kwargs):
+        user_id = request.data.get('user')
+        project_name = request.data.get('project_name')
+        project_file = request.FILES.get('file')
+        obj = models.Personal_Center.objects.filter(user_id=user_id).first()
+        project_obj = models.Self_Project.objects.create(project_name=project_name, user_project=project_file)
+        obj.project = project_obj
+        obj.save()
+        return APIResponse('作品添加成功')
 
     

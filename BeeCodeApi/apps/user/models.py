@@ -4,6 +4,8 @@ from django.contrib.auth.models import AbstractUser
 
 # Create your models here.
 
+
+
 class User(AbstractUser):
     # 扩写auth表 加入手机号 头像
     mobile = models.CharField(verbose_name='手机号', max_length=11, null=True)
@@ -11,6 +13,10 @@ class User(AbstractUser):
     icon = models.ImageField(verbose_name='头像', upload_to='icon', default='icon/default.png')
     # 用户的昵称
     nickname = models.CharField(verbose_name='昵称',max_length=32,null=True,blank=True)
+    following = models.ManyToManyField('self', related_name='followers', verbose_name='关注用户', blank=True)
+    followers = models.ManyToManyField('self', related_name='followers', verbose_name='粉丝用户', blank=True)
+
+
     class Meta:
         db_table = 'BeeCode_user'
         verbose_name = '用户表'
@@ -23,7 +29,7 @@ class User(AbstractUser):
 class Self_Project(models.Model):
     project_name = models.CharField(verbose_name='作品名称', max_length=32)
     user_project = models.FileField(max_length=255, upload_to='works', null=True, blank=True)
-
+    project = models.ForeignKey(to='Personal_Center', verbose_name='作品', on_delete=models.CASCADE, null=True)
     class Meta:
         db_table = 'BeeCode_Self_Project'
         verbose_name = '作品表'
@@ -37,13 +43,8 @@ class Personal_Center(models.Model):
     user = models.OneToOneField(User, verbose_name='用户个人中心', on_delete=models.CASCADE)
     bg_img = models.ImageField(verbose_name='背景', upload_to='bg', null=True, blank=True)
     introduction = models.CharField(max_length=255, verbose_name='简介',null=True)
-    following = models.ForeignKey(User, related_name='following_set', verbose_name='关注用户', on_delete=models.CASCADE,
-                                  null=True, blank=True)
-    followers = models.ForeignKey(User, related_name='followers_set', verbose_name='粉丝用户', on_delete=models.CASCADE,
-                                  null=True, blank=True)
-    project = models.ManyToManyField(Self_Project, verbose_name='作品')
-    star = models.ForeignKey(to='Favorite', verbose_name='收藏', on_delete=models.CASCADE, null=True, blank=True)
     qr_code = models.ImageField(verbose_name='二维码', null=True, blank=True)
+
     wallet = models.DecimalField(verbose_name='钱包', max_digits=5, decimal_places=2, default=0)
     addr = models.CharField(verbose_name='地址', max_length=32,null=True,)
 
@@ -91,6 +92,7 @@ class Achievement(models.Model):
 # 文章图片
 class PostImage(models.Model):
     img = models.ImageField(upload_to='posts/images/', verbose_name='帖子图片')
+    post_s = models.ForeignKey(to='Post',verbose_name='关联帖子表',on_delete=models.CASCADE,null=True, blank=True)
 
     class Meta:
         db_table = 'BeeCode_postimg'
@@ -100,7 +102,7 @@ class PostImage(models.Model):
 # 帖子分类表
 class Classify_Post(models.Model):
     name = models.CharField(max_length=32,verbose_name='分类名称')
-
+    classify_name = models.ForeignKey(to='Post', on_delete=models.PROTECT, null=True)
 
 
 # 帖子表
@@ -111,9 +113,7 @@ class Post(models.Model):
     comment_like_num = models.IntegerField(verbose_name='文章点赞数', default=0)
     created_at = models.DateTimeField(auto_now_add=True, verbose_name='发布时间')
     update_time = models.DateTimeField(auto_now=True, verbose_name='更新时间')
-    classify_name = models.ForeignKey(Classify_Post, on_delete=models.PROTECT,null=True)
-    post_s = models.ManyToManyField(PostImage)
-    is_featured = models.BooleanField(default=False, verbose_name='是否为精选文章')
+
 
     class Meta:
         db_table = 'BeeCode_post'
@@ -154,10 +154,11 @@ class CommentLike(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='comment_likes')
     comment = models.ForeignKey(Comment, on_delete=models.CASCADE, related_name='comment_likes')
 
-
+# 收藏表
 class Favorite(models.Model):  # 新增收藏模型，关联用户和帖子
-    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='favorites')
-    post = models.ForeignKey(Post, on_delete=models.CASCADE, related_name='favorites')
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='user_favorites')
+    post = models.ForeignKey(Post, on_delete=models.CASCADE, related_name='favorites_post')
+
 
     class Meta:
         unique_together = ('user', 'post')  # 确保用户对同一帖子只能收藏一次
