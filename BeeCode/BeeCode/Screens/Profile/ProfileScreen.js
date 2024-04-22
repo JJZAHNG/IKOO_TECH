@@ -24,7 +24,9 @@ const ProfileScreen = () => {
     introduction:'加载中...',
     uuid:'加载中...',
     following_count:'2',
-    follower_count:'2'
+    follower_count:'2',
+    addr:'加载中...',
+    user_img:'加载中...'
   });
 
   const tempUSerImage = require('./res/user.jpg');
@@ -39,6 +41,22 @@ const ProfileScreen = () => {
   ];
 
   useEffect(() => {
+
+    const replaceUrl = (data) => {
+      const newApiBase = `http://${config.SERVER_IP}:8000/api`;
+      // 确保data是一个对象并且不是null
+      if (data && typeof data === 'object') {
+        Object.keys(data).forEach(key => {
+          if (typeof data[key] === 'string' && data[key].includes('http://127.0.0.1:8000')) {
+            data[key] = data[key].replace('http://127.0.0.1:8000', newApiBase);
+          } else if (typeof data[key] === 'object') {
+            replaceUrl(data[key]);
+          }
+        });
+      }
+    };
+
+
     const getUserProfile = async () => {
       try {
         const storedUserData = await AsyncStorage.getItem('userData');
@@ -48,8 +66,13 @@ const ProfileScreen = () => {
           const userId = userDataJson.user_id;
           console.log('校验 2 Current USER ID >>> ',userId)
           const response = await fetch(`http://${config.SERVER_IP}:8000/api/v1/user/acctCenter/${userId}/`);
+          console.log('校验 插入： API接口：', response)
           if (!response.ok) throw new Error('Network response was not ok');
           const json = await response.json();
+          
+
+          // 使用替换函数处理URL
+          replaceUrl(json);
           console.log('校验 3 >>>', json)
 
           // 更新状态以使用从API获得的数据
@@ -57,8 +80,11 @@ const ProfileScreen = () => {
             ...prevData,
             username: json.username || prevData.username,
             bg_img: json.bg_img || prevData.bg_img,
-            introduction: json.introduction || prevData.introduction,
-            // ...其他需要更新的字段
+            introduction: json.user_introduction || prevData.introduction,
+            icon: json.user_img || prevData.icon,
+            following_count: json.following.toString(), // 将数字转换成字符串
+            follower_count: json.followers.toString(), // 将数字转换成字符串
+            // 确保其他字段也有类似的保护，根据你的业务逻辑来调整
           }));
 
           console.log("校验 4 >>> 个人中心当前信息：", userData.username, userData.bg_img, userData.introduction)
@@ -101,17 +127,18 @@ const ProfileScreen = () => {
   }
 
   return (
-
     <View style={styles.container}>
       <View style={styles.leftPanel}>
         <View style={styles.profileContainer}>
+          {/* 使用从API获取的背景图片 */}
           <Image
-            source={{ uri: userData.bg_img }}
+            source={userData.bg_img ? { uri: userData.bg_img } : require('./res/background.jpg')}
             style={styles.backgroundImage}
           />
           <TouchableOpacity onPress={handleAvatarClick}>
+            {/* 使用从API获取的用户头像 */}
             <Image
-              source={ tempUSerImage } // Change this path to your head portrait image
+              source={userData.user_img ? { uri: userData.user_img } : require('./res/user.jpg')}
               style={styles.avatar}
             />
           </TouchableOpacity>
@@ -127,7 +154,7 @@ const ProfileScreen = () => {
               />
             </TouchableOpacity>
           </View>
-
+  
           <TouchableOpacity onPress={handleIntroPress}>
             <Text style={styles.introduction}>用户简介：{userData.introduction}</Text>
           </TouchableOpacity>
@@ -166,6 +193,7 @@ const ProfileScreen = () => {
       </View>
     </View>
   );
+  
 };
 
 
