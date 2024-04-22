@@ -419,7 +419,7 @@ class Personal_CenterSerializer(serializers.ModelSerializer):
     bg_img = serializers.SerializerMethodField()
     following = serializers.SerializerMethodField()
     followers = serializers.SerializerMethodField()
-    star = serializers.SerializerMethodField()
+    # star = serializers.SerializerMethodField()
     qr_code = serializers.SerializerMethodField()
     project_num = serializers.SerializerMethodField()
     user_introduction = serializers.SerializerMethodField()
@@ -429,7 +429,7 @@ class Personal_CenterSerializer(serializers.ModelSerializer):
     class Meta:
         model = models.User
         fields = ['nickname', 'username', 'user_img', 'bg_img', 'user_introduction', 'following', 'followers',
-                  'project_num', 'star', 'qr_code',
+                  'project_num', 'qr_code',
                   'user_wallet', 'addr']
 
     # 用户头像
@@ -466,10 +466,10 @@ class Personal_CenterSerializer(serializers.ModelSerializer):
         return obj.personal_center.self_project_set.count()
 
 
-    def get_star(self, obj):
-        if obj.personal_center.star:
-            return models.Personal_Center.objects.filter(star=obj.star).count()
-        return 0
+    # def get_star(self, obj):
+    #     if obj.personal_center.star:
+    #         return models.Personal_Center.objects.filter(star=obj.star).count()
+    #     return 0
 
     def get_qr_code(self, obj):
         qr_code = obj.personal_center.qr_code
