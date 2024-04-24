@@ -3,7 +3,7 @@ from tencentcloud.common import credential
 from tencentcloud.sms.v20210111 import sms_client, models
 from tencentcloud.common.profile.client_profile import ClientProfile
 from tencentcloud.common.profile.http_profile import HttpProfile
-from .settings import *
+from libs.tx_sms.tx_tx_sis import *
 import json
 from BeeCodeApi.utils.common_logger import logger
 
@@ -20,7 +20,7 @@ def get_code(number=4):
 # 传入手机号和验证发送短信功能函数
 def send_sms(code, mobile):
     try:
-        cred = credential.Credential(SECRET_ID, SECRET_KEY)
+        cred = credential.Credential('','')
         httpProfile = HttpProfile()
         httpProfile.reqMethod = "POST"  # post请求(默认为post请求)
         httpProfile.reqTimeout = 30  # 请求超时时间，单位为秒(默认60秒)
@@ -34,7 +34,7 @@ def send_sms(code, mobile):
         req.SmsSdkAppId = APPID
         req.SignName = SIGN_NAME
         req.TemplateId = TEMPLATE_ID
-        req.TemplateParamSet = [code, "10"]
+        req.TemplateParamSet = [code]
         req.PhoneNumberSet = ["+86" + mobile]
         req.SessionContext = ""
         req.ExtendCode = ""
@@ -52,4 +52,4 @@ def send_sms(code, mobile):
 
 
 if __name__ == '__main__':
-    print(get_code())
+    ...

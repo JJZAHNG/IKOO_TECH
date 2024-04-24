@@ -613,7 +613,6 @@ class Collect_Serializer(serializers.ModelSerializer):
     def get_collect_(self,obj):
         followers_data = []
         for i in obj:
-            print()
             followers_data.append({
                 'username':i.post.user.nickname,
                 'userPost':i.post.title,

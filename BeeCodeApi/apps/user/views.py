@@ -51,7 +51,6 @@ class MobileView(ViewSet):
 
         # 随机生成验证码
         code = get_code()
-
         # 把验证码保存到缓存中
         cache.set('cache_mobile_%s' % mobile, code)
 

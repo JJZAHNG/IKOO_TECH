@@ -2,4 +2,5 @@
 logs/*.log
 __pycache__
 *.pyc
+BeeCodeApi/libs/tx_sms/tx_tx_sis.py
 # weekly updates

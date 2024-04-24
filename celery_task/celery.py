@@ -10,17 +10,17 @@ include = ['celery_task.user_task']
 app = Celery('app', broker=broker, backend=backend, include=include)
 
 # 配置国际化
-app.conf.timezone = 'Asia/Shanghai'
-
-# 是否使用utc时间
-app.conf.enable_utc = False
+# app.conf.timezone = 'Asia/Shanghai'
+#
+# # 是否使用utc时间
+# app.conf.enable_utc = False
 
 # 定制任务
-app.conf.beat_schedule = {
-    'update_cache': {
-        'task': 'celery_task.home_task.update_cache',
-        'schedule': timedelta(seconds=10),
-        'args': (),
-    },
-
-}
+# app.conf.beat_schedule = {
+#     'update_cache': {
+#         'task': 'celery_task.home_task.update_cache',
+#         'schedule': timedelta(seconds=10),
+#         'args': (),
+#     },
+#
+# }
